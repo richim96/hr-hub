@@ -5,15 +5,15 @@ from fastapi import APIRouter, Request
 
 from hr_hub.api import LOGGER
 from hr_hub.model.dto import NewHireRequest, EmployeeChangeRequest
-from hr_hub.model.dto import ResponseSchema
+from hr_hub.model.dto import ResponseDTO
 from hr_hub.service.employee import start_onboarding
 
 
 employee_router: APIRouter = APIRouter(prefix="/employee", tags=["Employee Operations"])
 
 
-@employee_router.post("/new-hire", response_model=ResponseSchema)
-async def create_employee(request: Request, event: NewHireRequest) -> ResponseSchema:
+@employee_router.post("/new-hire", response_model=ResponseDTO)
+async def create_employee(request: Request, event: NewHireRequest) -> ResponseDTO:
     """Create a new employee.
 
     Args:
@@ -25,10 +25,10 @@ async def create_employee(request: Request, event: NewHireRequest) -> ResponseSc
     return start_onboarding(request, event)
 
 
-@employee_router.patch("/change", response_model=ResponseSchema)
+@employee_router.patch("/change", response_model=ResponseDTO)
 async def update_employee(
     request: Request, event: EmployeeChangeRequest
-) -> ResponseSchema | None:
+) -> ResponseDTO | None:
     """Update employee details based on the provided change event.
 
     Args:

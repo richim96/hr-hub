@@ -5,8 +5,8 @@ from typing import TypeAlias, Literal
 
 from pydantic import BaseModel, EmailStr, Field
 
-from hr_hub.model.dto.employee import EmployeeSchema, EmployeeEquipmentSchema
-from hr_hub.model.dto.change import ChangeSchema
+from hr_hub.model.dto.employee import EmployeeDTO, EmployeeEquipmentDTO
+from hr_hub.model.dto.change import ChangeDTO
 
 
 class NewHireRequest(BaseModel):
@@ -23,8 +23,8 @@ class NewHireRequest(BaseModel):
     request_type: NewHireRequestType = Field(
         validation_alias="type", serialization_alias="type"
     )
-    employee: EmployeeSchema
-    equipment: EmployeeEquipmentSchema
+    employee: EmployeeDTO
+    equipment: EmployeeEquipmentDTO
 
 
 class EmployeeChangeRequest(BaseModel):
@@ -44,7 +44,7 @@ class EmployeeChangeRequest(BaseModel):
         validation_alias="type", serialization_alias="type"
     )
     employee_email: EmailStr
-    changes: dict[EmployeeField, ChangeSchema]
+    changes: dict[EmployeeField, ChangeDTO]
     effective_date: date
 
 

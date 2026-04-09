@@ -6,7 +6,7 @@ from typing import Literal, TypeAlias, Optional
 from pydantic import BaseModel
 
 
-class ResponseSchema(BaseModel):
+class ResponseDTO(BaseModel):
     """Model for the HR Hub output.
 
     Attributes:

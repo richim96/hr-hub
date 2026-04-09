@@ -3,7 +3,7 @@
 from datetime import date
 from pydantic import BaseModel, Field, EmailStr
 
-class EmployeeSchema(BaseModel):
+class EmployeeDTO(BaseModel):
     """Employee details.
 
     Attributes:
@@ -27,7 +27,7 @@ class EmployeeSchema(BaseModel):
     start_date: date
 
 
-class EmployeeEquipmentSchema(BaseModel):
+class EmployeeEquipmentDTO(BaseModel):
     """Employee equipment details.
 
     Attributes:
@@ -41,6 +41,6 @@ class EmployeeEquipmentSchema(BaseModel):
     headset: bool
 
 
-class EmployeeInfoSchema(BaseModel):
+class EmployeeInfoDTO(BaseModel):
 
-    department: str    
+    department: str

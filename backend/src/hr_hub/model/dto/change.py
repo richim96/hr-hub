@@ -3,8 +3,8 @@
 from pydantic import BaseModel, Field
 
 
-class ChangeSchema(BaseModel):
-    """Change details for a change event.
+class ChangeDTO(BaseModel):
+    """Change details for a change request.
 
     Attributes:
         from_value (str): Original value before the change
