@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import uuid
-from datetime import datetime, timedelta
 import random
 
 random.seed(96)
@@ -134,20 +133,6 @@ for i in range(N):
     else:                   # everyone else → random manager (excluding CEO)
         manager_emails.append(random.choice(non_ceo_mgr_emails))
 
-# ── Timestamps ────────────────────────────────────────────────────────────────
-base_date = datetime(2018, 1, 1)
-end_date  = datetime(2024, 12, 31)
-span_days = (end_date - base_date).days
-
-created_dates = [
-    base_date + timedelta(days=int(d))
-    for d in np.random.randint(0, span_days, N)
-]
-updated_dates = [
-    c + timedelta(days=int(d))
-    for c, d in zip(created_dates, np.random.randint(0, 365, N))
-]
-
 # ── Hardware ──────────────────────────────────────────────────────────────────
 laptops  = np.random.choice(LAPTOPS, N)
 monitors = np.random.choice([True, False], N, p=[0.75, 0.25])
@@ -155,18 +140,16 @@ headsets = np.random.choice([True, False], N, p=[0.60, 0.40])
 
 # ── Assemble DataFrame ────────────────────────────────────────────────────────
 df = pd.DataFrame({
-    "ID":            [str(uuid.uuid4()) for _ in range(N)],
-    "FirstName":    first_names,
-    "LastName":     last_names,
-    "Gender":        genders,
-    "Email":         emails,
-    "Department":    departments,
+    "EmployeeID": [str(uuid.uuid4()) for _ in range(N)],
+    "FirstName": first_names,
+    "LastName": last_names,
+    "Gender": genders,
+    "Email": emails,
+    "Department": departments,
     "ManagerEmail": manager_emails,
-    "Laptop":        laptops,
-    "Monitor":       monitors,
-    "Headset":       headsets,
-    "CreatedDate":  created_dates,
-    "UpdatedDate":  updated_dates,
+    "Laptop": laptops,
+    "Monitor": monitors,
+    "Headset": headsets,
 })
 
 # ── Validation ────────────────────────────────────────────────────────────────
