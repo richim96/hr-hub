@@ -1,10 +1,10 @@
 """Schema for Change event."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
-class ChangeSchema(BaseModel):
-    """Change details for a change event.
+class ChangeDTO(BaseModel):
+    """Change details for a change request.
 
     Attributes:
         from_value (str): Original value before the change
@@ -13,3 +13,5 @@ class ChangeSchema(BaseModel):
 
     from_value: str = Field(alias="from")
     to: str
+
+    model_config = ConfigDict(from_attributes=True)
