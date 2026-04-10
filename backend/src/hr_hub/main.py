@@ -2,6 +2,7 @@
 
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from hr_hub import LOGGER
 from hr_hub.api.employee import employee_router
@@ -26,6 +27,13 @@ app: FastAPI = FastAPI(
     lifespan=lifespan,
     version="0.1.0",
 )
-prefix: str = "/hr-hub/api/v0.1"
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],    # Frontend port
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+prefix: str = "/hr-hub/api/v0.1"
 app.include_router(employee_router, prefix=prefix)
