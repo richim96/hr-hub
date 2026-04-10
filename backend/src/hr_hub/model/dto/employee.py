@@ -1,7 +1,6 @@
 """Employee schema."""
 
-from typing import TypeAlias, Literal
-
+from typing import Literal
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 
 class EmployeeDTO(BaseModel):
@@ -47,8 +46,10 @@ class EmployeeInfoDTO(BaseModel):
     that are nullable in the database.
 
     Attributes:
-        department (Department): Department the employee belongs to.
-        salary (SalaryTier | None): Salary tier of the employee.
+        department (Literal["sales", "engineering", "support", "IT", "product_management", "marketing", "r&d", "accounting", "hr", "management"]):
+            Department the employee belongs to.
+        salary (Literal["low", "medium", "high"]):
+            Salary tier of the employee.
         active_projects (int | None): Number of active projects.
         avg_monthly_hours (int | None): Average monthly hours worked.
         years_at_company (int | None): Number of years at the company.
@@ -61,8 +62,19 @@ class EmployeeInfoDTO(BaseModel):
     """
     model_config = ConfigDict(from_attributes=True)
 
-    department: Department
-    salary: SalaryTier | None = None
+    department: Literal[
+        "sales",
+        "engineering",
+        "support",
+        "IT",
+        "product_management",
+        "marketing",
+        "r&d",
+        "accounting",
+        "hr",
+        "management",
+    ]
+    salary: Literal["low", "medium", "high"] | None = None
     active_projects: int | None = Field(default=None, ge=0)
     avg_monthly_hours: int | None = Field(default=None, ge=0)
     years_at_company: int | None = Field(default=None, ge=0)
@@ -72,19 +84,3 @@ class EmployeeInfoDTO(BaseModel):
     satisfaction_score: float | None = Field(default=None, ge=0.0, le=1.0)
     attrition: bool | None = None
     attrition_risk: float | None = Field(default=None, ge=0.0, le=1.0)
-
-
-# ----- Type Aliases -----
-Department: TypeAlias = Literal[
-    "sales",
-    "engineering",
-    "support",
-    "IT",
-    "product_management",
-    "marketing",
-    "r&d",
-    "accounting",
-    "hr",
-    "management",
-]
-SalaryTier: TypeAlias = Literal["low", "medium", "high"]

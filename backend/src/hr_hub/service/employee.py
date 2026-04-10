@@ -83,7 +83,6 @@ def _create_employee(
         session.add(info_row)
         session.flush()
     except Exception as e:
-        session.rollback()
         LOGGER.error(
             f"Could not create employee {employee.email}: {e}"
         )
