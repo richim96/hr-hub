@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from hr_hub.model.tables import Base
+from hr_hub.model.orm import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
