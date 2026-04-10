@@ -1,6 +1,7 @@
 """SQLAlchemy engine construction."""
 
 import os
+from typing import Dict, Any
 from sqlalchemy import Engine, create_engine
 from hr_hub.db import LOGGER
 
@@ -25,7 +26,7 @@ def create_db_engine() -> Engine:
     # SQLite needs `check_same_thread=False` when used from a threaded server
     # like FastAPI/uvicorn, where a session may touch the connection from a
     # different thread than the one that created it.
-    connect_args: dict = {}
+    connect_args: Dict[Any, Any] = {}
     if db_url.startswith("sqlite"):
         connect_args["check_same_thread"] = False
 

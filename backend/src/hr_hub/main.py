@@ -7,7 +7,6 @@ from dotenv import find_dotenv, load_dotenv
 
 from hr_hub import LOGGER
 from hr_hub.api.employee import employee_router
-from hr_hub._clients import HRISClient, ITTasksClient
 from hr_hub.db import build_sessionmaker, create_db_engine
 
 load_dotenv(find_dotenv())

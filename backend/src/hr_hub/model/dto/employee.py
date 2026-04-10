@@ -1,5 +1,7 @@
 """Employee schema."""
 
+from typing import TypeAlias, Literal
+
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 
 class EmployeeDTO(BaseModel):
@@ -15,12 +17,10 @@ class EmployeeDTO(BaseModel):
     """
     model_config = ConfigDict(from_attributes=True)
 
-    employee_id: str | None = Field(
-        default=None, validation_alias="id", serialization_alias="id"
-    )
+    employee_id: str
     first_name: str
     last_name: str
-    gender: str
+    gender: str | None = None
     email: EmailStr
     manager_email: EmailStr
 
@@ -35,14 +35,56 @@ class EmployeeEquipmentDTO(BaseModel):
     """
     model_config = ConfigDict(from_attributes=True)
 
-    laptop: str
-    monitor: bool
-    headset: bool
+    laptop: str | None = None
+    monitor: bool | None = None
+    headset: bool | None = None
 
 
 class EmployeeInfoDTO(BaseModel):
-    """
+    """Employment profile and attrition signals for an employee.
+
+    Mirrors the `employee_info` ORM table. Optional fields reflect columns
+    that are nullable in the database.
+
+    Attributes:
+        department (Department): Department the employee belongs to.
+        salary (SalaryTier | None): Salary tier of the employee.
+        active_projects (int | None): Number of active projects.
+        avg_monthly_hours (int | None): Average monthly hours worked.
+        years_at_company (int | None): Number of years at the company.
+        work_accidents (bool | None): Whether the employee has had a work accident.
+        received_promotion (bool | None): Whether the employee has received a promotion.
+        last_evaluation (float | None): Last performance evaluation score in [0, 1].
+        satisfaction_score (float | None): Employee satisfaction score in [0, 1].
+        attrition (bool | None): Whether the employee has left the company.
+        attrition_risk (float | None): Predicted probability of attrition in [0, 1].
     """
     model_config = ConfigDict(from_attributes=True)
 
-    department: str
+    department: Department
+    salary: SalaryTier | None = None
+    active_projects: int | None = Field(default=None, ge=0)
+    avg_monthly_hours: int | None = Field(default=None, ge=0)
+    years_at_company: int | None = Field(default=None, ge=0)
+    work_accidents: bool | None = None
+    received_promotion: bool | None = None
+    last_evaluation: float | None = Field(default=None, ge=0.0, le=1.0)
+    satisfaction_score: float | None = Field(default=None, ge=0.0, le=1.0)
+    attrition: bool | None = None
+    attrition_risk: float | None = Field(default=None, ge=0.0, le=1.0)
+
+
+# ----- Type Aliases -----
+Department: TypeAlias = Literal[
+    "sales",
+    "engineering",
+    "support",
+    "IT",
+    "product_management",
+    "marketing",
+    "r&d",
+    "accounting",
+    "hr",
+    "management",
+]
+SalaryTier: TypeAlias = Literal["low", "medium", "high"]

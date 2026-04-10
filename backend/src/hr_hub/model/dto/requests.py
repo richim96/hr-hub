@@ -5,7 +5,7 @@ from typing import TypeAlias, Literal
 
 from pydantic import BaseModel, EmailStr, Field
 
-from hr_hub.model.dto.employee import EmployeeDTO, EmployeeEquipmentDTO
+from hr_hub.model.dto.employee import EmployeeDTO, EmployeeEquipmentDTO, EmployeeInfoDTO
 from hr_hub.model.dto.change import ChangeDTO
 
 
@@ -15,8 +15,9 @@ class NewHireRequest(BaseModel):
     Attributes:
         request_id (str): Unique identifier for the new hire request (e.g., "evt_001")
         request_type (str): Type of request (e.g., "new_hire")
-        employee (EmployeeSchema): Employee details
-        equipment (EquipmentSchema): Equipment details for the new hire
+        employee (EmployeeDTO): Employee details
+        equipment (EmployeeEquipmentDTO): Equipment details for the new hire
+        info (EmployeeInfoDTO): Detailed info of the new hire
     """
 
     request_id: str
@@ -25,6 +26,7 @@ class NewHireRequest(BaseModel):
     )
     employee: EmployeeDTO
     equipment: EmployeeEquipmentDTO
+    info: EmployeeInfoDTO
 
 
 class EmployeeChangeRequest(BaseModel):

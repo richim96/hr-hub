@@ -6,7 +6,6 @@ from sqlalchemy import (
     Boolean,
     Float,
     SmallInteger,
-    Integer,
     DateTime,
     JSON,
     Enum,
@@ -29,7 +28,7 @@ class Employee(Base):
         last_name (str): Last name of the employee
         gender (str): Gender of the employee
         email (str): Unique email address of the employee. Indexed.
-        manager (str): Email of the employee's manager. Indexed.
+        manager_email (str): Email of the employee's manager. Indexed.
         laptop (str): Laptop assigned to the employee
         monitor (bool): Whether the employee has a monitor
         headset (bool): Whether the employee has a headset
@@ -39,9 +38,9 @@ class Employee(Base):
     employee_id = Column("EmployeeID", String, primary_key=True)
     first_name = Column("FirstName", String, nullable=False)
     last_name = Column("LastName", String, nullable=False)
-    gender = Column("Gender", Enum("M", "F"), String)
+    gender = Column("Gender", Enum("M", "F"))
     email = Column("Email", String, index=True, unique=True, nullable=False)
-    manager = Column("ManagerEmail", String, index=True)
+    manager_email = Column("ManagerEmail", String, index=True)
     laptop = Column("Laptop", String)
     monitor = Column("Monitor", Boolean)
     headset = Column("Headset", Boolean)
@@ -69,7 +68,6 @@ class EmployeeInfo(Base):
     """
     __tablename__ = "employee_info"
 
-    index = Column(Integer, primary_key=True, autoincrement=True)
     employee_id = Column(
         "EmployeeID",
         String,
@@ -99,18 +97,18 @@ class EmployeeInfo(Base):
     years_at_company = Column("YearsAtCompany", SmallInteger)
     work_accidents = Column("WorkAccidents", Boolean)
     received_promotion = Column("ReceivedPromotion", Boolean)
-    last_evaluation = Column(
+    last_evaluation = Column( # type: ignore
         "LastEvaluation",
         Float,
         CheckConstraint("LastEvaluation BETWEEN 0 AND 1")
     )
-    satisfaction_score = Column(
+    satisfaction_score = Column( # type: ignore
         "SatisfactionScore",
         Float,
         CheckConstraint("SatisfactionScore BETWEEN 0 AND 1")
-    ),
+    )
     attrition = Column("Attrition", Boolean)
-    attrition_risk = Column(
+    attrition_risk = Column( # type: ignore
         "AttritionRisk",
         Float,
         CheckConstraint("AttritionRisk BETWEEN 0 AND 1")
