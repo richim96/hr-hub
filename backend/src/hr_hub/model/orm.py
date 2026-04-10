@@ -1,4 +1,4 @@
-"""ORM models."""
+"""ORM models: internal object representation and db interaction."""
 
 from sqlalchemy import (
     Column,
@@ -24,27 +24,24 @@ class Employee(Base):
     """Database model for employee.
 
     Attributes:
-        index (int): Auto-incremented primary key
-        employee_id (str): Unique identifier for the employee
+        employee_id (str): Unique identifier for the employee. Primary key, indexed.
         first_name (str): First name of the employee
         last_name (str): Last name of the employee
         gender (str): Gender of the employee
-        email (str): Unique email address of the employee
-        manager (str): Email of the employee's manager
+        email (str): Unique email address of the employee. Indexed.
+        manager (str): Email of the employee's manager. Indexed.
         laptop (str): Laptop assigned to the employee
         monitor (bool): Whether the employee has a monitor
         headset (bool): Whether the employee has a headset
     """
+    __tablename__ = "employee"
 
-    __tablename__ = "employees"
-
-    index = Column(Integer, primary_key=True, autoincrement=True)
-    employee_id = Column("EmployeeID", String, unique=True, nullable=False)
+    employee_id = Column("EmployeeID", String, primary_key=True)
     first_name = Column("FirstName", String, nullable=False)
     last_name = Column("LastName", String, nullable=False)
     gender = Column("Gender", Enum("M", "F"), String)
-    email = Column("Email", String, unique=True, nullable=False)
-    manager = Column("ManagerEmail", String)
+    email = Column("Email", String, index=True, unique=True, nullable=False)
+    manager = Column("ManagerEmail", String, index=True)
     laptop = Column("Laptop", String)
     monitor = Column("Monitor", Boolean)
     headset = Column("Headset", Boolean)
@@ -57,8 +54,7 @@ class EmployeeInfo(Base):
     """Database model for employee info.
 
     Attributes:
-        index (int): Auto-incremented primary key
-        employee_id (str): Foreign key referencing the employee
+        employee_id (str): Foreign key referencing the employee. Primary key, indexed.
         department (str): Department the employee belongs to
         salary (str): Salary tier of the employee (e.g., "low", "medium", "high")
         active_projects (int): Number of active projects
@@ -71,14 +67,15 @@ class EmployeeInfo(Base):
         attrition (bool): Whether the employee has left the company
         attrition_risk (float): Predicted probability of attrition
     """
-    __tablename__ = "employees_info"
+    __tablename__ = "employee_info"
 
     index = Column(Integer, primary_key=True, autoincrement=True)
     employee_id = Column(
         "EmployeeID",
         String,
-        ForeignKey("employees.EmployeeID"),
-        nullable=False
+        ForeignKey("employee.EmployeeID"),
+        primary_key=True,
+        index=True,
     )
     department = Column(
         "Department",
@@ -93,7 +90,8 @@ class EmployeeInfo(Base):
             "accounting",
             "hr",
             "management",
-        )
+        ),
+        nullable=False
     )
     salary = Column("Salary", Enum("low", "medium", "high"))
     active_projects = Column("ActiveProjects", SmallInteger)
@@ -125,9 +123,8 @@ class ITTask(Base):
     """Database model for IT task.
     
     Attributes:
-        index (int): Auto-incremented primary key
-        task_id (str): Unique identifier for the task (e.g., "task_001")
-        employee_id (str): Foreign key referencing the employee
+        task_id (str): Identifier for the task (e.g., "task_001"). Primary key
+        employee_id (str): Foreign key referencing the employee. Indexed.
         title (str): Title of the task
         description (str): Detailed description of the task
         assignee (str): Email of the person or team assigned to the task
@@ -135,16 +132,20 @@ class ITTask(Base):
         status (str): Current status of the task (e.g., "open", "in_progress", "closed")
         task_metadata (dict): Additional metadata related to the task
     """
+    __tablename__ = "it_task"
 
-    __tablename__ = "it_tasks"
-
-    index = Column(Integer, primary_key=True, autoincrement=True)
-    task_id = Column("TaskID", String, unique=True, nullable=False)
-    employee_id = Column("EmployeeID", String, ForeignKey("employees.EmployeeID"), nullable=False)
+    task_id = Column("TaskID", String, primary_key=True, index=True)
+    employee_id = Column(
+        "EmployeeID",
+        String,
+        ForeignKey("employee.EmployeeID"),
+        index=True,
+        nullable=False
+    )
     title = Column("Title", String, nullable=False)
     description = Column("Description", String)
     assignee = Column("Assignee", String)
-    due_date = Column("DueDate", DateTime, nullable=True)
+    due_date = Column("DueDate", DateTime)
     status = Column("Status", Enum("Pending", "Canceled", "Completed"))
     task_metadata = Column("Metadata", JSON)
 

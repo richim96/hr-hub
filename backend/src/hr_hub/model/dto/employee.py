@@ -1,7 +1,6 @@
 """Employee schema."""
 
-from datetime import date
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, ConfigDict
 
 class EmployeeDTO(BaseModel):
     """Employee details.
@@ -13,8 +12,8 @@ class EmployeeDTO(BaseModel):
         gender (str): M or F, employee's gender
         email (EmailStr): Employee's email address
         manager_email (EmailStr): Employee's manager's email address
-        start_date (Date): Employee's start date
     """
+    model_config = ConfigDict(from_attributes=True)
 
     employee_id: str | None = Field(
         default=None, validation_alias="id", serialization_alias="id"
@@ -24,7 +23,6 @@ class EmployeeDTO(BaseModel):
     gender: str
     email: EmailStr
     manager_email: EmailStr
-    start_date: date
 
 
 class EmployeeEquipmentDTO(BaseModel):
@@ -35,6 +33,7 @@ class EmployeeEquipmentDTO(BaseModel):
         monitor (bool): Whether a monitor is provided
         headset (bool): Whether a headset is provided
     """
+    model_config = ConfigDict(from_attributes=True)
 
     laptop: str
     monitor: bool
@@ -42,5 +41,8 @@ class EmployeeEquipmentDTO(BaseModel):
 
 
 class EmployeeInfoDTO(BaseModel):
+    """
+    """
+    model_config = ConfigDict(from_attributes=True)
 
     department: str
