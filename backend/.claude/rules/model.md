@@ -11,7 +11,7 @@ description: Rules for working in src/hr_hub/model/ (ORM layer, orm.py)
 - All ORM classes inherit from `Base` (`DeclarativeBase`) defined in `orm.py`.
 - Table names use snake_case singular (`employee`, `employee_info`, `it_task`).
 - Column names use PascalCase string aliases (e.g., `Column("EmployeeID", ...)`). The Python attribute name uses snake_case.
-- Foreign keys reference the column alias string: `ForeignKey("employees.EmployeeID")`.
+- Foreign keys reference the `<table>.<column alias>` string (e.g., `ForeignKey("employee.EmployeeID")`).
 - `Enum` column values must be defined as explicit string literals in the `Column(...)` call.
 - Float columns representing scores or probabilities (0–1 range) must include a `CheckConstraint`.
 

@@ -14,7 +14,7 @@ The agent lives in `agent/agent.py` and is exported via `agent/__init__.py` as `
 
 - All tools live in `agent/`. Each file should group tools by domain (e.g., `employee_tool.py`, `ticketing_tool.py`).
 - Register tools by passing them explicitly to the `tools=[...]` list in the `Agent(...)` constructor. Do not use wildcard imports to register tools.
-- Tools must be plain Python functions decorated with `@hr_agent.tool` or passed as callables. They must have typed signatures — PydanticAI derives the tool schema from type annotations. They are bound to the scope of the model. Actions will be defined internally to the tools. A tool can query the database, but only query it. It cannot update or delete data, it is restricted to read-only (SELECT statements). Queries should come in text form directly from the LLM, the ORM should not be used: it's an extra layer of complexity not needed for the agent's use case.
+- Tools must be plain Python functions decorated with `@hr_agent.tool` or passed as callables. They must have typed signatures — PydanticAI derives the tool schema from type annotations. They are bound to the scope of the model. Actions will be defined internally to the tools. A tool can query the database, but only query it. It cannot update or delete data, it is restricted to read-only (SELECT statements). Queries should come in text form directly from the LLM, the orm layer should use the query directly: it's an extra layer of complexity not needed for the agent's use case.
 
 ## Environment
 

@@ -25,9 +25,11 @@ description: Rules for working in src/hr_hub/model/dto/
 ## APIResponse structure
 
 `APIResponse` is the only response type returned from the API. It contains:
-- `actions_taken: list[APIResponse.Action]` — each integration step as a nested `Action` object
+- `request_id: str` — identifier of the processed request
+- `request_type: RequestType` — one of `"new_hire"`, `"employee_change"`, `"ticket"`
+- `status: Status` — one of `"completed"`, `"pending"`, `"failed"`
+- `actions: list[APIResponse.Action]` — each integration step as a nested `Action` object
 - `llm_result: APIResponse.LLMResult | None` — populated when the agent is invoked
-- `summary: str` — human-readable description of what happened
 
 `Action` and `LLMResult` are defined as nested classes inside `APIResponse`. Reference them as `APIResponse.Action` and `APIResponse.LLMResult`, not as standalone imports.
 

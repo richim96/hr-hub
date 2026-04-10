@@ -28,7 +28,7 @@ Every discrete step (db write, agent call, external side-effect) should produce 
 ```python
 APIResponse.Action(action="create_employee", success=True, details="...")
 ```
-Collect actions in a list and pass them to `APIResponse.actions_taken`.
+Collect actions in a list and pass them to `APIResponse.actions`.
 
 ## Error handling
 
