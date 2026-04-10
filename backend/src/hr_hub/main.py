@@ -3,22 +3,28 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import find_dotenv, load_dotenv
 
 from hr_hub import LOGGER
 from hr_hub.api.employee import employee_router
 from hr_hub._clients import HRISClient, ITTasksClient
+from hr_hub.db import build_sessionmaker, create_db_engine
+
+load_dotenv(find_dotenv())
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.hris_client = HRISClient()
-    app.state.it_tasks_client = ITTasksClient()
+    app.state.db_engine = create_db_engine()
+    app.state.db_sessionmaker = build_sessionmaker(app.state.db_engine)
 
-    LOGGER.info("✅ Mock clients initialized")
+    LOGGER.info("✅ App context initialized")
 
     yield
 
-    LOGGER.info("👋 Shutting down clients")
+    LOGGER.info("👋 Clearing app context...")
+    app.state.db_engine.dispose()
+    LOGGER.info("👋 DB engine disposed")
 
 
 app: FastAPI = FastAPI(
@@ -35,5 +41,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-prefix: str = "/hr-hub/api/v0.1"
-app.include_router(employee_router, prefix=prefix)
+app.include_router(employee_router, prefix="/hr-hub/api/v0.1")
