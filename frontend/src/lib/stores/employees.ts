@@ -1,4 +1,4 @@
-import { writable, get } from 'svelte/store';
+import { writable } from 'svelte/store';
 import { createEmployee, listEmployees, updateEmployee } from '$lib/api/employees';
 import { addToast } from './toast';
 import type { Department, EmployeeChangeRequest, FullEmployee, NewHireRequest } from '$lib/types';

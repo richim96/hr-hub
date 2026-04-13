@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import { Eye, ChevronUp, ChevronDown } from 'lucide-svelte';
+	import { Eye } from 'lucide-svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Skeleton from '$lib/components/ui/Skeleton.svelte';
 	import type { APIResponse, ResponseStatus } from '$lib/types';

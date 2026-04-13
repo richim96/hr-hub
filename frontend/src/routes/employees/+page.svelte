@@ -108,28 +108,30 @@
 					on:change={handleDeptChange}
 				/>
 				<div class="flex flex-col gap-1">
-					<label class="text-sm font-medium text-gray-700">Min Attrition Risk</label>
+					<label for="riskMin" class="text-sm font-medium text-gray-700">Min Attrition Risk</label>
 					<input
+						id="riskMin"
 						type="range"
 						min="0"
 						max="1"
 						step="0.05"
 						value={store.filters.attritionRiskMin}
 						on:input={handleRiskMinInput}
-						class="accent-[#C05B28]-600"
+						class="accent-[#C05B28]"
 					/>
 					<span class="text-xs text-gray-500">{Math.round(store.filters.attritionRiskMin * 100)}%</span>
 				</div>
 				<div class="flex flex-col gap-1">
-					<label class="text-sm font-medium text-gray-700">Max Attrition Risk</label>
+					<label for="riskMax" class="text-sm font-medium text-gray-700">Max Attrition Risk</label>
 					<input
+						id="riskMax"
 						type="range"
 						min="0"
 						max="1"
 						step="0.05"
 						value={store.filters.attritionRiskMax}
 						on:input={handleRiskMaxInput}
-						class="accent-[#C05B28]-600"
+						class="accent-[#C05B28]"
 					/>
 					<span class="text-xs text-gray-500">{Math.round(store.filters.attritionRiskMax * 100)}%</span>
 				</div>

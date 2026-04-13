@@ -4,7 +4,6 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
-	import Select from '$lib/components/ui/Select.svelte';
 	import { changeEmployee } from '$lib/stores/employees';
 	import type { ChangeField, EmployeeChangeRequest, EmployeeField, FullEmployee } from '$lib/types';
 

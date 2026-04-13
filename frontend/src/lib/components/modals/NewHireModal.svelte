@@ -5,7 +5,7 @@
 	import Input from '$lib/components/ui/Input.svelte';
 	import Select from '$lib/components/ui/Select.svelte';
 	import { hireEmployee } from '$lib/stores/employees';
-	import type { Department, EmployeeEquipment, EmployeeInfo, Gender, NewHireRequest, SalaryTier } from '$lib/types';
+	import type { Department, Gender, NewHireRequest, SalaryTier } from '$lib/types';
 
 	export let open = false;
 

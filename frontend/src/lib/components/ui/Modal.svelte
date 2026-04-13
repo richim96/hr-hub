@@ -32,13 +32,14 @@
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in"
 		on:click|self={close}
-		role="dialog"
-		aria-modal="true"
-		aria-labelledby="modal-title"
+		role="presentation"
 	>
 		<!-- Panel -->
 		<div
 			class="relative w-full {widths[maxWidth]} bg-white rounded-xl shadow-2xl animate-slide-in max-h-[90vh] flex flex-col"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="modal-title"
 		>
 			<!-- Header -->
 			<div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
