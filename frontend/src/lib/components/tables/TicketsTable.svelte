@@ -12,7 +12,7 @@
 	const dispatch = createEventDispatcher<{ select: APIResponse }>();
 
 	let sortKey: 'request_id' | 'status' = 'request_id';
-	let sortDir: 'asc' | 'desc' = 'desc';
+	let sortDir: string = 'desc';
 
 	$: sorted = [...items].sort((a, b) => {
 		const av = a[sortKey] ?? '';

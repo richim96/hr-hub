@@ -98,6 +98,28 @@ Dashboards that hit unimplemented endpoints display an inline empty state rather
 - `employee_id` in `NewHireRequest.employee` is generated on the frontend as `emp_<uuid-prefix>`.
 - `request_id` is generated as `req_<uuid>`.
 
+## Custom static assets
+
+Drop these files in `static/` (served at the root URL). The app references them by these exact names:
+
+| File | Where it appears |
+|------|-----------------|
+| `home.png` | Favicon + sidebar logo |
+| `employees.png` | Employees nav icon |
+| `it_tasks.png` | IT Tasks nav icon |
+| `tickets.png` | Tickets nav icon |
+| `goomba_light.png` | Chat message bubble avatar |
+| `goomba_dark.png` | Chat toggle button and header avatar (inverted when open) |
+| `send_star.png` | Chat send button |
+
+## UI/UX notes
+
+- **Accent color** — `#C05B28` (burnt sienna) applied via Tailwind arbitrary-value syntax (`bg-[#C05B28]`, `text-[#C05B28]`, etc.) throughout buttons, badges, and highlights
+- **Responsive layout** — sidebar collapses to a mobile drawer at `< 768px`; hamburger button in header toggles it; drawer auto-closes on navigation
+- **Sidebar** — collapsible on desktop (chevron inline with logo); icon-only mode when collapsed; nav items use custom image icons
+- **Chat widget** — custom mascot images replace default icons; `whitespace-pre-wrap` on message bubbles for newline support
+- **Modals** — `role="presentation"` on backdrop, `role="dialog"` on panel for correct a11y semantics; Escape key closes via `svelte:window`
+
 ## Features
 
 ### Employees dashboard (`/employees`)
