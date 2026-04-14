@@ -11,7 +11,7 @@ class ChangeDTO(BaseModel):
         to (str): New value after the change
     """
 
-    from_value: str = Field(alias="from")
+    from_value: str
     to: str
 
     model_config = ConfigDict(from_attributes=True)

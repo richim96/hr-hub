@@ -78,16 +78,16 @@ class EmployeeInfo(Base):
     department = Column(
         "Department",
         Enum(
-            "sales",
-            "engineering",
-            "support",
-            "IT",
-            "product_management",
-            "marketing",
-            "r&d",
             "accounting",
+            "engineering",
             "hr",
+            "IT",
             "management",
+            "marketing",
+            "product_management",
+            "r&d",
+            "sales",
+            "support",
         ),
         nullable=False
     )
@@ -140,6 +140,7 @@ class ITTask(Base):
         index=True,
         nullable=False
     )
+    employee_email = Column("EmployeeEmail", String, index=True, nullable=False)
     title = Column("Title", String, nullable=False)
     description = Column("Description", String)
     assignee = Column("Assignee", String)

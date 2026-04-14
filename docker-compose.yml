@@ -1,0 +1,30 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount mock-cloud so the SQLite DB and storage files persist on the host
+      - ./mock-cloud:/app/mock-cloud
+    environment:
+      SQL_DB_HOST: sqlite:////app/mock-cloud/db/hr_hub.db
+      VECTOR_DB_PATH: /app/mock-cloud/storage
+      # Secrets — set in a .env file at the repo root (never commit it)
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      TAVILY_API_KEY: ${TAVILY_API_KEY}
+      SOTA_PATH: ${SOTA_PATH:-}
+      # Allow requests from the frontend container
+      ALLOWED_ORIGINS: http://localhost:3000
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      # Runtime env var read by $env/dynamic/public in the SvelteKit adapter-node server
+      PUBLIC_API_BASE_URL: http://localhost:8000
+      # Required by adapter-node when running behind a reverse proxy or on a
+      # non-standard origin — set to the public URL of the frontend
+      ORIGIN: http://localhost:3000

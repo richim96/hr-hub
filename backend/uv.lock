@@ -1091,7 +1091,7 @@ wheels = [
 ]
 
 [[package]]
-name = "hr-hub"
+name = "hr-hub-backend"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
