@@ -14,7 +14,7 @@ help:
 	@echo "    revision        Autogenerate a new migration  (MSG=\"description\")"
 	@echo "    migrate         Apply pending migrations (alembic upgrade head)"
 	@echo "    seed            Execute the db_seed notebook"
-	@echo "    reset-db        delete-db → revision → migrate → seed"
+	@echo "    reset-db        delete-db → revision → migrate → seed (MSG=\"description\")"
 	@echo ""
 	@echo "  Development"
 	@echo "    backend         FastAPI dev server with auto-reload (:8000)"
@@ -44,6 +44,7 @@ delete-db:
 # Usage: make revision MSG="add salary column"
 revision:
 	@test -n "$(MSG)" || (echo "Error: MSG is required. Usage: make revision MSG=\"description\"" && exit 1)
+	cd backend && uv run alembic upgrade head
 	cd backend && uv run alembic revision --autogenerate -m "$(MSG)"
 
 migrate:
@@ -54,7 +55,7 @@ migrate:
 seed:
 	cd notebooks && uv run jupyter nbconvert --to notebook --execute db_seed.ipynb --output db_seed.ipynb
 
-reset-db: delete-db revision MSG="full db reset" migrate seed
+reset-db: delete-db revision migrate seed
 
 # ── Development ───────────────────────────────────────────────────────────────
 
