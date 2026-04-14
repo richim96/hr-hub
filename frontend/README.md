@@ -9,7 +9,7 @@ SvelteKit single-page application for the HR Hub platform. Provides three operat
 | Framework | [SvelteKit](https://kit.svelte.dev/) 2 + Svelte 4 |
 | Language | TypeScript (strict) |
 | Styling | [Tailwind CSS](https://tailwindcss.com/) 3 |
-| Icons | [lucide-svelte](https://lucide.dev/) |
+| Icons | Custom + [lucide-svelte](https://lucide.dev/) |
 | HTTP | Native `fetch` via typed API client |
 | State | Svelte writable stores |
 | Package manager | yarn |

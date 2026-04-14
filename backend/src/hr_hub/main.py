@@ -1,5 +1,6 @@
 """Entry point for the HR Hub server."""
 
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,6 +11,9 @@ from hr_hub.api.employee import employee_router
 from hr_hub.db import build_sessionmaker, create_db_engine
 
 load_dotenv(find_dotenv())
+
+_raw = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:3000")
+ALLOWED_ORIGINS: list[str] = [o.strip() for o in _raw.split(",") if o.strip()]
 
 
 @asynccontextmanager
@@ -35,7 +39,7 @@ app: FastAPI = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],    # Frontend port
+    allow_origins=ALLOWED_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
 )
