@@ -1,6 +1,5 @@
 .DS_Store
 _INTERNAL_DOCS/
-.claude/
 
 # Environments
 .env
