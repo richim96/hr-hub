@@ -40,6 +40,7 @@ Detailed rules for each module live in `.claude/rules/`:
 | `model/dto/` | [rules/dto.md](rules/dto.md) | Pydantic schemas; `APIResponse` is the only outbound type |
 | `agent/` | [rules/agent.md](rules/agent.md) | PydanticAI agent (`hr_agent`); tools are read-only, call raw SQL |
 | `db/` | [rules/db.md](rules/db.md) | Engine, session lifecycle, Alembic wiring |
+| (all modules) | [rules/docstrings.md](rules/docstrings.md) | Google-style docstrings; types required on every arg/attribute |
 
 ## Environment variables
 
