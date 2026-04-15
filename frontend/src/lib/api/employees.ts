@@ -1,17 +1,15 @@
 /**
  * Employee API service.
  *
- * Implemented backend endpoints:
- *   POST /hr-hub/api/v0.1/employee/new-hire   ✅
- *   PATCH /hr-hub/api/v0.1/employee/change    ⚠️  stub (returns null)
- *
- * Not yet implemented (handle 404/error gracefully in stores):
- *   GET  /hr-hub/api/v0.1/employee            ❌
- *   GET  /hr-hub/api/v0.1/employee/:id        ❌
+ *   GET    /hr-hub/api/v0.1/employee            ✅ current employees only (attrition=False)
+ *   GET    /hr-hub/api/v0.1/employee/:id        ✅ single current employee
+ *   POST   /hr-hub/api/v0.1/employee/new-hire   ✅
+ *   PATCH  /hr-hub/api/v0.1/employee/:id        ✅ partial update (any field)
+ *   DELETE /hr-hub/api/v0.1/employee/:id        ✅ hard delete
  */
 
 import { apiFetch } from './client';
-import type { APIResponse, EmployeeChangeRequest, FullEmployee, NewHireRequest } from '$lib/types';
+import type { APIResponse, FullEmployee, NewHireRequest, UpdateEmployeeRequest } from '$lib/types';
 
 const PREFIX = '/hr-hub/api/v0.1/employee';
 
@@ -23,29 +21,27 @@ export async function createEmployee(payload: NewHireRequest): Promise<APIRespon
 	});
 }
 
-/**
- * Update employee fields.
- * NOTE: Backend stub — currently returns null. The store handles this gracefully.
- */
-export async function updateEmployee(payload: EmployeeChangeRequest): Promise<APIResponse> {
-	return apiFetch<APIResponse>(`${PREFIX}/change`, {
+/** Partially update an employee's identity, equipment, or employment info. */
+export async function updateEmployee(employeeId: string, payload: UpdateEmployeeRequest): Promise<APIResponse> {
+	return apiFetch<APIResponse>(`${PREFIX}/${employeeId}`, {
 		method: 'PATCH',
 		json: payload
 	});
 }
 
-/**
- * List all employees.
- * NOTE: Endpoint not yet implemented on the backend. Returns empty array until available.
- */
+/** Hard-delete an employee and all their related records. */
+export async function deleteEmployee(employeeId: string): Promise<APIResponse> {
+	return apiFetch<APIResponse>(`${PREFIX}/${employeeId}`, {
+		method: 'DELETE'
+	});
+}
+
+/** List all current employees (attrition=False). */
 export async function listEmployees(): Promise<FullEmployee[]> {
 	return apiFetch<FullEmployee[]>(`${PREFIX}`);
 }
 
-/**
- * Get a single employee by ID.
- * NOTE: Endpoint not yet implemented on the backend.
- */
+/** Get a single employee by ID. */
 export async function getEmployee(employeeId: string): Promise<FullEmployee> {
 	return apiFetch<FullEmployee>(`${PREFIX}/${employeeId}`);
 }

@@ -33,7 +33,7 @@ export const taskStore = writable<TaskStore>({
 	error: null,
 	filters: { ...DEFAULT_FILTERS },
 	page: 1,
-	pageSize: 50,
+	pageSize: 25,
 	total: 0
 });
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { UserPlus, Search, SlidersHorizontal } from 'lucide-svelte';
+	import { UserPlus, Search, SlidersHorizontal, RefreshCw } from 'lucide-svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Select from '$lib/components/ui/Select.svelte';
@@ -11,8 +11,10 @@
 		employeeStore,
 		fetchEmployees,
 		setEmployeeFilter,
-		filterEmployees
+		filterEmployees,
+		refreshRiskScores
 	} from '$lib/stores/employees';
+	import Pagination from '$lib/components/ui/Pagination.svelte';
 	import type { Department, FullEmployee } from '$lib/types';
 
 	onMount(() => {
@@ -23,10 +25,37 @@
 	let showEmployeeDetail = false;
 	let selectedEmployee: FullEmployee | null = null;
 	let showFilters = false;
+	let refreshing = false;
+
+	let sortKey: keyof FullEmployee = 'last_name';
+	let sortDir: 'asc' | 'desc' = 'asc';
+
+	function handleSort(e: CustomEvent<keyof FullEmployee>) {
+		const key = e.detail;
+		if (sortKey === key) {
+			sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+		} else {
+			sortKey = key;
+			sortDir = 'asc';
+		}
+		employeeStore.update((s) => ({ ...s, page: 1 }));
+	}
+
+	async function handleRefreshRisk() {
+		refreshing = true;
+		await refreshRiskScores();
+		refreshing = false;
+	}
 
 	$: store = $employeeStore;
 	$: filtered = filterEmployees(store.items, store.filters);
-	$: displayed = filtered.slice((store.page - 1) * store.pageSize, store.page * store.pageSize);
+	$: sortedFiltered = [...filtered].sort((a, b) => {
+		const av = a[sortKey] ?? '';
+		const bv = b[sortKey] ?? '';
+		const cmp = String(av).localeCompare(String(bv), undefined, { numeric: true });
+		return sortDir === 'asc' ? cmp : -cmp;
+	});
+	$: displayed = sortedFiltered.slice((store.page - 1) * store.pageSize, store.page * store.pageSize);
 	$: totalPages = Math.max(1, Math.ceil(filtered.length / store.pageSize));
 
 	const deptOptions: { value: Department | ''; label: string }[] = [
@@ -64,8 +93,9 @@
 	<title>Employees — HR Hub</title>
 </svelte:head>
 
+<div class="flex flex-col h-full">
 <!-- Page header -->
-<div class="flex items-center justify-between mb-6">
+<div class="flex items-center justify-between mb-6 shrink-0">
 	<div>
 		<h2 class="text-xl font-semibold text-gray-900">Employees</h2>
 		<p class="text-sm text-gray-500 mt-0.5">
@@ -77,6 +107,10 @@
 			<SlidersHorizontal size={15} />
 			Filters
 		</Button>
+		<Button variant="secondary" size="sm" on:click={handleRefreshRisk} loading={refreshing} disabled={refreshing}>
+			<RefreshCw size={15} />
+			Score All
+		</Button>
 		<Button variant="primary" size="sm" on:click={() => (showNewHire = true)}>
 			<UserPlus size={15} />
 			New Hire
@@ -85,7 +119,7 @@
 </div>
 
 <!-- Search + filter bar -->
-<Card padding="sm" class="mb-4">
+<Card padding="sm" class="mb-4 shrink-0">
 	<div class="flex flex-col gap-3">
 		<div class="relative">
 			<Search size={15} class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -141,44 +175,46 @@
 </Card>
 
 <!-- Table -->
-<Card padding="none">
-	<EmployeesTable
-		items={displayed}
-		loading={store.loading}
-		error={store.error}
-		on:select={(e) => { selectedEmployee = e.detail; showEmployeeDetail = true; }}
-	/>
-
-	<!-- Pagination -->
+<Card padding="none" class="flex-1 min-h-0 flex flex-col overflow-hidden">
 	{#if !store.loading && filtered.length > store.pageSize}
-		<div class="flex items-center justify-between px-4 py-3 border-t border-gray-100 text-sm text-gray-600">
-			<span>
-				{(store.page - 1) * store.pageSize + 1}–{Math.min(
-					store.page * store.pageSize,
-					filtered.length
-				)} of {filtered.length}
-			</span>
-			<div class="flex gap-2">
-				<Button
-					variant="ghost"
-					size="sm"
-					disabled={store.page <= 1}
-					on:click={() => employeeStore.update((s) => ({ ...s, page: s.page - 1 }))}
-				>
-					Previous
-				</Button>
-				<Button
-					variant="ghost"
-					size="sm"
-					disabled={store.page >= totalPages}
-					on:click={() => employeeStore.update((s) => ({ ...s, page: s.page + 1 }))}
-				>
-					Next
-				</Button>
-			</div>
-		</div>
+		<Pagination
+			position="top"
+			page={store.page}
+			{totalPages}
+			totalItems={filtered.length}
+			pageSize={store.pageSize}
+			on:first={() => employeeStore.update((s) => ({ ...s, page: 1 }))}
+			on:prev={() => employeeStore.update((s) => ({ ...s, page: s.page - 1 }))}
+			on:next={() => employeeStore.update((s) => ({ ...s, page: s.page + 1 }))}
+			on:last={() => employeeStore.update((s) => ({ ...s, page: totalPages }))}
+		/>
+	{/if}
+	<div class="flex-1 min-h-0">
+		<EmployeesTable
+			items={displayed}
+			loading={store.loading}
+			error={store.error}
+			{sortKey}
+			{sortDir}
+			on:sort={handleSort}
+			on:select={(e) => { selectedEmployee = e.detail; showEmployeeDetail = true; }}
+		/>
+	</div>
+	{#if !store.loading && filtered.length > store.pageSize}
+		<Pagination
+			position="bottom"
+			page={store.page}
+			{totalPages}
+			totalItems={filtered.length}
+			pageSize={store.pageSize}
+			on:first={() => employeeStore.update((s) => ({ ...s, page: 1 }))}
+			on:prev={() => employeeStore.update((s) => ({ ...s, page: s.page - 1 }))}
+			on:next={() => employeeStore.update((s) => ({ ...s, page: s.page + 1 }))}
+			on:last={() => employeeStore.update((s) => ({ ...s, page: totalPages }))}
+		/>
 	{/if}
 </Card>
+</div>
 
 <!-- Modals -->
 <NewHireModal bind:open={showNewHire} on:close={() => (showNewHire = false)} />

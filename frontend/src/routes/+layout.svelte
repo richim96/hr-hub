@@ -36,10 +36,10 @@
 
 <!-- Main content -->
 <main
-	class="layout-main pt-14 min-h-screen transition-all duration-200"
+	class="layout-main pt-14 h-screen flex flex-col transition-all duration-200"
 	style="--sidebar-w: {sidebarWidth}px;"
 >
-	<div class="p-4 md:p-6">
+	<div class="flex-1 overflow-hidden p-4 md:p-6 flex flex-col">
 		<slot />
 	</div>
 </main>

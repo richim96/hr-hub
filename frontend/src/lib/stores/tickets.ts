@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
-import { listTickets, createTicket } from '$lib/api/tickets';
+import { listTickets, createTicket, updateTicket, deleteTicket } from '$lib/api/tickets';
 import { addToast } from './toast';
-import type { APIResponse, ResponseStatus, TicketRequest } from '$lib/types';
+import type { APIResponse, ResponseStatus, TicketRequest, UpdateTicketRequest } from '$lib/types';
 
 interface TicketFilters {
 	search: string;
@@ -31,7 +31,7 @@ export const ticketStore = writable<TicketStore>({
 	error: null,
 	filters: { ...DEFAULT_FILTERS },
 	page: 1,
-	pageSize: 50,
+	pageSize: 25,
 	total: 0
 });
 
@@ -71,6 +71,45 @@ export async function submitTicket(payload: TicketRequest): Promise<APIResponse 
 	} catch (err) {
 		addToast('error', err instanceof Error ? err.message : 'Failed to submit ticket');
 		return null;
+	}
+}
+
+export async function editTicket(requestId: string, payload: UpdateTicketRequest): Promise<void> {
+	try {
+		const response = await updateTicket(requestId, payload);
+		if (response.status === 'failed') {
+			addToast('error', 'Failed to update ticket.');
+			return;
+		}
+		addToast('success', 'Ticket updated.');
+		ticketStore.update((s) => ({
+			...s,
+			items: s.items.map((t) =>
+				t.request_id === requestId
+					? { ...t, subject: response.subject, text: response.text }
+					: t
+			)
+		}));
+	} catch (err) {
+		addToast('error', err instanceof Error ? err.message : 'Failed to update ticket');
+	}
+}
+
+export async function removeTicket(requestId: string): Promise<void> {
+	try {
+		const response = await deleteTicket(requestId);
+		if (response.status === 'failed') {
+			addToast('error', 'Failed to delete ticket.');
+			return;
+		}
+		addToast('success', 'Ticket deleted.');
+		ticketStore.update((s) => ({
+			...s,
+			items: s.items.filter((t) => t.request_id !== requestId),
+			total: s.total - 1
+		}));
+	} catch (err) {
+		addToast('error', err instanceof Error ? err.message : 'Failed to delete ticket');
 	}
 }
 

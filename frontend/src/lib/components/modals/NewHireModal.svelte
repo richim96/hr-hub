@@ -57,6 +57,7 @@
 		if (!managerEmail.trim() || !managerEmail.includes('@'))
 			errors.managerEmail = 'Valid email required';
 		if (!department) errors.department = 'Required';
+		if (!salary) errors.salary = 'Required';
 		return Object.keys(errors).length === 0;
 	}
 
@@ -82,7 +83,7 @@
 			},
 			info: {
 				department: department as Department,
-				salary: (salary as SalaryTier) || null
+				salary: salary as SalaryTier
 			}
 		};
 
@@ -136,7 +137,7 @@
 					error={errors.department}
 					placeholder="Select department…"
 				/>
-				<Select id="salary" label="Salary Tier" bind:value={salary} options={salaryOptions} placeholder="Select tier…" />
+				<Select id="salary" label="Salary Tier" bind:value={salary} options={salaryOptions} required error={errors.salary} placeholder="Select tier…" />
 			</div>
 		</fieldset>
 

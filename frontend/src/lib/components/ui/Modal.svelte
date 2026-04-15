@@ -20,18 +20,15 @@
 		dispatch('close');
 	}
 
-	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === 'Escape') close();
+	$: if (typeof document !== 'undefined') {
+		document.body.style.overflow = open ? 'hidden' : '';
 	}
 </script>
-
-<svelte:window on:keydown={handleKeydown} />
 
 {#if open}
 	<!-- Overlay -->
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in"
-		on:click|self={close}
 		role="presentation"
 	>
 		<!-- Panel -->
@@ -43,7 +40,9 @@
 		>
 			<!-- Header -->
 			<div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
-				<h2 id="modal-title" class="text-lg font-semibold text-gray-900">{title}</h2>
+				<h2 id="modal-title" class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+					{#if $$slots.title}<slot name="title" />{:else}{title}{/if}
+				</h2>
 				<button
 					on:click={close}
 					class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"

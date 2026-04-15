@@ -7,7 +7,8 @@
 	import TicketsTable from '$lib/components/tables/TicketsTable.svelte';
 	import NewTicketModal from '$lib/components/modals/NewTicketModal.svelte';
 	import TicketDetailModal from '$lib/components/modals/TicketDetailModal.svelte';
-	import { ticketStore, fetchTickets, setTicketFilter, filterTickets } from '$lib/stores/tickets';
+	import { ticketStore, fetchTickets, setTicketFilter, filterTickets, removeTicket } from '$lib/stores/tickets';
+	import Pagination from '$lib/components/ui/Pagination.svelte';
 	import type { APIResponse, ResponseStatus } from '$lib/types';
 
 	onMount(() => {
@@ -48,8 +49,9 @@
 	<title>Tickets — HR Hub</title>
 </svelte:head>
 
+<div class="flex flex-col h-full">
 <!-- Page header -->
-<div class="flex items-center justify-between mb-6">
+<div class="flex items-center justify-between mb-6 shrink-0">
 	<div>
 		<h2 class="text-xl font-semibold text-gray-900">People Tickets</h2>
 		<p class="text-sm text-gray-500 mt-0.5">
@@ -69,7 +71,7 @@
 </div>
 
 <!-- Search + filter bar -->
-<Card padding="sm" class="mb-4">
+<Card padding="sm" class="mb-4 shrink-0">
 	<div class="flex flex-col gap-3">
 		<div class="relative">
 			<Search size={15} class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -108,57 +110,58 @@
 </Card>
 
 <!-- Table -->
-<Card padding="none">
-	<TicketsTable
-		items={displayed}
-		loading={store.loading}
-		error={store.error}
-		on:select={(e) => { selectedTicket = e.detail; showTicketDetail = true; }}
-	/>
-
+<Card padding="none" class="flex-1 min-h-0 flex flex-col overflow-hidden">
 	{#if !store.loading && filtered.length > store.pageSize}
-		<div class="flex items-center justify-between px-4 py-3 border-t border-gray-100 text-sm text-gray-600">
-			<span>
-				{(store.page - 1) * store.pageSize + 1}–{Math.min(
-					store.page * store.pageSize,
-					filtered.length
-				)} of {filtered.length}
-			</span>
-			<div class="flex gap-2">
-				<Button
-					variant="ghost"
-					size="sm"
-					disabled={store.page <= 1}
-					on:click={() => ticketStore.update((s) => ({ ...s, page: s.page - 1 }))}
-				>
-					Previous
-				</Button>
-				<Button
-					variant="ghost"
-					size="sm"
-					disabled={store.page >= totalPages}
-					on:click={() => ticketStore.update((s) => ({ ...s, page: s.page + 1 }))}
-				>
-					Next
-				</Button>
-			</div>
-		</div>
+		<Pagination
+			position="top"
+			page={store.page}
+			{totalPages}
+			totalItems={filtered.length}
+			pageSize={store.pageSize}
+			on:first={() => ticketStore.update((s) => ({ ...s, page: 1 }))}
+			on:prev={() => ticketStore.update((s) => ({ ...s, page: s.page - 1 }))}
+			on:next={() => ticketStore.update((s) => ({ ...s, page: s.page + 1 }))}
+			on:last={() => ticketStore.update((s) => ({ ...s, page: totalPages }))}
+		/>
+	{/if}
+	<div class="flex-1 min-h-0">
+		<TicketsTable
+			items={displayed}
+			loading={store.loading}
+			error={store.error}
+			on:select={(e) => { selectedTicket = e.detail; showTicketDetail = true; }}
+		/>
+	</div>
+	{#if !store.loading && filtered.length > store.pageSize}
+		<Pagination
+			position="bottom"
+			page={store.page}
+			{totalPages}
+			totalItems={filtered.length}
+			pageSize={store.pageSize}
+			on:first={() => ticketStore.update((s) => ({ ...s, page: 1 }))}
+			on:prev={() => ticketStore.update((s) => ({ ...s, page: s.page - 1 }))}
+			on:next={() => ticketStore.update((s) => ({ ...s, page: s.page + 1 }))}
+			on:last={() => ticketStore.update((s) => ({ ...s, page: totalPages }))}
+		/>
 	{/if}
 </Card>
+</div>
 
 <!-- Modals -->
 <NewTicketModal
 	bind:open={showNewTicket}
 	on:close={() => (showNewTicket = false)}
-	on:submitted={(e) => {
-		showNewTicket = false;
-		selectedTicket = e.detail;
-		showTicketDetail = true;
-	}}
+	on:submitted={() => { showNewTicket = false; }}
 />
 
 <TicketDetailModal
 	bind:open={showTicketDetail}
 	ticket={selectedTicket}
 	on:close={() => { showTicketDetail = false; selectedTicket = null; }}
+	on:deleted={async (e) => {
+		showTicketDetail = false;
+		selectedTicket = null;
+		await removeTicket(e.detail);
+	}}
 />

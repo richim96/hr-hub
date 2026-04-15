@@ -1,7 +1,8 @@
 import { writable } from 'svelte/store';
-import { createEmployee, listEmployees, updateEmployee } from '$lib/api/employees';
+import { createEmployee, deleteEmployee, listEmployees, updateEmployee } from '$lib/api/employees';
+import { scoreAll } from '$lib/api/prediction';
 import { addToast } from './toast';
-import type { Department, EmployeeChangeRequest, FullEmployee, NewHireRequest } from '$lib/types';
+import type { Department, FullEmployee, NewHireRequest, UpdateEmployeeRequest } from '$lib/types';
 
 interface EmployeeFilters {
 	search: string;
@@ -33,7 +34,7 @@ export const employeeStore = writable<EmployeeStore>({
 	error: null,
 	filters: { ...DEFAULT_FILTERS },
 	page: 1,
-	pageSize: 50,
+	pageSize: 25,
 	total: 0
 });
 
@@ -77,14 +78,47 @@ export async function hireEmployee(payload: NewHireRequest): Promise<boolean> {
 	}
 }
 
-export async function changeEmployee(payload: EmployeeChangeRequest): Promise<boolean> {
+export async function changeEmployee(employeeId: string, payload: UpdateEmployeeRequest): Promise<boolean> {
 	try {
-		await updateEmployee(payload);
+		await updateEmployee(employeeId, payload);
 		addToast('success', 'Employee updated successfully.');
 		await fetchEmployees();
 		return true;
 	} catch (err) {
 		const message = err instanceof Error ? err.message : 'Failed to update employee';
+		addToast('error', message);
+		return false;
+	}
+}
+
+export async function removeEmployee(employeeId: string): Promise<boolean> {
+	try {
+		await deleteEmployee(employeeId);
+		addToast('success', 'Employee deleted successfully.');
+		await fetchEmployees();
+		return true;
+	} catch (err) {
+		const message = err instanceof Error ? err.message : 'Failed to delete employee';
+		addToast('error', message);
+		return false;
+	}
+}
+
+/** Batch-score all employees and refresh the list. */
+export async function refreshRiskScores(): Promise<boolean> {
+	try {
+		const requestId = `req_${crypto.randomUUID()}`;
+		const response = await scoreAll({ request_id: requestId, request_type: 'prediction' });
+		if (response.status === 'failed') {
+			addToast('error', `Batch scoring failed: ${response.actions.find((a) => !a.success)?.details ?? 'model unavailable'}`);
+			return false;
+		}
+		const detail = response.actions.find((a) => a.success)?.details ?? 'Risk scores refreshed.';
+		addToast('success', detail);
+		await fetchEmployees();
+		return true;
+	} catch (err) {
+		const message = err instanceof Error ? err.message : 'Failed to refresh risk scores';
 		addToast('error', message);
 		return false;
 	}

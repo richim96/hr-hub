@@ -32,7 +32,7 @@
 		submitting = true;
 
 		const payload: TicketRequest = {
-			request_id: `req_${crypto.randomUUID()}`,
+			request_id: `ticket_${crypto.randomUUID()}`,
 			request_type: 'people_ticket',
 			submitted_by: submittedBy,
 			subject,

@@ -8,6 +8,7 @@
 	import NewTaskModal from '$lib/components/modals/NewTaskModal.svelte';
 	import TaskDetailModal from '$lib/components/modals/TaskDetailModal.svelte';
 	import { taskStore, fetchTasks, setTaskFilter, filterTasks, removeTask } from '$lib/stores/tasks';
+	import Pagination from '$lib/components/ui/Pagination.svelte';
 	import type { ITTask, TaskStatus } from '$lib/types';
 
 	onMount(() => {
@@ -19,9 +20,29 @@
 	let selectedTask: ITTask | null = null;
 	let showFilters = false;
 
+	let sortKey: keyof ITTask = 'due_date';
+	let sortDir: 'asc' | 'desc' = 'asc';
+
+	function handleSort(e: CustomEvent<keyof ITTask>) {
+		const key = e.detail;
+		if (sortKey === key) {
+			sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+		} else {
+			sortKey = key;
+			sortDir = 'asc';
+		}
+		taskStore.update((s) => ({ ...s, page: 1 }));
+	}
+
 	$: store = $taskStore;
 	$: filtered = filterTasks(store.items, store.filters);
-	$: displayed = filtered.slice((store.page - 1) * store.pageSize, store.page * store.pageSize);
+	$: sortedFiltered = [...filtered].sort((a, b) => {
+		const av = a[sortKey] ?? '';
+		const bv = b[sortKey] ?? '';
+		const cmp = String(av).localeCompare(String(bv), undefined, { numeric: true });
+		return sortDir === 'asc' ? cmp : -cmp;
+	});
+	$: displayed = sortedFiltered.slice((store.page - 1) * store.pageSize, store.page * store.pageSize);
 	$: totalPages = Math.max(1, Math.ceil(filtered.length / store.pageSize));
 
 	const statusOptions: { value: TaskStatus | ''; label: string }[] = [
@@ -30,12 +51,6 @@
 		{ value: 'Completed', label: 'Completed' },
 		{ value: 'Canceled', label: 'Canceled' }
 	];
-
-	async function handleDelete(taskId: string) {
-		if (confirm('Delete this task?')) {
-			await removeTask(taskId);
-		}
-	}
 
 	function handleSearchInput(e: Event) {
 		setTaskFilter({ search: (e.target as HTMLInputElement).value });
@@ -58,8 +73,9 @@
 	<title>IT Tasks — HR Hub</title>
 </svelte:head>
 
+<div class="flex flex-col h-full">
 <!-- Page header -->
-<div class="flex items-center justify-between mb-6">
+<div class="flex items-center justify-between mb-6 shrink-0">
 	<div>
 		<h2 class="text-xl font-semibold text-gray-900">IT Tasks</h2>
 		<p class="text-sm text-gray-500 mt-0.5">
@@ -79,7 +95,7 @@
 </div>
 
 <!-- Search + filter bar -->
-<Card padding="sm" class="mb-4">
+<Card padding="sm" class="mb-4 shrink-0">
 	<div class="flex flex-col gap-3">
 		<div class="relative">
 			<Search size={15} class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -129,44 +145,46 @@
 </Card>
 
 <!-- Table -->
-<Card padding="none">
-	<TasksTable
-		items={displayed}
-		loading={store.loading}
-		error={store.error}
-		on:edit={(e) => { selectedTask = e.detail; showTaskDetail = true; }}
-		on:delete={(e) => handleDelete(e.detail)}
-	/>
-
+<Card padding="none" class="flex-1 min-h-0 flex flex-col overflow-hidden">
 	{#if !store.loading && filtered.length > store.pageSize}
-		<div class="flex items-center justify-between px-4 py-3 border-t border-gray-100 text-sm text-gray-600">
-			<span>
-				{(store.page - 1) * store.pageSize + 1}–{Math.min(
-					store.page * store.pageSize,
-					filtered.length
-				)} of {filtered.length}
-			</span>
-			<div class="flex gap-2">
-				<Button
-					variant="ghost"
-					size="sm"
-					disabled={store.page <= 1}
-					on:click={() => taskStore.update((s) => ({ ...s, page: s.page - 1 }))}
-				>
-					Previous
-				</Button>
-				<Button
-					variant="ghost"
-					size="sm"
-					disabled={store.page >= totalPages}
-					on:click={() => taskStore.update((s) => ({ ...s, page: s.page + 1 }))}
-				>
-					Next
-				</Button>
-			</div>
-		</div>
+		<Pagination
+			position="top"
+			page={store.page}
+			{totalPages}
+			totalItems={filtered.length}
+			pageSize={store.pageSize}
+			on:first={() => taskStore.update((s) => ({ ...s, page: 1 }))}
+			on:prev={() => taskStore.update((s) => ({ ...s, page: s.page - 1 }))}
+			on:next={() => taskStore.update((s) => ({ ...s, page: s.page + 1 }))}
+			on:last={() => taskStore.update((s) => ({ ...s, page: totalPages }))}
+		/>
+	{/if}
+	<div class="flex-1 min-h-0">
+		<TasksTable
+			items={displayed}
+			loading={store.loading}
+			error={store.error}
+			{sortKey}
+			{sortDir}
+			on:sort={handleSort}
+			on:select={(e) => { selectedTask = e.detail; showTaskDetail = true; }}
+		/>
+	</div>
+	{#if !store.loading && filtered.length > store.pageSize}
+		<Pagination
+			position="bottom"
+			page={store.page}
+			{totalPages}
+			totalItems={filtered.length}
+			pageSize={store.pageSize}
+			on:first={() => taskStore.update((s) => ({ ...s, page: 1 }))}
+			on:prev={() => taskStore.update((s) => ({ ...s, page: s.page - 1 }))}
+			on:next={() => taskStore.update((s) => ({ ...s, page: s.page + 1 }))}
+			on:last={() => taskStore.update((s) => ({ ...s, page: totalPages }))}
+		/>
 	{/if}
 </Card>
+</div>
 
 <!-- Modals -->
 <NewTaskModal bind:open={showNewTask} on:close={() => (showNewTask = false)} />
@@ -175,4 +193,9 @@
 	bind:open={showTaskDetail}
 	task={selectedTask}
 	on:close={() => { showTaskDetail = false; selectedTask = null; }}
+	on:deleted={async (e) => {
+		showTaskDetail = false;
+		selectedTask = null;
+		await removeTask(e.detail);
+	}}
 />

@@ -27,6 +27,9 @@
 		errors = {};
 		if (!employeeId.trim()) errors.employeeId = 'Required';
 		if (!title.trim()) errors.title = 'Required';
+		if (!description.trim()) errors.description = 'Required';
+		if (!assignee.trim()) errors.assignee = 'Required';
+		if (!dueDate) errors.dueDate = 'Required';
 		return Object.keys(errors).length === 0;
 	}
 
@@ -36,9 +39,9 @@
 		const ok = await addTask({
 			employee_id: employeeId,
 			title,
-			description: description || null,
-			assignee: assignee || null,
-			due_date: dueDate || null,
+			description,
+			assignee,
+			due_date: dueDate,
 			status
 		});
 		submitting = false;
@@ -65,9 +68,9 @@
 			placeholder="emp_abc123"
 		/>
 		<Input id="ntTitle" label="Title" bind:value={title} required error={errors.title} placeholder="Set up email account" />
-		<Textarea id="ntDesc" label="Description" bind:value={description} rows={3} />
-		<Input id="ntAssignee" type="email" label="Assignee" bind:value={assignee} placeholder="it-team@company.com" />
-		<Input id="ntDue" type="date" label="Due Date" bind:value={dueDate} />
+		<Textarea id="ntDesc" label="Description" bind:value={description} rows={3} required error={errors.description} />
+		<Input id="ntAssignee" type="email" label="Assignee" bind:value={assignee} required error={errors.assignee} placeholder="it-team@company.com" />
+		<Input id="ntDue" type="date" label="Due Date" bind:value={dueDate} required error={errors.dueDate} />
 	</form>
 
 	<svelte:fragment slot="footer">
