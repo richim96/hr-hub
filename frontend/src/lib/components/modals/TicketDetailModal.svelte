@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import { Pencil, Trash2 } from 'lucide-svelte';
+	import { Pencil, Trash2, Sparkles } from 'lucide-svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import ConfirmModal from '$lib/components/ui/ConfirmModal.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
 	import Textarea from '$lib/components/ui/Textarea.svelte';
-	import { editTicket } from '$lib/stores/tickets';
+	import { editTicket, runClassification } from '$lib/stores/tickets';
 	import type { Ticket, TicketStatus } from '$lib/types';
 
 	export let open = false;
@@ -17,6 +17,7 @@
 
 	let editing = false;
 	let submitting = false;
+	let classifying = false;
 	let confirmOpen = false;
 
 	let title = '';
@@ -46,6 +47,14 @@
 		});
 		submitting = false;
 		editing = false;
+	}
+
+	async function handleClassify() {
+		if (!ticket) return;
+		classifying = true;
+		const updated = await runClassification(ticket.request_id);
+		if (updated) ticket = { ...ticket, llm_result: updated.llm_result };
+		classifying = false;
 	}
 
 	async function handleDelete() {
@@ -129,13 +138,18 @@
 								<span class="px-2 py-0.5 bg-[#fdf4ef] text-[#9a3d1a] rounded-full text-xs">{topic}</span>
 							{/each}
 						</div>
-						<div class="flex items-center gap-2 text-sm text-gray-600">
-							<span>Confidence:</span>
-							<div class="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden max-w-32">
-								<div class="h-full bg-[#C05B28] rounded-full" style="width: {ticket.llm_result.confidence * 100}%" />
+						{#if ticket.llm_result.confidence != null}
+							<div class="flex items-center gap-2 text-sm text-gray-600">
+								<span>Confidence:</span>
+								<div class="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden max-w-32">
+									<div class="h-full bg-[#C05B28] rounded-full" style="width: {ticket.llm_result.confidence * 100}%" />
+								</div>
+								<span class="font-medium">{Math.round(ticket.llm_result.confidence * 100)}%</span>
 							</div>
-							<span class="font-medium">{Math.round(ticket.llm_result.confidence * 100)}%</span>
-						</div>
+						{/if}
+						{#if ticket.llm_result.summary}
+							<p class="text-sm text-gray-600 italic">{ticket.llm_result.summary}</p>
+						{/if}
 						{#if ticket.llm_result.draft_response}
 							<div>
 								<p class="text-sm font-medium text-gray-700 mb-1">Draft Response</p>
@@ -175,6 +189,12 @@
 			<Button variant="secondary" on:click={cancelEdit} disabled={submitting}>Cancel</Button>
 			<Button variant="primary" on:click={handleSave} loading={submitting}>Save Changes</Button>
 		{:else}
+			{#if ticket && !ticket.llm_result}
+				<Button variant="secondary" on:click={handleClassify} loading={classifying}>
+					<Sparkles size={14} />
+					Classify
+				</Button>
+			{/if}
 			<Button variant="secondary" on:click={handleClose}>Close</Button>
 		{/if}
 	</svelte:fragment>

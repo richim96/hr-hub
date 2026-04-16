@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import { listTickets, createTicket, updateTicket, deleteTicket } from '$lib/api/tickets';
+import { listTickets, createTicket, updateTicket, deleteTicket, classifyTicket } from '$lib/api/tickets';
 import { addToast } from './toast';
 import { isWarm, readCache, writeCache, appendToCache, patchInCache, removeFromCache } from './cache';
 import type { Ticket, TicketStatus, TicketRequest, UpdateTicketRequest } from '$lib/types';
@@ -133,6 +133,23 @@ export async function removeTicket(requestId: string): Promise<void> {
 		}));
 	} catch (err) {
 		addToast('error', err instanceof Error ? err.message : 'Failed to delete ticket');
+	}
+}
+
+export async function runClassification(requestId: string): Promise<Ticket | null> {
+	try {
+		const ticket = await classifyTicket(requestId);
+		addToast('success', 'Ticket classified.');
+
+		patchInCache<Ticket>('tickets', 'request_id', requestId, { llm_result: ticket.llm_result });
+		ticketStore.update((s) => ({
+			...s,
+			items: s.items.map((t) => (t.request_id === requestId ? { ...t, llm_result: ticket.llm_result } : t))
+		}));
+		return ticket;
+	} catch (err) {
+		addToast('error', err instanceof Error ? err.message : 'Classification failed');
+		return null;
 	}
 }
 

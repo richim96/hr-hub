@@ -4,7 +4,9 @@
  * Implemented backend endpoints:
  *   GET    /hr-hub/api/v0.1/ticketing             ✅ newest first
  *   POST   /hr-hub/api/v0.1/ticketing             ✅
+ *   PATCH  /hr-hub/api/v0.1/ticketing/{id}        ✅
  *   DELETE /hr-hub/api/v0.1/ticketing/{id}        ✅
+ *   POST   /hr-hub/api/v0.1/ticketing/{id}/classify ✅
  */
 
 import { apiFetch } from './client';
@@ -38,4 +40,9 @@ export async function updateTicket(requestId: string, payload: UpdateTicketReque
 /** Hard-delete a ticket by request_id. */
 export async function deleteTicket(requestId: string): Promise<void> {
 	return apiFetch<void>(`${PREFIX}/${requestId}`, { method: 'DELETE' });
+}
+
+/** Run (or re-run) AI classification on an existing ticket. */
+export async function classifyTicket(requestId: string): Promise<Ticket> {
+	return apiFetch<Ticket>(`${PREFIX}/${requestId}/classify`, { method: 'POST' });
 }

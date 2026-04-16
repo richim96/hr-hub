@@ -30,7 +30,8 @@
 		await scrollToBottom();
 
 		try {
-			const res = await sendChatMessage({ message: text, context });
+			const request_id = `req_${crypto.randomUUID()}`;
+			const res = await sendChatMessage({ message: text, context, request_id });
 			messages = [...messages, { role: 'assistant', content: res.reply }];
 		} catch (err) {
 			const msg =

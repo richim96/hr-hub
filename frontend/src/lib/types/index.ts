@@ -170,9 +170,10 @@ export interface APIAction {
 
 export interface LLMResult {
 	topics: string[];
-	confidence: number;
-	extracted_info: Record<string, unknown>;
-	draft_response: string;
+	summary?: string;
+	confidence?: number;
+	extracted_info?: Record<string, unknown>;
+	draft_response?: string;
 }
 
 export interface APIResponse {

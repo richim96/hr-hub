@@ -1,9 +1,8 @@
 /**
  * Chat / LLM Agent API service.
  *
- * NOTE: No chat endpoint exists on the backend yet.
  * The ChatWidget uses this function and handles errors gracefully.
- * Expected endpoint (once implemented): POST /hr-hub/api/v0.1/agent/query
+ * Endpoint: POST /hr-hub/api/v0.1/agent/chat
  */
 
 import { apiFetch } from './client';
@@ -16,6 +15,7 @@ export interface ChatMessage {
 export interface ChatRequest {
 	message: string;
 	context?: Record<string, unknown>;
+	request_id: string;
 }
 
 export interface ChatResponse {
@@ -24,7 +24,7 @@ export interface ChatResponse {
 
 /** Send a natural-language query to the HR agent. */
 export async function sendChatMessage(payload: ChatRequest): Promise<ChatResponse> {
-	return apiFetch<ChatResponse>('/hr-hub/api/v0.1/agent/query', {
+	return apiFetch<ChatResponse>('/hr-hub/api/v0.1/agent/chat', {
 		method: 'POST',
 		json: payload
 	});
