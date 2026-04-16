@@ -1,15 +1,8 @@
 """Attrition prediction service.
 
-The SOTA gradient-boosted pipeline (trained in
-notebooks/employee_attrition/train_attrition_model.py) is loaded once at
-application startup via `load_model()` and cached on ``app.state``.  All
-inference requests receive the pipeline via dependency injection — no
-module-level globals, no file I/O at request time.
-
-Feature order and encoding MUST match the pipeline produced by the training
-script.  The ColumnTransformer inside the pipeline handles all preprocessing,
-so this module only needs to assemble a single-row DataFrame with the correct
-column names.
+The SOTA gradient-boosted pipeline is loaded once at application startup
+via `load_model()` and cached on ``app.state``. All inference requests receive
+the pipeline via dependency injection.
 """
 
 import os
@@ -25,8 +18,8 @@ from hr_hub.model.dto import APIResponseDTO, AttritionFeaturesDTO
 from hr_hub.service import LOGGER
 
 
-# Minimum data for new employees used as fallback on null input
-_FEATURE_DEFAULTS: dict[str, Any] = {
+_SALARY_ENCODING: dict[str, float] = {"low": 0., "medium": 0.5, "high": 1.}
+_DEFAULTS: dict[str, Any] = {
     "ActiveProjects": 1,
     "AvgMonthlyHours": 160,
     "YearsAtCompany": 1,
@@ -34,13 +27,7 @@ _FEATURE_DEFAULTS: dict[str, Any] = {
     "ReceivedPromotion": 0,
     "LastEvaluation": 0.75,
     "SatisfactionScore": 0.75,
-}
-
-_SALARY_ENCODING: dict[str, float] = {
-    "low": 0.,
-    "medium": 0.5,
-    "high": 1.,
-}
+} # Base data for new employees used as fallback on null input
 
 
 def get_attrition_model(request: Request) -> Any | None:
@@ -58,9 +45,6 @@ def get_attrition_model(request: Request) -> Any | None:
 
     Args:
         request (Request): The incoming FastAPI request (used to reach ``app.state``).
-
-    Returns:
-        Any | None: The loaded sklearn Pipeline, or None if unavailable.
     """
     return request.app.state.attrition_model
 
@@ -69,15 +53,11 @@ def load_model() -> Any | None:
     """Load the attrition pipeline from SOTA_PATH and return it.
 
     Called once during application startup (lifespan in main.py); the result
-    is stored on ``app.state.attrition_model``.  Returns ``None`` if the
-    env var is unset or the file is missing — requests will then return a 503.
-
-    Returns:
-        Any | None: The loaded sklearn Pipeline, or None on failure.
+    is stored on ``app.state.attrition_model``.
     """
     model_path = os.getenv("SOTA_PATH")
     if not model_path:
-        LOGGER.warning("SOTA_PATH is not set; attrition prediction unavailable.")
+        LOGGER.warning("SOTA_PATH is not set; attrition modal unavailable.")
         return None
 
     try:
@@ -106,17 +86,10 @@ def score_employee(
     Args:
         employee_id (str): Primary key of the employee to score.
         session (Session): Active SQLAlchemy session. Caller owns commit/rollback.
-        attrition_model (Any | None): Loaded sklearn Pipeline from ``app.state``. None produces a failure action.
-
-    Returns:
-        APIResponseDTO.Action: Action indicating success or failure of the scoring step.
+        attrition_model (Any | None): Loaded sklearn Pipeline from ``app.state``.
     """
     if attrition_model is None:
-        return APIResponseDTO.Action(
-            action="score_attrition",
-            success=False,
-            details="Prediction model is not available. Check SOTA_PATH configuration.",
-        )
+        return _action(False, "Prediction model is not available. Check path config.")
 
     try:
         info: EmployeeInfo | None = (
@@ -126,19 +99,11 @@ def score_employee(
         )
     except Exception as e:
         LOGGER.error(f"DB error fetching EmployeeInfo for {employee_id}: {e}")
-        return APIResponseDTO.Action(
-            action="score_attrition",
-            success=False,
-            details=f"Database error: {e}",
-        )
+        return _action(False, f"Database error: {e}")
 
     if info is None:
-        return APIResponseDTO.Action(
-            action="score_attrition",
-            success=False,
-            details=f"Employee {employee_id!r} not found.",
-        )
-
+        return _action(False, f"Employee {employee_id!r} not found.")
+    
     features = AttritionFeaturesDTO(
         department=info.department,
         salary=info.salary,
@@ -155,32 +120,20 @@ def score_employee(
         risk = _run_inference(features, attrition_model)
     except Exception as e:
         LOGGER.error(f"Inference failed for employee {employee_id}: {e}")
-        return APIResponseDTO.Action(
-            action="score_attrition",
-            success=False,
-            details=f"Inference error: {e}",
-        )
+        return _action(False, f"Inference error: {e}")
 
     try:
         info.attrition_risk = risk
         session.flush()
     except Exception as e:
         LOGGER.error(f"Could not persist attrition_risk for {employee_id}: {e}")
-        return APIResponseDTO.Action(
-            action="score_attrition",
-            success=False,
-            details=f"Could not save attrition risk: {e}",
-        )
+        return _action(False, f"Could not save attrition risk: {e}")
 
     LOGGER.info(f"Scored employee {employee_id}: risk={risk:.4f}")
-    return APIResponseDTO.Action(
-        action="score_attrition",
-        success=True,
-        details=f"Attrition risk for {employee_id} persisted: {risk:.4f}.",
-    )
+    return _action(True, f"Attrition risk for {employee_id} persisted: {risk:.4f}.")
 
 
-def score_all_employees(
+def score_all(
     session: Session,
     request_id: str,
     attrition_model: Any | None,
@@ -195,14 +148,10 @@ def score_all_employees(
     Args:
         session (Session): Active SQLAlchemy session. Caller owns commit/rollback.
         request_id (str): Identifier to embed in the response envelope.
-        attrition_model (Any | None): Loaded sklearn Pipeline from ``app.state``. None triggers a 503-style failure response.
-
-    Returns:
-        APIResponseDTO: Summary ``score_attrition`` action and
-        ``batch_attrition_results`` containing one entry per scored employee.
+        attrition_model (Any | None): Loaded sklearn Pipeline from ``app.state``.
     """
     if attrition_model is None:
-        return _unavailable_response(request_id)
+        return _response(request_id, "Prediction model could not be loaded", False)
 
     # ------------------------------------------------------------------
     # 1. Fetch current employees only (attrition is False or unset).
@@ -215,10 +164,10 @@ def score_all_employees(
         )
     except Exception as e:
         LOGGER.error(f"DB error fetching employees for batch scoring [{request_id}]: {e}")
-        return _error_response(request_id, f"Database error: {e}")
+        return _response(request_id, f"Database error: {e}", False)
 
     if not rows:
-        return _error_response(request_id, "No current employees found to score.")
+        return _response(request_id, "No current employees found to score.", False)
 
     # ------------------------------------------------------------------
     # 2. Build a multi-row DataFrame and run vectorized inference.
@@ -228,13 +177,13 @@ def score_all_employees(
             {
                 "Department": row.department,
                 "Salary": _SALARY_ENCODING[row.salary],
-                "ActiveProjects": int(row.active_projects) if row.active_projects is not None else _FEATURE_DEFAULTS["ActiveProjects"],
-                "AvgMonthlyHours": int(row.avg_monthly_hours) if row.avg_monthly_hours is not None else _FEATURE_DEFAULTS["AvgMonthlyHours"],
-                "YearsAtCompany": int(row.years_at_company) if row.years_at_company is not None else _FEATURE_DEFAULTS["YearsAtCompany"],
-                "WorkAccidents": int(row.work_accidents) if row.work_accidents is not None else _FEATURE_DEFAULTS["WorkAccidents"],
-                "ReceivedPromotion": int(row.received_promotion) if row.received_promotion is not None else _FEATURE_DEFAULTS["ReceivedPromotion"],
-                "LastEvaluation": float(row.last_evaluation) if row.last_evaluation is not None else _FEATURE_DEFAULTS["LastEvaluation"],
-                "SatisfactionScore": float(row.satisfaction_score) if row.satisfaction_score is not None else _FEATURE_DEFAULTS["SatisfactionScore"],
+                "ActiveProjects": row.active_projects if row.active_projects is not None else _DEFAULTS["ActiveProjects"],
+                "AvgMonthlyHours": row.avg_monthly_hours if row.avg_monthly_hours is not None else _DEFAULTS["AvgMonthlyHours"],
+                "YearsAtCompany": row.years_at_company if row.years_at_company is not None else _DEFAULTS["YearsAtCompany"],
+                "WorkAccidents": row.work_accidents if row.work_accidents is not None else _DEFAULTS["WorkAccidents"],
+                "ReceivedPromotion": row.received_promotion if row.received_promotion is not None else _DEFAULTS["ReceivedPromotion"],
+                "LastEvaluation": row.last_evaluation if row.last_evaluation is not None else _DEFAULTS["LastEvaluation"],
+                "SatisfactionScore": row.satisfaction_score if row.satisfaction_score is not None else _DEFAULTS["SatisfactionScore"],
             }
             for row in rows
         ]
@@ -243,11 +192,11 @@ def score_all_employees(
         # scikit-learn's transformers cannot handle — cast to object explicitly.
         df["Department"] = df["Department"].astype(object)
         probabilities: list[float] = [
-            round(float(p), 4) for p in attrition_model.predict_proba(df)[:, 1]
+            float(p).__round__(4) for p in attrition_model.predict_proba(df)[:, 1]
         ]
     except Exception as e:
         LOGGER.error(f"Batch inference failed [{request_id}]: {e}")
-        return _error_response(request_id, f"Inference error: {e}")
+        return _response(request_id, f"Inference error: {e}", False)
 
     # ------------------------------------------------------------------
     # 3. Persist updated risk scores.
@@ -258,109 +207,59 @@ def score_all_employees(
         session.flush()
     except Exception as e:
         LOGGER.error(f"Could not persist batch attrition scores [{request_id}]: {e}")
-        return _error_response(request_id, f"Could not save attrition scores: {e}")
+        return _response(request_id, f"Could not save attrition scores: {e}", False)
 
-    scored = len(rows)
-    LOGGER.info(f"Batch scoring complete [{request_id}]: {scored} employees scored")
-
-    return APIResponseDTO(
-        request_id=request_id,
-        request_type="prediction",
-        status="completed",
-        actions=[
-            APIResponseDTO.Action(
-                action="score_attrition",
-                success=True,
-                details=f"Attrition risk persisted for {scored} employee(s).",
-            )
-        ],
-    )
+    LOGGER.info(f"Full employee scoring complete [{request_id}].")
+    return _response(request_id, f"Attrition risk persisted for all employees", True)
 
 
 # ---------------------------------------------------------------------------
 # Private helpers
 # ---------------------------------------------------------------------------
 
-def _run_inference(features: AttritionFeaturesDTO, pipeline: Any) -> float:
+def _run_inference(features: AttritionFeaturesDTO, attrition_model: Any) -> float:
     """Build a single-row feature DataFrame and return the predicted attrition probability.
 
     Args:
         features (AttritionFeaturesDTO): Employee features to score.
-        pipeline (Any): Loaded sklearn Pipeline.
-
-    Returns:
-        float: Predicted attrition probability rounded to 4 decimal places.
+        attrition_model (Any): Loaded sklearn Pipeline.
     """
-    row: dict[str, Any] = {
+    df = pd.DataFrame([{
         "Department": features.department,
         "Salary": _SALARY_ENCODING[features.salary],
-        "ActiveProjects": (
-            features.active_projects
-            if features.active_projects is not None
-            else _FEATURE_DEFAULTS["ActiveProjects"]
-        ),
-        "AvgMonthlyHours": (
-            features.avg_monthly_hours
-            if features.avg_monthly_hours is not None
-            else _FEATURE_DEFAULTS["AvgMonthlyHours"]
-        ),
-        "YearsAtCompany": (
-            features.years_at_company
-            if features.years_at_company is not None
-            else _FEATURE_DEFAULTS["YearsAtCompany"]
-        ),
-        "WorkAccidents": (
-            int(features.work_accidents)
-            if features.work_accidents is not None
-            else _FEATURE_DEFAULTS["WorkAccidents"]
-        ),
-        "ReceivedPromotion": (
-            int(features.received_promotion)
-            if features.received_promotion is not None
-            else _FEATURE_DEFAULTS["ReceivedPromotion"]
-        ),
-        "LastEvaluation": (
-            features.last_evaluation
-            if features.last_evaluation is not None
-            else _FEATURE_DEFAULTS["LastEvaluation"]
-        ),
-        "SatisfactionScore": (
-            features.satisfaction_score
-            if features.satisfaction_score is not None
-            else _FEATURE_DEFAULTS["SatisfactionScore"]
-        ),
-    }
+        "ActiveProjects": features.active_projects if features.active_projects is not None else _DEFAULTS["ActiveProjects"],
+        "AvgMonthlyHours": features.avg_monthly_hours if features.avg_monthly_hours is not None else _DEFAULTS["AvgMonthlyHours"],
+        "YearsAtCompany": features.years_at_company if features.years_at_company is not None else _DEFAULTS["YearsAtCompany"],
+        "WorkAccidents": int(features.work_accidents) if features.work_accidents is not None else _DEFAULTS["WorkAccidents"],
+        "ReceivedPromotion": int(features.received_promotion) if features.received_promotion is not None else _DEFAULTS["ReceivedPromotion"],
+        "LastEvaluation": features.last_evaluation if features.last_evaluation is not None else _DEFAULTS["LastEvaluation"],
+        "SatisfactionScore": features.satisfaction_score if features.satisfaction_score is not None else _DEFAULTS["SatisfactionScore"],
+    }])
 
-    df = pd.DataFrame([row])
-    prob: float = float(pipeline.predict_proba(df)[0, 1])
-    return round(prob, 4)
+    return float(attrition_model.predict_proba(df)[0, 1]).__round__(4)
 
 
-def _unavailable_response(request_id: str) -> APIResponseDTO:
+def _action(success: bool, msg: str) -> APIResponseDTO.Action:
+    """Helper to build a standardized APIResponseDTO.Action.
+    
+    Args:
+        success (bool): Whether the action succeeded or failed.
+        message (str): Detail message to include in the action details.
+    """
+    return APIResponseDTO.Action(action="score_attrition", success=success, details=msg)
+
+
+def _response(request_id: str, message: str, success: bool) -> APIResponseDTO:
+    """Helper to build a standardized APIResponseDTO.
+
+    Args:
+        request_id (str): Identifier to embed in the response envelope.
+        message (str): Detail message to include in the action details.
+        success (bool): Whether the action succeeded or failed.
+    """
     return APIResponseDTO(
         request_id=request_id,
         request_type="prediction",
-        status="failed",
-        actions=[
-            APIResponseDTO.Action(
-                action="score_attrition",
-                success=False,
-                details="Prediction model is not available. Check SOTA_PATH configuration.",
-            )
-        ],
-    )
-
-
-def _error_response(request_id: str, message: str) -> APIResponseDTO:
-    return APIResponseDTO(
-        request_id=request_id,
-        request_type="prediction",
-        status="failed",
-        actions=[
-            APIResponseDTO.Action(
-                action="score_attrition",
-                success=False,
-                details=message,
-            )
-        ],
+        status="completed" if success else "failed",
+        actions=[_action(success, message)],
     )

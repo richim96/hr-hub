@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends
 from hr_hub.api import LOGGER
 from hr_hub.db import get_session
 from hr_hub.model.dto import ScoreAllAttritionRequest, APIResponseDTO
-from hr_hub.service.prediction import score_all_employees, get_attrition_model
+from hr_hub.service.prediction import score_all, get_attrition_model
 
 
 prediction_router: APIRouter = APIRouter(prefix="/prediction", tags=["Prediction"])
@@ -30,4 +30,4 @@ async def predict_all_attrition(
         attrition_model (Any | None): Attrition prediction model — injected by FastAPI.
     """
     LOGGER.info(f"Score-all attrition request [ {request.request_id} ]")
-    return score_all_employees(session, request.request_id, attrition_model)
+    return score_all(session, request.request_id, attrition_model)
