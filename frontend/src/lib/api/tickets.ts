@@ -8,34 +8,34 @@
  */
 
 import { apiFetch } from './client';
-import type { APIResponse, TicketRequest, UpdateTicketRequest } from '$lib/types';
+import type { Ticket, TicketRequest, UpdateTicketRequest } from '$lib/types';
 
 const PREFIX = '/hr-hub/api/v0.1/ticketing';
 
-/** Submit a new people-team ticket. Expects APIResponse in return. */
-export async function createTicket(payload: TicketRequest): Promise<APIResponse> {
-	return apiFetch<APIResponse>(PREFIX, {
+/** Submit a new people-team ticket. */
+export async function createTicket(payload: TicketRequest): Promise<Ticket> {
+	return apiFetch<Ticket>(PREFIX, {
 		method: 'POST',
 		json: payload
 	});
 }
 
-/** List all tickets. Not yet implemented on the backend. */
-export async function listTickets(): Promise<APIResponse[]> {
-	return apiFetch<APIResponse[]>(PREFIX);
+/** List all tickets, newest first. */
+export async function listTickets(): Promise<Ticket[]> {
+	return apiFetch<Ticket[]>(PREFIX);
 }
 
-/** Get a single ticket by request_id. Not yet implemented on the backend. */
-export async function getTicket(requestId: string): Promise<APIResponse> {
-	return apiFetch<APIResponse>(`${PREFIX}/${requestId}`);
+/** Get a single ticket by request_id. */
+export async function getTicket(requestId: string): Promise<Ticket> {
+	return apiFetch<Ticket>(`${PREFIX}/${requestId}`);
 }
 
-/** Partially update a ticket's subject and/or text. */
-export async function updateTicket(requestId: string, payload: UpdateTicketRequest): Promise<APIResponse> {
-	return apiFetch<APIResponse>(`${PREFIX}/${requestId}`, { method: 'PATCH', json: payload });
+/** Partially update a ticket's title and/or text. */
+export async function updateTicket(requestId: string, payload: UpdateTicketRequest): Promise<Ticket> {
+	return apiFetch<Ticket>(`${PREFIX}/${requestId}`, { method: 'PATCH', json: payload });
 }
 
 /** Hard-delete a ticket by request_id. */
-export async function deleteTicket(requestId: string): Promise<APIResponse> {
-	return apiFetch<APIResponse>(`${PREFIX}/${requestId}`, { method: 'DELETE' });
+export async function deleteTicket(requestId: string): Promise<void> {
+	return apiFetch<void>(`${PREFIX}/${requestId}`, { method: 'DELETE' });
 }

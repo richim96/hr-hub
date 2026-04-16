@@ -11,6 +11,7 @@ from hr_hub.model.dto.requests import NewITTaskRequest
 from hr_hub.model.dto.requests import UpdateITTaskRequest
 from hr_hub.model.dto.response import APIResponseDTO
 from hr_hub.model.dto.it_task import ITTaskDTO
+from hr_hub.model.dto.ticket import TicketDTO
 
 
 __all__ = [
@@ -28,4 +29,5 @@ __all__ = [
     "UpdateITTaskRequest",
     "APIResponseDTO",
     "ITTaskDTO",
+    "TicketDTO",
 ]

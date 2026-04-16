@@ -3,7 +3,7 @@
 from dotenv import load_dotenv, find_dotenv
 from pydantic_ai import Agent
 
-from backend.src.hr_hub.agent.tools.employee import *
+from hr_hub.agent.employee_tool import *
 
 
 load_dotenv(find_dotenv())

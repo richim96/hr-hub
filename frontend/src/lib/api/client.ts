@@ -26,6 +26,7 @@ interface FetchOptions extends RequestInit {
  * Thin wrapper around fetch.
  * - Sets `Content-Type: application/json` when `options.json` is provided.
  * - Throws `ApiError` on non-2xx responses.
+ * - Retries up to 2 times on network errors (e.g. server restarting).
  */
 export async function apiFetch<T>(path: string, options: FetchOptions = {}): Promise<T> {
 	const { json, ...rest } = options;
@@ -36,27 +37,42 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
 		...(rest.headers as Record<string, string> | undefined)
 	};
 
-	const response = await fetch(`${BASE_URL}${path}`, {
+	const init: RequestInit = {
 		...rest,
 		headers,
 		body: json !== undefined ? JSON.stringify(json) : rest.body
-	});
+	};
 
-	if (!response.ok) {
-		let message = `HTTP ${response.status}`;
-		try {
-			const body = await response.json();
-			message = body?.detail ?? body?.message ?? message;
-		} catch {
-			// ignore parse errors — keep the default message
+	let lastError: unknown;
+	for (let attempt = 0; attempt <= 2; attempt++) {
+		if (attempt > 0) {
+			await new Promise((resolve) => setTimeout(resolve, 150 * attempt));
 		}
-		throw new ApiError(response.status, message);
+		try {
+			const response = await fetch(`${BASE_URL}${path}`, init);
+
+			if (!response.ok) {
+				let message = `HTTP ${response.status}`;
+				try {
+					const body = await response.json();
+					message = body?.detail ?? body?.message ?? message;
+				} catch {
+					// ignore parse errors — keep the default message
+				}
+				throw new ApiError(response.status, message);
+			}
+
+			if (response.status === 204) {
+				return undefined as T;
+			}
+
+			return response.json() as Promise<T>;
+		} catch (err) {
+			// Only retry on network errors (fetch throws TypeError), not ApiError.
+			if (err instanceof ApiError) throw err;
+			lastError = err;
+		}
 	}
 
-	// 204 No Content
-	if (response.status === 204) {
-		return undefined as T;
-	}
-
-	return response.json() as Promise<T>;
+	throw lastError;
 }

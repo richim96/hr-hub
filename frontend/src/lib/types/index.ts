@@ -25,6 +25,8 @@ export type Gender = 'M' | 'F';
 
 export type TaskStatus = 'Pending' | 'Completed' | 'Canceled';
 
+export type TicketStatus = 'Pending' | 'Canceled' | 'Completed';
+
 export type RequestType = 'new_hire' | 'employee_change' | 'people_ticket' | 'prediction';
 
 export type ResponseStatus = 'completed' | 'pending' | 'failed';
@@ -141,18 +143,18 @@ export interface UpdateEmployeeRequest {
 
 /** Mirrors backend UpdateTicketRequest. */
 export interface UpdateTicketRequest {
-	subject?: string | null;
+	title?: string | null;
 	text?: string | null;
 }
 
 /**
- * Mirrors backend TicketRequest.
+ * Mirrors backend NewTicketRequest.
  */
 export interface TicketRequest {
 	request_id: string;
 	request_type: 'people_ticket';
 	submitted_by: string;
-	subject: string;
+	title: string;
 	text: string;
 }
 
@@ -179,10 +181,19 @@ export interface APIResponse {
 	status: ResponseStatus;
 	actions: APIAction[];
 	llm_result?: LLMResult | null;
-	// Ticket-specific fields
-	subject?: string | null;
-	text?: string | null;
-	submitted_by?: string | null;
+}
+
+/** Mirrors backend TicketDTO. */
+export interface Ticket {
+	request_id: string;
+	request_type: string;
+	status: TicketStatus;
+	submitted_by: string;
+	title: string;
+	text: string;
+	actions: APIAction[];
+	llm_result?: LLMResult | null;
+	created_at: string;
 }
 
 /** Mirrors backend ScoreAllAttritionRequest */

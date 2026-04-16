@@ -6,35 +6,32 @@ from sqlalchemy.orm import Session
 
 from hr_hub.model import Ticket
 from hr_hub.model.dto import APIResponseDTO, NewTicketRequest, UpdateTicketRequest
+from hr_hub.model.dto.ticket import TicketDTO
 from hr_hub.service import LOGGER
 
 
-def create_ticket(request: NewTicketRequest, session: Session) -> APIResponseDTO:
-    """Persist a new people-team ticket and return a completed APIResponse.
-
-    The ticket is stored in the database immediately.  LLM processing
-    (``llm_result``) is not performed yet — that will be wired in when the
-    HR agent is integrated.
+def create_ticket(request: NewTicketRequest, session: Session) -> TicketDTO | None:
+    """Persist a new people-team ticket and return the created record.
 
     Args:
-        request (TicketRequestDTO): Inbound ticket request from the frontend.
+        request (NewTicketRequest): Inbound ticket request from the frontend.
         session (Session): Active SQLAlchemy session. Caller owns commit/rollback.
 
     Returns:
-        APIResponseDTO: Completed response with a ``create_ticket`` action.
+        TicketDTO: The newly created ticket, or None if the insert failed.
     """
     action = APIResponseDTO.Action(
         action="create_ticket",
         success=True,
-        details=f"Ticket '{request.subject}' submitted by {request.submitted_by}.",
+        details=f"Ticket '{request.title}' submitted by {request.submitted_by}.",
     )
 
     row = Ticket(
         request_id=request.request_id,
         request_type=request.request_type,
-        status="pending",
+        status="Pending",
         submitted_by=str(request.submitted_by),
-        subject=request.subject,
+        title=request.title,
         text=request.text,
         actions=[action.model_dump()],
         llm_result=None,
@@ -44,31 +41,14 @@ def create_ticket(request: NewTicketRequest, session: Session) -> APIResponseDTO
     try:
         session.add(row)
         session.flush()
-        LOGGER.info(f"Ticket created [ {request.request_id} -> {request.subject!r} ]")
+        LOGGER.info(f"Ticket created [ {request.request_id} -> {request.title!r} ]")
+        return TicketDTO.model_validate(row)
     except Exception as e:
         LOGGER.error(f"Could not persist ticket {request.request_id}: {e}")
-        return APIResponseDTO(
-            request_id=request.request_id,
-            request_type="people_ticket",
-            status="failed",
-            actions=[
-                APIResponseDTO.Action(
-                    action="create_ticket",
-                    success=False,
-                    details=f"Could not save ticket: {e}",
-                )
-            ],
-        )
-
-    return APIResponseDTO(
-        request_id=request.request_id,
-        request_type="people_ticket",
-        status="pending",
-        actions=[action],
-    )
+        return None
 
 
-def delete_ticket(request_id: str, session: Session) -> APIResponseDTO:
+def delete_ticket(request_id: str, session: Session) -> bool:
     """Hard-delete a ticket from the database.
 
     Args:
@@ -76,55 +56,31 @@ def delete_ticket(request_id: str, session: Session) -> APIResponseDTO:
         session (Session): Active SQLAlchemy session. Caller owns commit/rollback.
 
     Returns:
-        APIResponseDTO: Status and action describing what happened.
+        bool: True if the ticket was deleted, False if not found or deletion failed.
     """
-    from uuid import uuid4
-    response_id = str(uuid4())
+    try:
+        row: Ticket | None = session.get(Ticket, request_id)
+    except Exception as e:
+        LOGGER.error(f"DB error fetching ticket {request_id} for deletion: {e}")
+        return False
 
-    row = session.get(Ticket, request_id)
     if row is None:
-        return APIResponseDTO(
-            request_id=response_id,
-            request_type="people_ticket",
-            status="failed",
-            actions=[APIResponseDTO.Action(
-                action="delete_ticket",
-                success=False,
-                details=f"Ticket {request_id!r} not found.",
-            )],
-        )
+        return False
 
     try:
         session.delete(row)
         session.flush()
         LOGGER.info(f"Ticket deleted [ {request_id} ]")
+        return True
     except Exception as e:
         LOGGER.error(f"Could not delete ticket {request_id}: {e}")
-        return APIResponseDTO(
-            request_id=response_id,
-            request_type="people_ticket",
-            status="failed",
-            actions=[APIResponseDTO.Action(
-                action="delete_ticket",
-                success=False,
-                details=f"Could not delete ticket: {e}",
-            )],
-        )
-
-    return APIResponseDTO(
-        request_id=response_id,
-        request_type="people_ticket",
-        status="completed",
-        actions=[APIResponseDTO.Action(
-            action="delete_ticket",
-            success=True,
-            details=f"Ticket {request_id} deleted.",
-        )],
-    )
+        return False
 
 
-def update_ticket(request_id: str, request: UpdateTicketRequest, session: Session) -> APIResponseDTO:
+def update_ticket(request_id: str, request: UpdateTicketRequest, session: Session) -> TicketDTO | None:
     """Partially update a ticket's subject and/or text.
+
+    Only fields explicitly set in the request (non-None) are written to the DB.
 
     Args:
         request_id (str): Primary key of the ticket to update.
@@ -132,65 +88,39 @@ def update_ticket(request_id: str, request: UpdateTicketRequest, session: Sessio
         session (Session): Active SQLAlchemy session. Caller owns commit/rollback.
 
     Returns:
-        APIResponseDTO: Status and action describing what happened.
+        TicketDTO: The updated ticket, or None if not found or update failed.
     """
-    row = session.get(Ticket, request_id)
-    if row is None:
-        return APIResponseDTO(
-            request_id=request_id,
-            request_type="people_ticket",
-            status="failed",
-            actions=[APIResponseDTO.Action(
-                action="update_ticket",
-                success=False,
-                details=f"Ticket {request_id!r} not found.",
-            )],
-        )
+    try:
+        row: Ticket | None = session.get(Ticket, request_id)
+    except Exception as e:
+        LOGGER.error(f"DB error fetching ticket {request_id} for update: {e}")
+        return None
 
-    if request.subject is not None:
-        row.subject = request.subject
+    if row is None:
+        return None
+
+    if request.title is not None:
+        row.title = request.title
     if request.text is not None:
         row.text = request.text
 
     try:
         session.flush()
         LOGGER.info(f"Ticket updated [ {request_id} ]")
+        return TicketDTO.model_validate(row)
     except Exception as e:
         LOGGER.error(f"Could not update ticket {request_id}: {e}")
-        return APIResponseDTO(
-            request_id=request_id,
-            request_type="people_ticket",
-            status="failed",
-            actions=[APIResponseDTO.Action(
-                action="update_ticket",
-                success=False,
-                details=f"Could not update ticket: {e}",
-            )],
-        )
-
-    return APIResponseDTO(
-        request_id=request_id,
-        request_type="people_ticket",
-        status=row.status,
-        actions=[APIResponseDTO.Action(
-            action="update_ticket",
-            success=True,
-            details=f"Ticket {request_id} updated.",
-        )],
-        subject=row.subject,
-        text=row.text,
-        submitted_by=row.submitted_by,
-    )
+        return None
 
 
-def list_tickets(session: Session) -> list[APIResponseDTO]:
-    """Return all stored tickets as APIResponse objects, newest first.
+def list_tickets(session: Session) -> list[TicketDTO]:
+    """Return all stored tickets ordered by creation time descending.
 
     Args:
         session (Session): Active SQLAlchemy session. Caller owns commit/rollback.
 
     Returns:
-        list[APIResponseDTO]: All persisted tickets ordered by creation time descending.
+        list[TicketDTO]: All persisted tickets, newest first.
     """
     try:
         rows: list[Ticket] = (
@@ -198,24 +128,7 @@ def list_tickets(session: Session) -> list[APIResponseDTO]:
             .order_by(Ticket.created_at.desc())
             .all()
         )
+        return [TicketDTO.model_validate(row) for row in rows]
     except Exception as e:
         LOGGER.error(f"DB error fetching tickets: {e}")
         return []
-
-    result: list[APIResponseDTO] = []
-    for row in rows:
-        actions = [APIResponseDTO.Action(**a) for a in (row.actions or [])]
-        llm = APIResponseDTO.LLMResult(**row.llm_result) if row.llm_result else None
-        result.append(
-            APIResponseDTO(
-                request_id=row.request_id,
-                request_type="people_ticket",
-                status=row.status,
-                actions=actions,
-                llm_result=llm,
-                subject=row.subject,
-                text=row.text,
-                submitted_by=row.submitted_by,
-            )
-        )
-    return result

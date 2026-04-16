@@ -27,7 +27,7 @@ description: Rules for working in src/hr_hub/model/dto/
 `APIResponse` is the only response type returned from the API. It contains:
 - `request_id: str` — identifier of the processed request
 - `request_type: RequestType` — one of `"new_hire"`, `"employee_change"`, `"ticket"`
-- `status: Status` — one of `"completed"`, `"pending"`, `"failed"`
+- `status: Status` — one of `"Pending"`, `"Canceled"`, `"Completed"`
 - `actions: list[APIResponse.Action]` — each integration step as a nested `Action` object
 - `llm_result: APIResponse.LLMResult | None` — populated when the agent is invoked
 

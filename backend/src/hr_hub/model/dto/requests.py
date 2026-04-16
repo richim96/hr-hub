@@ -89,17 +89,17 @@ class NewTicketRequest(BaseModel):
     """Data Transfer Object for people ticket events.
 
     Attributes:
-        event_id (str): Unique identifier for the ticket request (e.g., "evt_003")
+        request_id (str): Unique identifier for the ticket request (e.g., "evt_003").
         request_type (Literal["people_ticket"]): Type of request.
-        submitted_by (EmailStr): Email of the person who submitted the ticket
-        subject (str): Subject of the ticket
-        text (str): Detailed description of the ticket issue
+        submitted_by (EmailStr): Email of the person who submitted the ticket.
+        title (str): Title of the ticket.
+        text (str): Detailed description of the ticket issue.
     """
 
     request_id: str
     request_type: Literal["people_ticket"]
     submitted_by: EmailStr
-    subject: str
+    title: str
     text: str
 
 
@@ -109,13 +109,13 @@ class UpdateTicketRequest(BaseModel):
     All fields are optional — only non-None fields are written to the database.
 
     Attributes:
-        subject (str | None): Updated subject line.
+        title (str | None): Updated ticket title.
         text (str | None): Updated ticket description.
     """
 
     model_config = ConfigDict(from_attributes=True)
 
-    subject: str | None = None
+    title: str | None = None
     text: str | None = None
 
 

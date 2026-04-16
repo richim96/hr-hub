@@ -2,16 +2,16 @@ import { writable } from 'svelte/store';
 import { listTickets, createTicket, updateTicket, deleteTicket } from '$lib/api/tickets';
 import { addToast } from './toast';
 import { isWarm, readCache, writeCache, appendToCache, patchInCache, removeFromCache } from './cache';
-import type { APIResponse, ResponseStatus, TicketRequest, UpdateTicketRequest } from '$lib/types';
+import type { Ticket, TicketStatus, TicketRequest, UpdateTicketRequest } from '$lib/types';
 
 interface TicketFilters {
 	search: string;
-	status: ResponseStatus | '';
+	status: TicketStatus | '';
 	submittedBy: string;
 }
 
 interface TicketStore {
-	items: APIResponse[];
+	items: Ticket[];
 	loading: boolean;
 	error: string | null;
 	filters: TicketFilters;
@@ -42,7 +42,7 @@ let _fetchPromise: Promise<void> | null = null;
 export async function fetchTickets(): Promise<void> {
 	// Warm: serve from localStorage, skip network.
 	if (isWarm('tickets')) {
-		const cached = readCache<APIResponse>('tickets');
+		const cached = readCache<Ticket>('tickets');
 		if (cached !== null) {
 			ticketStore.update((s) => ({ ...s, items: cached, total: cached.length, loading: false, error: null }));
 			return;
@@ -80,22 +80,18 @@ export function setTicketFilter(partial: Partial<TicketFilters>): void {
 	debounceTimer = setTimeout(fetchTickets, 300);
 }
 
-export async function submitTicket(payload: TicketRequest): Promise<APIResponse | null> {
+export async function submitTicket(payload: TicketRequest): Promise<Ticket | null> {
 	try {
-		const response = await createTicket(payload);
-		if (response.status === 'failed') {
-			addToast('error', 'Ticket submission failed.');
-			return null;
-		}
+		const ticket = await createTicket(payload);
 		addToast('success', 'Ticket submitted successfully.');
 
-		appendToCache('tickets', response);
+		appendToCache('tickets', ticket);
 		ticketStore.update((s) => ({
 			...s,
-			items: [response, ...s.items],
+			items: [ticket, ...s.items],
 			total: s.total + 1
 		}));
-		return response;
+		return ticket;
 	} catch (err) {
 		addToast('error', err instanceof Error ? err.message : 'Failed to submit ticket');
 		return null;
@@ -104,22 +100,18 @@ export async function submitTicket(payload: TicketRequest): Promise<APIResponse 
 
 export async function editTicket(requestId: string, payload: UpdateTicketRequest): Promise<void> {
 	try {
-		const response = await updateTicket(requestId, payload);
-		if (response.status === 'failed') {
-			addToast('error', 'Failed to update ticket.');
-			return;
-		}
+		const ticket = await updateTicket(requestId, payload);
 		addToast('success', 'Ticket updated.');
 
-		patchInCache<APIResponse>('tickets', 'request_id', requestId, {
-			subject: response.subject,
-			text: response.text
+		patchInCache<Ticket>('tickets', 'request_id', requestId, {
+			title: ticket.title,
+			text: ticket.text
 		});
 		ticketStore.update((s) => ({
 			...s,
 			items: s.items.map((t) =>
 				t.request_id === requestId
-					? { ...t, subject: response.subject, text: response.text }
+					? { ...t, title: ticket.title, text: ticket.text }
 					: t
 			)
 		}));
@@ -130,11 +122,7 @@ export async function editTicket(requestId: string, payload: UpdateTicketRequest
 
 export async function removeTicket(requestId: string): Promise<void> {
 	try {
-		const response = await deleteTicket(requestId);
-		if (response.status === 'failed') {
-			addToast('error', 'Failed to delete ticket.');
-			return;
-		}
+		await deleteTicket(requestId);
 		addToast('success', 'Ticket deleted.');
 
 		removeFromCache('tickets', 'request_id', requestId);
@@ -148,7 +136,7 @@ export async function removeTicket(requestId: string): Promise<void> {
 	}
 }
 
-export function filterTickets(items: APIResponse[], filters: TicketFilters): APIResponse[] {
+export function filterTickets(items: Ticket[], filters: TicketFilters): Ticket[] {
 	return items.filter((ticket) => {
 		const matchesStatus = !filters.status || ticket.status === filters.status;
 		const matchesSearch =

@@ -9,7 +9,7 @@
 	import TicketDetailModal from '$lib/components/modals/TicketDetailModal.svelte';
 	import { ticketStore, fetchTickets, setTicketFilter, filterTickets, removeTicket } from '$lib/stores/tickets';
 	import Pagination from '$lib/components/ui/Pagination.svelte';
-	import type { APIResponse, ResponseStatus } from '$lib/types';
+	import type { Ticket, TicketStatus } from '$lib/types';
 
 	onMount(() => {
 		fetchTickets();
@@ -17,18 +17,18 @@
 
 	let showNewTicket = false;
 	let showTicketDetail = false;
-	let selectedTicket: APIResponse | null = null;
+	let selectedTicket: Ticket | null = null;
 
 	$: store = $ticketStore;
 	$: filtered = filterTickets(store.items, store.filters);
 	$: displayed = filtered.slice((store.page - 1) * store.pageSize, store.page * store.pageSize);
 	$: totalPages = Math.max(1, Math.ceil(filtered.length / store.pageSize));
 
-	const statusOptions: { value: ResponseStatus | ''; label: string }[] = [
+	const statusOptions: { value: TicketStatus | ''; label: string }[] = [
 		{ value: '', label: 'All statuses' },
-		{ value: 'completed', label: 'Completed' },
-		{ value: 'pending', label: 'Pending' },
-		{ value: 'failed', label: 'Failed' }
+		{ value: 'Completed', label: 'Completed' },
+		{ value: 'Pending', label: 'Pending' },
+		{ value: 'Canceled', label: 'Canceled' }
 	];
 
 	function handleSearchInput(e: Event) {
@@ -36,7 +36,7 @@
 	}
 
 	function handleStatusChange(e: Event) {
-		setTicketFilter({ status: (e.target as HTMLSelectElement).value as ResponseStatus | '' });
+		setTicketFilter({ status: (e.target as HTMLSelectElement).value as TicketStatus | '' });
 	}
 
 	function handleSubmitterInput(e: Event) {

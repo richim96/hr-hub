@@ -7,19 +7,19 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { submitTicket } from '$lib/stores/tickets';
 	import { employeeStore } from '$lib/stores/employees';
-	import type { APIResponse, TicketRequest } from '$lib/types';
+	import type { Ticket, TicketRequest } from '$lib/types';
 
 	export let open = false;
 
-	const dispatch = createEventDispatcher<{ close: void; submitted: APIResponse }>();
+	const dispatch = createEventDispatcher<{ close: void; submitted: Ticket }>();
 
 	let submittedBy = '';
 	let emailQuery = '';
 	let dropdownOpen = false;
-	let subject = '';
+	let title = '';
 	let text = '';
 	let submitting = false;
-	let result: APIResponse | null = null;
+	let result: Ticket | null = null;
 	let errors: Record<string, string> = {};
 
 	$: employees = $employeeStore.items;
@@ -42,7 +42,7 @@
 	function validate() {
 		errors = {};
 		if (!submittedBy) errors.submittedBy = 'Select a valid employee email';
-		if (!subject.trim()) errors.subject = 'Required';
+		if (!title.trim()) errors.title = 'Required';
 		if (!text.trim()) errors.text = 'Required';
 		return Object.keys(errors).length === 0;
 	}
@@ -55,7 +55,7 @@
 			request_id: `ticket_${crypto.randomUUID()}`,
 			request_type: 'people_ticket',
 			submitted_by: submittedBy,
-			subject,
+			title,
 			text
 		};
 
@@ -65,7 +65,7 @@
 	}
 
 	function handleClose() {
-		submittedBy = emailQuery = subject = text = '';
+		submittedBy = emailQuery = title = text = '';
 		dropdownOpen = false;
 		errors = {};
 		result = null;
@@ -78,7 +78,7 @@
 		<!-- Success view -->
 		<div class="space-y-5">
 			<div class="flex items-center gap-3">
-				<Badge variant={result.status === 'completed' ? 'completed' : 'failed'}>
+				<Badge variant={result.status === 'Completed' ? 'completed' : result.status === 'Canceled' ? 'failed' : 'pending'}>
 					{result.status}
 				</Badge>
 				<span class="text-sm text-gray-500 font-mono">{result.request_id}</span>
@@ -170,11 +170,11 @@
 				{/if}
 			</div>
 			<Input
-				id="ticketSubject"
-				label="Subject"
-				bind:value={subject}
+				id="ticketTitle"
+				label="Title"
+				bind:value={title}
 				required
-				error={errors.subject}
+				error={errors.title}
 				placeholder="Address change and documentation"
 			/>
 			<Textarea

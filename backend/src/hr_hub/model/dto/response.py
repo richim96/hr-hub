@@ -13,26 +13,16 @@ class APIResponseDTO(BaseModel):
             Type of the request processed.
         status (Literal["completed", "pending", "failed"]):
             Processing status.
-        actions (list[Action]): List of actions taken by the agent based on the request.
-        llm_result (LLMResult | None): Result from the LLM analysis, if applicable.
+        actions (list[APIResponseDTO.Action]): List of actions taken by the agent based on the request.
+        llm_result (APIResponseDTO.LLMResult | None): Result from the LLM analysis, if applicable.
     """
     model_config = ConfigDict(from_attributes=True)
-
-    request_id: str
-    request_type: Literal["new_hire", "employee_change", "people_ticket", "prediction"]
-    status: Literal["completed", "pending", "failed"]
-    actions: list[Action]
-    llm_result: Optional[LLMResult] = None
-    # Ticket-specific fields — populated only for people_ticket responses
-    subject: Optional[str] = None
-    text: Optional[str] = None
-    submitted_by: Optional[str] = None
 
     class Action(BaseModel):
         """Action taken based on the request.
 
         Attributes:
-            action (Literal["create_employee", "update_employee", "create_task", "create_ticket", "update_ticket", "close_ticket", "score_attrition"]):
+            action (Literal["create_employee", "update_employee", "delete_employee", "create_task", "create_ticket", "update_ticket", "close_ticket", "delete_ticket", "score_attrition"]):
                 Description of the action taken.
             success (bool): Whether the action was successful.
             details (str): Additional details about the action taken, such as error messages if it failed.
@@ -67,3 +57,9 @@ class APIResponseDTO(BaseModel):
         confidence: float
         extracted_info: Dict[Any, Any]
         draft_response: str
+
+    request_id: str
+    request_type: Literal["new_hire", "employee_change", "people_ticket", "prediction"]
+    status: Literal["completed", "pending", "failed"]
+    actions: list[Action]
+    llm_result: Optional[LLMResult] = None

@@ -8,10 +8,10 @@
 	import Input from '$lib/components/ui/Input.svelte';
 	import Textarea from '$lib/components/ui/Textarea.svelte';
 	import { editTicket } from '$lib/stores/tickets';
-	import type { APIResponse } from '$lib/types';
+	import type { Ticket, TicketStatus } from '$lib/types';
 
 	export let open = false;
-	export let ticket: APIResponse | null = null;
+	export let ticket: Ticket | null = null;
 
 	const dispatch = createEventDispatcher<{ close: void; deleted: string }>();
 
@@ -19,7 +19,7 @@
 	let submitting = false;
 	let confirmOpen = false;
 
-	let subject = '';
+	let title = '';
 	let text = '';
 
 	$: if (ticket && open) {
@@ -28,8 +28,8 @@
 
 	function startEdit() {
 		if (!ticket) return;
-		subject = ticket.subject ?? '';
-		text = ticket.text ?? '';
+		title = ticket.title;
+		text = ticket.text;
 		editing = true;
 	}
 
@@ -41,7 +41,7 @@
 		if (!ticket) return;
 		submitting = true;
 		await editTicket(ticket.request_id, {
-			subject: subject || null,
+			title: title || null,
 			text: text || null
 		});
 		submitting = false;
@@ -53,9 +53,9 @@
 		confirmOpen = false;
 	}
 
-	function statusVariant(status: string) {
-		if (status === 'completed') return 'completed';
-		if (status === 'failed') return 'failed';
+	function statusVariant(status: TicketStatus) {
+		if (status === 'Completed') return 'completed';
+		if (status === 'Canceled') return 'failed';
 		return 'pending';
 	}
 
@@ -68,7 +68,7 @@
 <Modal {open} maxWidth="xl" on:close={handleClose}>
 	<svelte:fragment slot="title">
 		{#if ticket}
-			{ticket.subject ?? ticket.request_id}
+			{ticket.title}
 			{#if !editing}
 				<button
 					class="p-1 rounded text-gray-400 hover:text-[#C05B28] hover:bg-[#fdf4ef] transition-colors"
@@ -91,7 +91,7 @@
 	{#if ticket}
 		{#if editing}
 			<form class="space-y-4">
-				<Input id="ticketSubject" label="Subject" bind:value={subject} required />
+				<Input id="ticketTitle" label="Title" bind:value={title} required />
 				<Textarea id="ticketText" label="Description" bind:value={text} rows={6} />
 			</form>
 		{:else}
@@ -108,27 +108,17 @@
 					</div>
 				</div>
 
-				<!-- Subject -->
-				<div class="pt-2 border-t border-gray-100">
-					<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Subject</p>
-					<p class="text-base font-semibold text-gray-900">{ticket.subject ?? '—'}</p>
+				<!-- Description -->
+				<div>
+					<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Description</p>
+					<p class="text-sm text-gray-700 whitespace-pre-wrap">{ticket.text}</p>
 				</div>
 
-				<!-- Description -->
-				{#if ticket.text}
-					<div>
-						<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Description</p>
-						<p class="text-sm text-gray-700 whitespace-pre-wrap">{ticket.text}</p>
-					</div>
-				{/if}
-
 				<!-- Meta -->
-				{#if ticket.submitted_by}
-					<div class="pt-2 border-t border-gray-100">
-						<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Submitted By</p>
-						<p class="text-sm text-gray-700">{ticket.submitted_by}</p>
-					</div>
-				{/if}
+				<div class="pt-2 border-t border-gray-100">
+					<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Submitted By</p>
+					<p class="text-sm text-gray-700">{ticket.submitted_by}</p>
+				</div>
 
 				<!-- LLM result -->
 				{#if ticket.llm_result}
@@ -193,7 +183,7 @@
 <ConfirmModal
 	open={confirmOpen}
 	title="Delete Ticket"
-	message="Delete ticket '{ticket?.subject ?? ticket?.request_id ?? ''}'? This cannot be undone."
+	message="Delete ticket '{ticket?.title ?? ticket?.request_id ?? ''}'? This cannot be undone."
 	on:confirm={handleDelete}
 	on:cancel={() => (confirmOpen = false)}
 />
