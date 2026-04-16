@@ -9,9 +9,11 @@ dependencies = [
     "chromadb>=1.5.5",
     "fastapi[standard]>=0.128.2",
     "guidance>=0.3.1",
+    "pandas>=3.0.2",
     "pydantic>=2.12.5",
     "pydantic-ai>=1.56.0",
     "python-dotenv>=1.2.1",
+    "scikit-learn>=1.8.0",
     "sqlalchemy>=2.0.49",
 ]
 

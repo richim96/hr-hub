@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { X, User } from 'lucide-svelte';
 	import { sendChatMessage, type ChatMessage } from '$lib/api/chat';
+	import { modalOpen } from '$lib/stores/ui';
 
 	const GOOMBA_LIGHT = '/goomba_light.png';
 	const GOOMBA_DARK = '/goomba_dark.png';
@@ -66,7 +67,7 @@
 </script>
 
 <!-- Floating button -->
-<div class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+<div class="fixed bottom-6 right-6 flex flex-col items-end gap-3 {$modalOpen ? 'z-40 pointer-events-none' : 'z-50'}">
 	{#if open}
 		<!-- Chat panel -->
 		<div

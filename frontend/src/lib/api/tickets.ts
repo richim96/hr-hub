@@ -1,13 +1,14 @@
 /**
  * Ticketing API service.
  *
- * NOTE: Ticketing endpoints are marked TODO on the backend.
- * These functions are defined with the correct signatures and will work
- * once the backend adds the endpoints under /hr-hub/api/v0.1/ticketing.
+ * Implemented backend endpoints:
+ *   GET    /hr-hub/api/v0.1/ticketing             ✅ newest first
+ *   POST   /hr-hub/api/v0.1/ticketing             ✅
+ *   DELETE /hr-hub/api/v0.1/ticketing/{id}        ✅
  */
 
 import { apiFetch } from './client';
-import type { APIResponse, TicketRequest } from '$lib/types';
+import type { APIResponse, TicketRequest, UpdateTicketRequest } from '$lib/types';
 
 const PREFIX = '/hr-hub/api/v0.1/ticketing';
 
@@ -27,4 +28,14 @@ export async function listTickets(): Promise<APIResponse[]> {
 /** Get a single ticket by request_id. Not yet implemented on the backend. */
 export async function getTicket(requestId: string): Promise<APIResponse> {
 	return apiFetch<APIResponse>(`${PREFIX}/${requestId}`);
+}
+
+/** Partially update a ticket's subject and/or text. */
+export async function updateTicket(requestId: string, payload: UpdateTicketRequest): Promise<APIResponse> {
+	return apiFetch<APIResponse>(`${PREFIX}/${requestId}`, { method: 'PATCH', json: payload });
+}
+
+/** Hard-delete a ticket by request_id. */
+export async function deleteTicket(requestId: string): Promise<APIResponse> {
+	return apiFetch<APIResponse>(`${PREFIX}/${requestId}`, { method: 'DELETE' });
 }

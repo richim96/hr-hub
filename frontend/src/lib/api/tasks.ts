@@ -1,15 +1,18 @@
 /**
  * IT Tasks API service.
  *
- * NOTE: No task endpoints are implemented on the backend yet.
- * These functions are defined with the correct signatures and will work
- * once the backend adds the endpoints.
+ * Implemented backend endpoints:
+ *   GET    /hr-hub/api/v0.1/it-tasks               ✅ optional ?employee_id filter
+ *   GET    /hr-hub/api/v0.1/it-tasks/:id           ✅
+ *   POST   /hr-hub/api/v0.1/it-tasks               ✅
+ *   PATCH  /hr-hub/api/v0.1/it-tasks/:id           ✅
+ *   DELETE /hr-hub/api/v0.1/it-tasks/:id           ✅
  */
 
 import { apiFetch } from './client';
 import type { ITTask } from '$lib/types';
 
-const PREFIX = '/hr-hub/api/v0.1/tasks';
+const PREFIX = '/hr-hub/api/v0.1/it-tasks';
 
 export async function listTasks(employeeId?: string): Promise<ITTask[]> {
 	const query = employeeId ? `?employee_id=${encodeURIComponent(employeeId)}` : '';

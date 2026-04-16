@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Plus, Search, SlidersHorizontal } from 'lucide-svelte';
+	import { Plus, Search } from 'lucide-svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Select from '$lib/components/ui/Select.svelte';
 	import TicketsTable from '$lib/components/tables/TicketsTable.svelte';
 	import NewTicketModal from '$lib/components/modals/NewTicketModal.svelte';
 	import TicketDetailModal from '$lib/components/modals/TicketDetailModal.svelte';
-	import { ticketStore, fetchTickets, setTicketFilter, filterTickets } from '$lib/stores/tickets';
+	import { ticketStore, fetchTickets, setTicketFilter, filterTickets, removeTicket } from '$lib/stores/tickets';
+	import Pagination from '$lib/components/ui/Pagination.svelte';
 	import type { APIResponse, ResponseStatus } from '$lib/types';
 
 	onMount(() => {
@@ -17,7 +18,6 @@
 	let showNewTicket = false;
 	let showTicketDetail = false;
 	let selectedTicket: APIResponse | null = null;
-	let showFilters = false;
 
 	$: store = $ticketStore;
 	$: filtered = filterTickets(store.items, store.filters);
@@ -46,21 +46,19 @@
 
 <svelte:head>
 	<title>Tickets — HR Hub</title>
+
 </svelte:head>
 
+<div class="flex flex-col">
 <!-- Page header -->
-<div class="flex items-center justify-between mb-6">
+<div class="flex items-center justify-between mb-6 shrink-0">
 	<div>
-		<h2 class="text-xl font-semibold text-gray-900">People Tickets</h2>
+		<h2 class="text-xl font-semibold text-gray-900">Tickets</h2>
 		<p class="text-sm text-gray-500 mt-0.5">
 			{#if store.loading}Loading…{:else}{filtered.length} tickets{/if}
 		</p>
 	</div>
 	<div class="flex gap-2">
-		<Button variant="secondary" size="sm" on:click={() => (showFilters = !showFilters)}>
-			<SlidersHorizontal size={15} />
-			Filters
-		</Button>
 		<Button variant="primary" size="sm" on:click={() => (showNewTicket = true)}>
 			<Plus size={15} />
 			New Ticket
@@ -69,96 +67,81 @@
 </div>
 
 <!-- Search + filter bar -->
-<Card padding="sm" class="mb-4">
+<Card padding="sm" class="mb-4 shrink-0">
 	<div class="flex flex-col gap-3">
 		<div class="relative">
 			<Search size={15} class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
 			<input
 				type="text"
-				placeholder="Search by request ID or topic…"
+				placeholder="Search by topic…"
 				value={store.filters.search}
 				on:input={handleSearchInput}
 				class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C05B28]-500"
 			/>
 		</div>
 
-		{#if showFilters}
-			<div class="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100">
-				<Select
-					id="ticketStatusFilter"
-					label="Status"
-					value={store.filters.status}
-					options={statusOptions}
-					on:change={handleStatusChange}
+		<div class="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100">
+			<Select
+				id="ticketStatusFilter"
+				label="Status"
+				value={store.filters.status}
+				options={statusOptions}
+				on:change={handleStatusChange}
+			/>
+			<div class="flex flex-col gap-1">
+				<label for="submitterFilter" class="text-sm font-medium text-gray-700">Submitted By</label>
+				<input
+					id="submitterFilter"
+					type="text"
+					placeholder="employee@company.com"
+					value={store.filters.submittedBy}
+					on:input={handleSubmitterInput}
+					class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C05B28]-500"
 				/>
-				<div class="flex flex-col gap-1">
-					<label for="submitterFilter" class="text-sm font-medium text-gray-700">Submitted By</label>
-					<input
-						id="submitterFilter"
-						type="text"
-						placeholder="employee@company.com"
-						value={store.filters.submittedBy}
-						on:input={handleSubmitterInput}
-						class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C05B28]-500"
-					/>
-				</div>
 			</div>
-		{/if}
+		</div>
 	</div>
 </Card>
 
 <!-- Table -->
-<Card padding="none">
+<Card padding="none" class="overflow-hidden">
+	{#if !store.loading && filtered.length > store.pageSize}
+		<Pagination
+			position="top"
+			page={store.page}
+			{totalPages}
+			totalItems={filtered.length}
+			pageSize={store.pageSize}
+			on:first={() => ticketStore.update((s) => ({ ...s, page: 1 }))}
+			on:prev={() => ticketStore.update((s) => ({ ...s, page: s.page - 1 }))}
+			on:next={() => ticketStore.update((s) => ({ ...s, page: s.page + 1 }))}
+			on:last={() => ticketStore.update((s) => ({ ...s, page: totalPages }))}
+		/>
+	{/if}
 	<TicketsTable
 		items={displayed}
 		loading={store.loading}
 		error={store.error}
+		maxHeight="calc(100vh - 28rem)"
 		on:select={(e) => { selectedTicket = e.detail; showTicketDetail = true; }}
 	/>
-
-	{#if !store.loading && filtered.length > store.pageSize}
-		<div class="flex items-center justify-between px-4 py-3 border-t border-gray-100 text-sm text-gray-600">
-			<span>
-				{(store.page - 1) * store.pageSize + 1}–{Math.min(
-					store.page * store.pageSize,
-					filtered.length
-				)} of {filtered.length}
-			</span>
-			<div class="flex gap-2">
-				<Button
-					variant="ghost"
-					size="sm"
-					disabled={store.page <= 1}
-					on:click={() => ticketStore.update((s) => ({ ...s, page: s.page - 1 }))}
-				>
-					Previous
-				</Button>
-				<Button
-					variant="ghost"
-					size="sm"
-					disabled={store.page >= totalPages}
-					on:click={() => ticketStore.update((s) => ({ ...s, page: s.page + 1 }))}
-				>
-					Next
-				</Button>
-			</div>
-		</div>
-	{/if}
 </Card>
+</div>
 
 <!-- Modals -->
 <NewTicketModal
 	bind:open={showNewTicket}
 	on:close={() => (showNewTicket = false)}
-	on:submitted={(e) => {
-		showNewTicket = false;
-		selectedTicket = e.detail;
-		showTicketDetail = true;
-	}}
+	on:submitted={() => { showNewTicket = false; }}
 />
 
 <TicketDetailModal
 	bind:open={showTicketDetail}
 	ticket={selectedTicket}
 	on:close={() => { showTicketDetail = false; selectedTicket = null; }}
+	on:deleted={async (e) => {
+		showTicketDetail = false;
+		selectedTicket = null;
+		await removeTicket(e.detail);
+	}}
 />

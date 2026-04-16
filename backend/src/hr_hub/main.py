@@ -8,7 +8,11 @@ from dotenv import find_dotenv, load_dotenv
 
 from hr_hub import LOGGER
 from hr_hub.api.employee import employee_router
+from hr_hub.api.prediction import prediction_router
+from hr_hub.api.it_task import it_task_router
+from hr_hub.api.ticketing import ticketing_router
 from hr_hub.db import build_sessionmaker, create_db_engine
+from hr_hub.service.prediction import load_model
 
 load_dotenv(find_dotenv())
 
@@ -20,6 +24,7 @@ ALLOWED_ORIGINS: list[str] = [o.strip() for o in _raw.split(",") if o.strip()]
 async def lifespan(app: FastAPI):
     app.state.db_engine = create_db_engine()
     app.state.db_sessionmaker = build_sessionmaker(app.state.db_engine)
+    app.state.attrition_model = load_model()
 
     LOGGER.info("✅ App context initialized")
 
@@ -45,3 +50,6 @@ app.add_middleware(
 )
 
 app.include_router(employee_router, prefix="/hr-hub/api/v0.1")
+app.include_router(prediction_router, prefix="/hr-hub/api/v0.1")
+app.include_router(it_task_router, prefix="/hr-hub/api/v0.1")
+app.include_router(ticketing_router, prefix="/hr-hub/api/v0.1")

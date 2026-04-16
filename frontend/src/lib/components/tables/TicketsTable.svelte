@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import { Eye } from 'lucide-svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Skeleton from '$lib/components/ui/Skeleton.svelte';
 	import type { APIResponse, ResponseStatus } from '$lib/types';
@@ -8,18 +7,9 @@
 	export let items: APIResponse[] = [];
 	export let loading = false;
 	export let error: string | null = null;
+	export let maxHeight = 'calc(100vh - 20rem)';
 
 	const dispatch = createEventDispatcher<{ select: APIResponse }>();
-
-	let sortKey: 'request_id' | 'status' = 'request_id';
-	let sortDir: string = 'desc';
-
-	$: sorted = [...items].sort((a, b) => {
-		const av = a[sortKey] ?? '';
-		const bv = b[sortKey] ?? '';
-		const cmp = String(av).localeCompare(String(bv));
-		return sortDir === 'asc' ? cmp : -cmp;
-	});
 
 	function statusVariant(status: ResponseStatus) {
 		if (status === 'completed') return 'completed';
@@ -33,16 +23,16 @@
 	}
 </script>
 
-<div class="overflow-x-auto">
+<div class="overflow-auto" style="max-height: {maxHeight}">
 	<table class="w-full text-sm">
-		<thead>
-			<tr class="border-b border-gray-200 bg-gray-50">
-				<th class="px-4 py-3 text-left font-medium text-gray-600">Request ID</th>
-				<th class="px-4 py-3 text-left font-medium text-gray-600">Status</th>
-				<th class="px-4 py-3 text-left font-medium text-gray-600">Topics (LLM)</th>
-				<th class="px-4 py-3 text-left font-medium text-gray-600">Confidence</th>
-				<th class="px-4 py-3 text-left font-medium text-gray-600">Actions</th>
-				<th class="w-10" />
+		<thead class="sticky top-0 z-10 bg-gray-50">
+			<tr class="border-b border-gray-200">
+				<th class="px-4 py-2 text-left font-medium text-gray-600">Employee</th>
+				<th class="px-4 py-2 text-left font-medium text-gray-600">Status</th>
+				<th class="px-4 py-2 text-left font-medium text-gray-600">Topics</th>
+				<th class="px-4 py-2 text-left font-medium text-gray-600">Confidence</th>
+				<th class="px-4 py-2 text-left font-medium text-gray-600">Actions</th>
+				<th class="px-4 py-2 text-left font-medium text-gray-600">Ticket ID</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -55,7 +45,7 @@
 						<p class="text-sm mt-1 text-gray-400">Ticketing endpoint is not yet available on the backend.</p>
 					</td>
 				</tr>
-			{:else if sorted.length === 0}
+			{:else if items.length === 0}
 				<tr>
 					<td colspan="6" class="px-4 py-12 text-center text-gray-500">
 						<p class="font-medium">No tickets yet</p>
@@ -63,16 +53,16 @@
 					</td>
 				</tr>
 			{:else}
-				{#each sorted as ticket}
+				{#each items as ticket}
 					<tr
 						class="border-b border-gray-100 hover:bg-[#fdf4ef]/30 cursor-pointer transition-colors"
 						on:click={() => dispatch('select', ticket)}
 					>
-						<td class="px-4 py-3 font-mono text-xs text-gray-600">{ticket.request_id}</td>
-						<td class="px-4 py-3">
+						<td class="px-4 py-3 text-xs text-gray-600">{ticket.submitted_by ?? '—'}</td>
+						<td class="px-4 py-2">
 							<Badge variant={statusVariant(ticket.status)}>{ticket.status}</Badge>
 						</td>
-						<td class="px-4 py-3">
+						<td class="px-4 py-2">
 							{#if ticket.llm_result?.topics?.length}
 								<div class="flex flex-wrap gap-1">
 									{#each ticket.llm_result.topics as topic}
@@ -89,15 +79,7 @@
 						<td class="px-4 py-3 text-xs text-gray-500">
 							{ticket.actions.length} action{ticket.actions.length !== 1 ? 's' : ''}
 						</td>
-						<td class="px-4 py-3">
-							<button
-								class="p-1.5 rounded text-gray-400 hover:text-[#C05B28] hover:bg-[#fdf4ef] transition-colors"
-								on:click|stopPropagation={() => dispatch('select', ticket)}
-								aria-label="View ticket"
-							>
-								<Eye size={15} />
-							</button>
-						</td>
+						<td class="px-4 py-3 font-mono text-xs text-gray-400">{ticket.request_id}</td>
 					</tr>
 				{/each}
 			{/if}

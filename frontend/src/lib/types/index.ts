@@ -25,27 +25,20 @@ export type Gender = 'M' | 'F';
 
 export type TaskStatus = 'Pending' | 'Completed' | 'Canceled';
 
-export type RequestType = 'new_hire' | 'employee_change' | 'people_ticket';
+export type RequestType = 'new_hire' | 'employee_change' | 'people_ticket' | 'prediction';
 
 export type ResponseStatus = 'completed' | 'pending' | 'failed';
 
 export type ActionType =
 	| 'create_employee'
 	| 'update_employee'
+	| 'delete_employee'
 	| 'create_task'
 	| 'create_ticket'
 	| 'update_ticket'
-	| 'close_ticket';
-
-export type EmployeeField =
-	| 'first_name'
-	| 'last_name'
-	| 'email'
-	| 'start_date'
-	| 'team'
-	| 'role'
-	| 'manager'
-	| 'location';
+	| 'close_ticket'
+	| 'delete_ticket'
+	| 'score_attrition';
 
 // ---------------------------------------------------------------------------
 // Employee DTOs
@@ -58,7 +51,7 @@ export interface Employee {
 	last_name: string;
 	gender?: Gender | null;
 	email: string;
-	manager_email: string;
+	manager_email?: string | null;
 }
 
 /** Mirrors backend EmployeeEquipmentDTO */
@@ -71,7 +64,7 @@ export interface EmployeeEquipment {
 /** Mirrors backend EmployeeInfoDTO */
 export interface EmployeeInfo {
 	department: Department;
-	salary?: SalaryTier | null;
+	salary: SalaryTier;
 	active_projects?: number | null;
 	avg_monthly_hours?: number | null;
 	years_at_company?: number | null;
@@ -103,15 +96,6 @@ export interface ITTask {
 }
 
 // ---------------------------------------------------------------------------
-// Change DTO
-// ---------------------------------------------------------------------------
-
-export interface ChangeField {
-	from_value: string;
-	to: string;
-}
-
-// ---------------------------------------------------------------------------
 // Request payloads
 // ---------------------------------------------------------------------------
 
@@ -127,14 +111,38 @@ export interface NewHireRequest {
 }
 
 /**
- * Mirrors backend EmployeeChangeRequest.
+ * Mirrors backend UpdateEmployeeRequest.
+ * All fields optional — only non-null values are written by the backend.
  */
-export interface EmployeeChangeRequest {
-	request_id: string;
-	request_type: 'employee_change';
-	employee_email: string;
-	changes: Partial<Record<EmployeeField, ChangeField>>;
-	effective_date: string; // ISO date string YYYY-MM-DD
+export interface UpdateEmployeeRequest {
+	// Identity
+	first_name?: string;
+	last_name?: string;
+	gender?: Gender | null;
+	email?: string;
+	manager_email?: string | null;
+	// Equipment
+	laptop?: string | null;
+	monitor?: boolean | null;
+	headset?: boolean | null;
+	// Employment info
+	department?: Department;
+	salary?: SalaryTier;
+	active_projects?: number | null;
+	avg_monthly_hours?: number | null;
+	years_at_company?: number | null;
+	work_accidents?: boolean | null;
+	received_promotion?: boolean | null;
+	last_evaluation?: number | null;
+	satisfaction_score?: number | null;
+	attrition?: boolean | null;
+	attrition_risk?: number | null;
+}
+
+/** Mirrors backend UpdateTicketRequest. */
+export interface UpdateTicketRequest {
+	subject?: string | null;
+	text?: string | null;
 }
 
 /**
@@ -171,6 +179,16 @@ export interface APIResponse {
 	status: ResponseStatus;
 	actions: APIAction[];
 	llm_result?: LLMResult | null;
+	// Ticket-specific fields
+	subject?: string | null;
+	text?: string | null;
+	submitted_by?: string | null;
+}
+
+/** Mirrors backend ScoreAllAttritionRequest */
+export interface ScoreAllRequest {
+	request_id: string;
+	request_type: 'prediction';
 }
 
 // ---------------------------------------------------------------------------
