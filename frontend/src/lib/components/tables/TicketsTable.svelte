@@ -7,6 +7,7 @@
 	export let items: APIResponse[] = [];
 	export let loading = false;
 	export let error: string | null = null;
+	export let maxHeight = 'calc(100vh - 20rem)';
 
 	const dispatch = createEventDispatcher<{ select: APIResponse }>();
 
@@ -22,13 +23,13 @@
 	}
 </script>
 
-<div class="overflow-auto h-full">
+<div class="overflow-auto" style="max-height: {maxHeight}">
 	<table class="w-full text-sm">
 		<thead class="sticky top-0 z-10 bg-gray-50">
 			<tr class="border-b border-gray-200">
 				<th class="px-4 py-2 text-left font-medium text-gray-600">Employee</th>
 				<th class="px-4 py-2 text-left font-medium text-gray-600">Status</th>
-				<th class="px-4 py-2 text-left font-medium text-gray-600">Topics (LLM)</th>
+				<th class="px-4 py-2 text-left font-medium text-gray-600">Topics</th>
 				<th class="px-4 py-2 text-left font-medium text-gray-600">Confidence</th>
 				<th class="px-4 py-2 text-left font-medium text-gray-600">Actions</th>
 				<th class="px-4 py-2 text-left font-medium text-gray-600">Ticket ID</th>

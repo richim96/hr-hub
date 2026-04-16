@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Plus, Search, SlidersHorizontal } from 'lucide-svelte';
+	import { Plus, Search } from 'lucide-svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Select from '$lib/components/ui/Select.svelte';
@@ -18,7 +18,6 @@
 	let showNewTicket = false;
 	let showTicketDetail = false;
 	let selectedTicket: APIResponse | null = null;
-	let showFilters = false;
 
 	$: store = $ticketStore;
 	$: filtered = filterTickets(store.items, store.filters);
@@ -47,22 +46,19 @@
 
 <svelte:head>
 	<title>Tickets — HR Hub</title>
+
 </svelte:head>
 
-<div class="flex flex-col h-full">
+<div class="flex flex-col">
 <!-- Page header -->
 <div class="flex items-center justify-between mb-6 shrink-0">
 	<div>
-		<h2 class="text-xl font-semibold text-gray-900">People Tickets</h2>
+		<h2 class="text-xl font-semibold text-gray-900">Tickets</h2>
 		<p class="text-sm text-gray-500 mt-0.5">
 			{#if store.loading}Loading…{:else}{filtered.length} tickets{/if}
 		</p>
 	</div>
 	<div class="flex gap-2">
-		<Button variant="secondary" size="sm" on:click={() => (showFilters = !showFilters)}>
-			<SlidersHorizontal size={15} />
-			Filters
-		</Button>
 		<Button variant="primary" size="sm" on:click={() => (showNewTicket = true)}>
 			<Plus size={15} />
 			New Ticket
@@ -77,40 +73,38 @@
 			<Search size={15} class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
 			<input
 				type="text"
-				placeholder="Search by request ID or topic…"
+				placeholder="Search by topic…"
 				value={store.filters.search}
 				on:input={handleSearchInput}
 				class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C05B28]-500"
 			/>
 		</div>
 
-		{#if showFilters}
-			<div class="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100">
-				<Select
-					id="ticketStatusFilter"
-					label="Status"
-					value={store.filters.status}
-					options={statusOptions}
-					on:change={handleStatusChange}
+		<div class="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100">
+			<Select
+				id="ticketStatusFilter"
+				label="Status"
+				value={store.filters.status}
+				options={statusOptions}
+				on:change={handleStatusChange}
+			/>
+			<div class="flex flex-col gap-1">
+				<label for="submitterFilter" class="text-sm font-medium text-gray-700">Submitted By</label>
+				<input
+					id="submitterFilter"
+					type="text"
+					placeholder="employee@company.com"
+					value={store.filters.submittedBy}
+					on:input={handleSubmitterInput}
+					class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C05B28]-500"
 				/>
-				<div class="flex flex-col gap-1">
-					<label for="submitterFilter" class="text-sm font-medium text-gray-700">Submitted By</label>
-					<input
-						id="submitterFilter"
-						type="text"
-						placeholder="employee@company.com"
-						value={store.filters.submittedBy}
-						on:input={handleSubmitterInput}
-						class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C05B28]-500"
-					/>
-				</div>
 			</div>
-		{/if}
+		</div>
 	</div>
 </Card>
 
 <!-- Table -->
-<Card padding="none" class="flex-1 min-h-0 flex flex-col overflow-hidden">
+<Card padding="none" class="overflow-hidden">
 	{#if !store.loading && filtered.length > store.pageSize}
 		<Pagination
 			position="top"
@@ -124,27 +118,13 @@
 			on:last={() => ticketStore.update((s) => ({ ...s, page: totalPages }))}
 		/>
 	{/if}
-	<div class="flex-1 min-h-0">
-		<TicketsTable
-			items={displayed}
-			loading={store.loading}
-			error={store.error}
-			on:select={(e) => { selectedTicket = e.detail; showTicketDetail = true; }}
-		/>
-	</div>
-	{#if !store.loading && filtered.length > store.pageSize}
-		<Pagination
-			position="bottom"
-			page={store.page}
-			{totalPages}
-			totalItems={filtered.length}
-			pageSize={store.pageSize}
-			on:first={() => ticketStore.update((s) => ({ ...s, page: 1 }))}
-			on:prev={() => ticketStore.update((s) => ({ ...s, page: s.page - 1 }))}
-			on:next={() => ticketStore.update((s) => ({ ...s, page: s.page + 1 }))}
-			on:last={() => ticketStore.update((s) => ({ ...s, page: totalPages }))}
-		/>
-	{/if}
+	<TicketsTable
+		items={displayed}
+		loading={store.loading}
+		error={store.error}
+		maxHeight="calc(100vh - 28rem)"
+		on:select={(e) => { selectedTicket = e.detail; showTicketDetail = true; }}
+	/>
 </Card>
 </div>
 

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { X } from 'lucide-svelte';
+	import { modalOpen } from '$lib/stores/ui';
 
 	export let open = false;
 	export let title = '';
@@ -22,6 +23,7 @@
 
 	$: if (typeof document !== 'undefined') {
 		document.body.style.overflow = open ? 'hidden' : '';
+		modalOpen.set(open);
 	}
 </script>
 

@@ -19,6 +19,8 @@
 	let submitting = false;
 	let confirmOpen = false;
 
+	$: if (!open) editing = false;
+
 	// --- Edit shadow copies ---
 	let editFirstName = '';
 	let editLastName = '';
@@ -284,7 +286,7 @@
 							</div>
 							<div>
 								<span class="text-gray-500">Gender</span>
-								<p class="text-gray-900 mt-0.5">{employee.gender ?? '—'}</p>
+								<p class="text-gray-900 mt-0.5">{employee.gender === 'M' ? 'Male' : employee.gender === 'F' ? 'Female' : '—'}</p>
 							</div>
 						</div>
 					</div>

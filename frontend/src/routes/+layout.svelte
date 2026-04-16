@@ -1,16 +1,29 @@
 <script lang="ts">
 	import '../app.css';
+	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Toast from '$lib/components/Toast.svelte';
 	import ChatWidget from '$lib/components/ChatWidget.svelte';
+	import { fetchEmployees } from '$lib/stores/employees';
+	import { fetchTasks } from '$lib/stores/tasks';
+	import { fetchTickets } from '$lib/stores/tickets';
 
 	let sidebarCollapsed = false;
 	let mobileSidebarOpen = false;
 
 	$: sidebarWidth = sidebarCollapsed ? 64 : 240;
 	$: $page.url.pathname, (mobileSidebarOpen = false);
+
+	// Pre-fetch all domains on startup so every page navigation is served from cache.
+	// Each fetch is deduplicated — the page's own onMount calling the same function
+	// will attach to the in-flight promise rather than issuing a second request.
+	onMount(() => {
+		fetchEmployees();
+		fetchTasks();
+		fetchTickets();
+	});
 </script>
 
 <!-- Mobile overlay -->

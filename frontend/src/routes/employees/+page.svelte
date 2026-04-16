@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { UserPlus, Search, SlidersHorizontal, RefreshCw } from 'lucide-svelte';
+	import { UserPlus, Search, RefreshCw } from 'lucide-svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Select from '$lib/components/ui/Select.svelte';
@@ -24,7 +24,6 @@
 	let showNewHire = false;
 	let showEmployeeDetail = false;
 	let selectedEmployee: FullEmployee | null = null;
-	let showFilters = false;
 	let refreshing = false;
 
 	let sortKey: keyof FullEmployee = 'last_name';
@@ -47,12 +46,25 @@
 		refreshing = false;
 	}
 
+	const SALARY_ORDER: Record<string, number> = { low: 0, medium: 1, high: 2 };
+
+	function compareEmployees(a: FullEmployee, b: FullEmployee, key: keyof FullEmployee): number {
+		if (key === 'salary') {
+			return (SALARY_ORDER[a.salary] ?? -1) - (SALARY_ORDER[b.salary] ?? -1);
+		}
+		const av = a[key];
+		const bv = b[key];
+		if (av == null && bv == null) return 0;
+		if (av == null) return -1;
+		if (bv == null) return 1;
+		if (typeof av === 'number' && typeof bv === 'number') return av - bv;
+		return String(av).localeCompare(String(bv), undefined, { numeric: true });
+	}
+
 	$: store = $employeeStore;
 	$: filtered = filterEmployees(store.items, store.filters);
 	$: sortedFiltered = [...filtered].sort((a, b) => {
-		const av = a[sortKey] ?? '';
-		const bv = b[sortKey] ?? '';
-		const cmp = String(av).localeCompare(String(bv), undefined, { numeric: true });
+		const cmp = compareEmployees(a, b, sortKey);
 		return sortDir === 'asc' ? cmp : -cmp;
 	});
 	$: displayed = sortedFiltered.slice((store.page - 1) * store.pageSize, store.page * store.pageSize);
@@ -93,7 +105,7 @@
 	<title>Employees — HR Hub</title>
 </svelte:head>
 
-<div class="flex flex-col h-full">
+<div class="flex flex-col">
 <!-- Page header -->
 <div class="flex items-center justify-between mb-6 shrink-0">
 	<div>
@@ -103,10 +115,6 @@
 		</p>
 	</div>
 	<div class="flex gap-2">
-		<Button variant="secondary" size="sm" on:click={() => (showFilters = !showFilters)}>
-			<SlidersHorizontal size={15} />
-			Filters
-		</Button>
 		<Button variant="secondary" size="sm" on:click={handleRefreshRisk} loading={refreshing} disabled={refreshing}>
 			<RefreshCw size={15} />
 			Score All
@@ -132,50 +140,48 @@
 			/>
 		</div>
 
-		{#if showFilters}
-			<div class="grid grid-cols-2 md:grid-cols-3 gap-3 pt-2 border-t border-gray-100">
-				<Select
-					id="deptFilter"
-					label="Department"
-					value={store.filters.department}
-					options={deptOptions}
-					on:change={handleDeptChange}
+		<div class="grid grid-cols-2 md:grid-cols-3 gap-3 pt-2 border-t border-gray-100">
+			<Select
+				id="deptFilter"
+				label="Department"
+				value={store.filters.department}
+				options={deptOptions}
+				on:change={handleDeptChange}
+			/>
+			<div class="flex flex-col gap-1">
+				<label for="riskMin" class="text-sm font-medium text-gray-700">Min Attrition Risk</label>
+				<input
+					id="riskMin"
+					type="range"
+					min="0"
+					max="1"
+					step="0.05"
+					value={store.filters.attritionRiskMin}
+					on:input={handleRiskMinInput}
+					class="accent-[#C05B28]"
 				/>
-				<div class="flex flex-col gap-1">
-					<label for="riskMin" class="text-sm font-medium text-gray-700">Min Attrition Risk</label>
-					<input
-						id="riskMin"
-						type="range"
-						min="0"
-						max="1"
-						step="0.05"
-						value={store.filters.attritionRiskMin}
-						on:input={handleRiskMinInput}
-						class="accent-[#C05B28]"
-					/>
-					<span class="text-xs text-gray-500">{Math.round(store.filters.attritionRiskMin * 100)}%</span>
-				</div>
-				<div class="flex flex-col gap-1">
-					<label for="riskMax" class="text-sm font-medium text-gray-700">Max Attrition Risk</label>
-					<input
-						id="riskMax"
-						type="range"
-						min="0"
-						max="1"
-						step="0.05"
-						value={store.filters.attritionRiskMax}
-						on:input={handleRiskMaxInput}
-						class="accent-[#C05B28]"
-					/>
-					<span class="text-xs text-gray-500">{Math.round(store.filters.attritionRiskMax * 100)}%</span>
-				</div>
+				<span class="text-xs text-gray-500">{Math.round(store.filters.attritionRiskMin * 100)}%</span>
 			</div>
-		{/if}
+			<div class="flex flex-col gap-1">
+				<label for="riskMax" class="text-sm font-medium text-gray-700">Max Attrition Risk</label>
+				<input
+					id="riskMax"
+					type="range"
+					min="0"
+					max="1"
+					step="0.05"
+					value={store.filters.attritionRiskMax}
+					on:input={handleRiskMaxInput}
+					class="accent-[#C05B28]"
+				/>
+				<span class="text-xs text-gray-500">{Math.round(store.filters.attritionRiskMax * 100)}%</span>
+			</div>
+		</div>
 	</div>
 </Card>
 
 <!-- Table -->
-<Card padding="none" class="flex-1 min-h-0 flex flex-col overflow-hidden">
+<Card padding="none" class="overflow-hidden">
 	{#if !store.loading && filtered.length > store.pageSize}
 		<Pagination
 			position="top"
@@ -189,30 +195,16 @@
 			on:last={() => employeeStore.update((s) => ({ ...s, page: totalPages }))}
 		/>
 	{/if}
-	<div class="flex-1 min-h-0">
-		<EmployeesTable
-			items={displayed}
-			loading={store.loading}
-			error={store.error}
-			{sortKey}
-			{sortDir}
-			on:sort={handleSort}
-			on:select={(e) => { selectedEmployee = e.detail; showEmployeeDetail = true; }}
-		/>
-	</div>
-	{#if !store.loading && filtered.length > store.pageSize}
-		<Pagination
-			position="bottom"
-			page={store.page}
-			{totalPages}
-			totalItems={filtered.length}
-			pageSize={store.pageSize}
-			on:first={() => employeeStore.update((s) => ({ ...s, page: 1 }))}
-			on:prev={() => employeeStore.update((s) => ({ ...s, page: s.page - 1 }))}
-			on:next={() => employeeStore.update((s) => ({ ...s, page: s.page + 1 }))}
-			on:last={() => employeeStore.update((s) => ({ ...s, page: totalPages }))}
-		/>
-	{/if}
+	<EmployeesTable
+		items={displayed}
+		loading={store.loading}
+		error={store.error}
+		{sortKey}
+		{sortDir}
+		maxHeight="calc(100vh - 30rem)"
+		on:sort={handleSort}
+		on:select={(e) => { selectedEmployee = e.detail; showEmployeeDetail = true; }}
+	/>
 </Card>
 </div>
 

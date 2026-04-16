@@ -1,6 +1,7 @@
 import { writable } from 'svelte/store';
 import { listTasks, createTask, updateTask, deleteTask } from '$lib/api/tasks';
 import { addToast } from './toast';
+import { isWarm, readCache, writeCache, appendToCache, replaceInCache, removeFromCache } from './cache';
 import type { ITTask, TaskStatus } from '$lib/types';
 
 interface TaskFilters {
@@ -33,21 +34,45 @@ export const taskStore = writable<TaskStore>({
 	error: null,
 	filters: { ...DEFAULT_FILTERS },
 	page: 1,
-	pageSize: 25,
+	pageSize: 100,
 	total: 0
 });
 
 let debounceTimer: ReturnType<typeof setTimeout>;
+let _fetchPromise: Promise<void> | null = null;
 
 export async function fetchTasks(employeeId?: string): Promise<void> {
-	taskStore.update((s) => ({ ...s, loading: true, error: null }));
-	try {
-		const items = await listTasks(employeeId);
-		taskStore.update((s) => ({ ...s, items, total: items.length, loading: false }));
-	} catch (err) {
-		const message = err instanceof Error ? err.message : 'Failed to load tasks';
-		taskStore.update((s) => ({ ...s, loading: false, error: message, items: [] }));
+	// Warm: serve from localStorage (filter in-memory if employeeId given).
+	if (isWarm('tasks')) {
+		const cached = readCache<ITTask>('tasks');
+		if (cached !== null) {
+			const items = employeeId ? cached.filter((t) => t.employee_id === employeeId) : cached;
+			taskStore.update((s) => ({ ...s, items, total: items.length, loading: false, error: null }));
+			return;
+		}
+		// Cache key missing despite warm flag — fall through to re-fetch.
 	}
+
+	// If a cold-start fetch is already in-flight, wait for it instead of starting a second one.
+	// Note: a concurrent caller with a different employeeId will get all tasks from cache once settled.
+	if (_fetchPromise) return _fetchPromise;
+
+	// Cold start: fetch the full unfiltered list from backend, populate cache.
+	taskStore.update((s) => ({ ...s, loading: true, error: null }));
+	_fetchPromise = (async () => {
+		try {
+			const all = await listTasks();
+			writeCache('tasks', all);
+			const items = employeeId ? all.filter((t) => t.employee_id === employeeId) : all;
+			taskStore.update((s) => ({ ...s, items, total: items.length, loading: false }));
+		} catch (err) {
+			const message = err instanceof Error ? err.message : 'Failed to load tasks';
+			taskStore.update((s) => ({ ...s, loading: false, error: message, items: [] }));
+		} finally {
+			_fetchPromise = null;
+		}
+	})();
+	return _fetchPromise;
 }
 
 export function setTaskFilter(partial: Partial<TaskFilters>): void {
@@ -62,9 +87,15 @@ export function setTaskFilter(partial: Partial<TaskFilters>): void {
 
 export async function addTask(payload: Omit<ITTask, 'task_id'>): Promise<boolean> {
 	try {
-		await createTask(payload);
+		const created = await createTask(payload);
 		addToast('success', 'Task created successfully.');
-		await fetchTasks();
+
+		appendToCache('tasks', created);
+		taskStore.update((s) => ({
+			...s,
+			items: [...s.items, created],
+			total: s.total + 1
+		}));
 		return true;
 	} catch (err) {
 		addToast('error', err instanceof Error ? err.message : 'Failed to create task');
@@ -74,9 +105,14 @@ export async function addTask(payload: Omit<ITTask, 'task_id'>): Promise<boolean
 
 export async function editTask(taskId: string, payload: Partial<ITTask>): Promise<boolean> {
 	try {
-		await updateTask(taskId, payload);
+		const updated = await updateTask(taskId, payload);
 		addToast('success', 'Task updated.');
-		await fetchTasks();
+
+		replaceInCache<ITTask>('tasks', 'task_id', taskId, updated);
+		taskStore.update((s) => ({
+			...s,
+			items: s.items.map((t) => (t.task_id === taskId ? updated : t))
+		}));
 		return true;
 	} catch (err) {
 		addToast('error', err instanceof Error ? err.message : 'Failed to update task');
@@ -88,7 +124,13 @@ export async function removeTask(taskId: string): Promise<boolean> {
 	try {
 		await deleteTask(taskId);
 		addToast('success', 'Task deleted.');
-		await fetchTasks();
+
+		removeFromCache('tasks', 'task_id', taskId);
+		taskStore.update((s) => ({
+			...s,
+			items: s.items.filter((t) => t.task_id !== taskId),
+			total: s.total - 1
+		}));
 		return true;
 	} catch (err) {
 		addToast('error', err instanceof Error ? err.message : 'Failed to delete task');

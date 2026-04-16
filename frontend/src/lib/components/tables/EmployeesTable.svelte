@@ -10,6 +10,7 @@
 	export let error: string | null = null;
 	export let sortKey: keyof FullEmployee = 'last_name';
 	export let sortDir: 'asc' | 'desc' = 'asc';
+	export let maxHeight = 'calc(100vh - 20rem)';
 
 	const dispatch = createEventDispatcher<{ select: FullEmployee; sort: keyof FullEmployee }>();
 
@@ -38,7 +39,7 @@ const columns: { key: keyof FullEmployee; label: string }[] = [
 	];
 </script>
 
-<div class="overflow-auto h-full">
+<div class="overflow-auto" style="max-height: {maxHeight}">
 	<table class="w-full text-sm">
 		<thead class="sticky top-0 z-10 bg-gray-50">
 			<tr class="border-b border-gray-200">
