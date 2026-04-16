@@ -18,7 +18,7 @@ The agent lives in `agent/agent.py` and is exported via `agent/__init__.py` as `
 
 ## Environment
 
-The agent loads its API key from the environment via `python-dotenv`. The relevant key is `OPENAI_API_KEY`. Do not hardcode model names as string literals outside of `agent.py` — define a module-level constant if the model name needs to be referenced more than once.
+The agent loads its API key from the environment via `python-dotenv`. The relevant key is `GROQ_API_KEY`. Do not hardcode model names as string literals outside of `agent.py` — define a module-level constant if the model name needs to be referenced more than once.
 
 ## Logging
 

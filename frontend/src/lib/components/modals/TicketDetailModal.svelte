@@ -1,25 +1,26 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import { Pencil, Trash2 } from 'lucide-svelte';
+	import { Pencil, Trash2, Sparkles } from 'lucide-svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import ConfirmModal from '$lib/components/ui/ConfirmModal.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
 	import Textarea from '$lib/components/ui/Textarea.svelte';
-	import { editTicket } from '$lib/stores/tickets';
-	import type { APIResponse } from '$lib/types';
+	import { editTicket, runClassification } from '$lib/stores/tickets';
+	import type { Ticket, TicketStatus } from '$lib/types';
 
 	export let open = false;
-	export let ticket: APIResponse | null = null;
+	export let ticket: Ticket | null = null;
 
 	const dispatch = createEventDispatcher<{ close: void; deleted: string }>();
 
 	let editing = false;
 	let submitting = false;
+	let classifying = false;
 	let confirmOpen = false;
 
-	let subject = '';
+	let title = '';
 	let text = '';
 
 	$: if (ticket && open) {
@@ -28,8 +29,8 @@
 
 	function startEdit() {
 		if (!ticket) return;
-		subject = ticket.subject ?? '';
-		text = ticket.text ?? '';
+		title = ticket.title;
+		text = ticket.text;
 		editing = true;
 	}
 
@@ -41,11 +42,19 @@
 		if (!ticket) return;
 		submitting = true;
 		await editTicket(ticket.request_id, {
-			subject: subject || null,
+			title: title || null,
 			text: text || null
 		});
 		submitting = false;
 		editing = false;
+	}
+
+	async function handleClassify() {
+		if (!ticket) return;
+		classifying = true;
+		const updated = await runClassification(ticket.request_id);
+		if (updated) ticket = { ...ticket, llm_result: updated.llm_result };
+		classifying = false;
 	}
 
 	async function handleDelete() {
@@ -53,9 +62,9 @@
 		confirmOpen = false;
 	}
 
-	function statusVariant(status: string) {
-		if (status === 'completed') return 'completed';
-		if (status === 'failed') return 'failed';
+	function statusVariant(status: TicketStatus) {
+		if (status === 'Completed') return 'completed';
+		if (status === 'Canceled') return 'failed';
 		return 'pending';
 	}
 
@@ -68,7 +77,7 @@
 <Modal {open} maxWidth="xl" on:close={handleClose}>
 	<svelte:fragment slot="title">
 		{#if ticket}
-			{ticket.subject ?? ticket.request_id}
+			{ticket.title}
 			{#if !editing}
 				<button
 					class="p-1 rounded text-gray-400 hover:text-[#C05B28] hover:bg-[#fdf4ef] transition-colors"
@@ -91,7 +100,7 @@
 	{#if ticket}
 		{#if editing}
 			<form class="space-y-4">
-				<Input id="ticketSubject" label="Subject" bind:value={subject} required />
+				<Input id="ticketTitle" label="Title" bind:value={title} required />
 				<Textarea id="ticketText" label="Description" bind:value={text} rows={6} />
 			</form>
 		{:else}
@@ -108,27 +117,17 @@
 					</div>
 				</div>
 
-				<!-- Subject -->
-				<div class="pt-2 border-t border-gray-100">
-					<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Subject</p>
-					<p class="text-base font-semibold text-gray-900">{ticket.subject ?? '—'}</p>
+				<!-- Description -->
+				<div>
+					<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Description</p>
+					<p class="text-sm text-gray-700 whitespace-pre-wrap">{ticket.text}</p>
 				</div>
 
-				<!-- Description -->
-				{#if ticket.text}
-					<div>
-						<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Description</p>
-						<p class="text-sm text-gray-700 whitespace-pre-wrap">{ticket.text}</p>
-					</div>
-				{/if}
-
 				<!-- Meta -->
-				{#if ticket.submitted_by}
-					<div class="pt-2 border-t border-gray-100">
-						<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Submitted By</p>
-						<p class="text-sm text-gray-700">{ticket.submitted_by}</p>
-					</div>
-				{/if}
+				<div class="pt-2 border-t border-gray-100">
+					<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Submitted By</p>
+					<p class="text-sm text-gray-700">{ticket.submitted_by}</p>
+				</div>
 
 				<!-- LLM result -->
 				{#if ticket.llm_result}
@@ -139,13 +138,18 @@
 								<span class="px-2 py-0.5 bg-[#fdf4ef] text-[#9a3d1a] rounded-full text-xs">{topic}</span>
 							{/each}
 						</div>
-						<div class="flex items-center gap-2 text-sm text-gray-600">
-							<span>Confidence:</span>
-							<div class="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden max-w-32">
-								<div class="h-full bg-[#C05B28] rounded-full" style="width: {ticket.llm_result.confidence * 100}%" />
+						{#if ticket.llm_result.confidence != null}
+							<div class="flex items-center gap-2 text-sm text-gray-600">
+								<span>Confidence:</span>
+								<div class="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden max-w-32">
+									<div class="h-full bg-[#C05B28] rounded-full" style="width: {ticket.llm_result.confidence * 100}%" />
+								</div>
+								<span class="font-medium">{Math.round(ticket.llm_result.confidence * 100)}%</span>
 							</div>
-							<span class="font-medium">{Math.round(ticket.llm_result.confidence * 100)}%</span>
-						</div>
+						{/if}
+						{#if ticket.llm_result.summary}
+							<p class="text-sm text-gray-600 italic">{ticket.llm_result.summary}</p>
+						{/if}
 						{#if ticket.llm_result.draft_response}
 							<div>
 								<p class="text-sm font-medium text-gray-700 mb-1">Draft Response</p>
@@ -185,6 +189,12 @@
 			<Button variant="secondary" on:click={cancelEdit} disabled={submitting}>Cancel</Button>
 			<Button variant="primary" on:click={handleSave} loading={submitting}>Save Changes</Button>
 		{:else}
+			{#if ticket && !ticket.llm_result}
+				<Button variant="secondary" on:click={handleClassify} loading={classifying}>
+					<Sparkles size={14} />
+					Classify
+				</Button>
+			{/if}
 			<Button variant="secondary" on:click={handleClose}>Close</Button>
 		{/if}
 	</svelte:fragment>
@@ -193,7 +203,7 @@
 <ConfirmModal
 	open={confirmOpen}
 	title="Delete Ticket"
-	message="Delete ticket '{ticket?.subject ?? ticket?.request_id ?? ''}'? This cannot be undone."
+	message="Delete ticket '{ticket?.title ?? ticket?.request_id ?? ''}'? This cannot be undone."
 	on:confirm={handleDelete}
 	on:cancel={() => (confirmOpen = false)}
 />

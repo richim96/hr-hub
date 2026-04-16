@@ -1,4 +1,4 @@
-"""Pydantic schema for attrition prediction inputs."""
+"""Prediction schemas — attrition feature DTO and request envelopes."""
 
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
@@ -44,3 +44,15 @@ class AttritionFeaturesDTO(BaseModel):
     received_promotion: bool | None = None
     last_evaluation: float | None = Field(default=None, ge=0.0, le=1.0)
     satisfaction_score: float | None = Field(default=None, ge=0.0, le=1.0)
+
+
+class ScoreAllAttritionRequest(BaseModel):
+    """Request to re-score attrition risk for all current employees.
+
+    Attributes:
+        request_id (str): Unique identifier for the request (e.g., ``"req_002"``).
+        request_type (Literal["prediction"]): Must be ``"prediction"``.
+    """
+
+    request_id: str
+    request_type: Literal["prediction"]

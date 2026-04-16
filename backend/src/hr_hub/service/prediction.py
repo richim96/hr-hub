@@ -14,7 +14,7 @@ from fastapi import Request
 from sqlalchemy.orm import Session
 
 from hr_hub.model import EmployeeInfo
-from hr_hub.model.dto import APIResponseDTO, AttritionFeaturesDTO
+from hr_hub.model.dto import APIResponse, AttritionFeaturesDTO
 from hr_hub.service import LOGGER
 
 
@@ -77,7 +77,7 @@ def score_employee(
     employee_id: str,
     session: Session,
     attrition_model: Any | None,
-) -> APIResponseDTO.Action:
+) -> APIResponse.Action:
     """Score an existing employee and persist the updated attrition_risk to the DB.
 
     Fetches the employee's ``EmployeeInfo`` row, runs the attrition model,
@@ -137,7 +137,7 @@ def score_all(
     session: Session,
     request_id: str,
     attrition_model: Any | None,
-) -> APIResponseDTO:
+) -> APIResponse:
     """Score attrition risk for all current employees.
 
     Employees with ``attrition == True`` are excluded — they have already left
@@ -239,17 +239,17 @@ def _run_inference(features: AttritionFeaturesDTO, attrition_model: Any) -> floa
     return float(attrition_model.predict_proba(df)[0, 1]).__round__(4)
 
 
-def _action(success: bool, msg: str) -> APIResponseDTO.Action:
+def _action(success: bool, msg: str) -> APIResponse.Action:
     """Helper to build a standardized APIResponseDTO.Action.
     
     Args:
         success (bool): Whether the action succeeded or failed.
         message (str): Detail message to include in the action details.
     """
-    return APIResponseDTO.Action(action="score_attrition", success=success, details=msg)
+    return APIResponse.Action(action="score_attrition", success=success, details=msg)
 
 
-def _response(request_id: str, message: str, success: bool) -> APIResponseDTO:
+def _response(request_id: str, message: str, success: bool) -> APIResponse:
     """Helper to build a standardized APIResponseDTO.
 
     Args:
@@ -257,7 +257,7 @@ def _response(request_id: str, message: str, success: bool) -> APIResponseDTO:
         message (str): Detail message to include in the action details.
         success (bool): Whether the action succeeded or failed.
     """
-    return APIResponseDTO(
+    return APIResponse(
         request_id=request_id,
         request_type="prediction",
         status="completed" if success else "failed",

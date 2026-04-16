@@ -41,10 +41,9 @@ delete-db:
 	rm -f $(DB_PATH)
 	@echo "Deleted $(DB_PATH)"
 
-# Usage: make revision MSG="add salary column"
 revision:
 	@test -n "$(MSG)" || (echo "Error: MSG is required. Usage: make revision MSG=\"description\"" && exit 1)
-	cd backend && uv run alembic upgrade head
+	cd backend && uv run alembic upgrade head # safety net to ensure db is running head before new revision
 	cd backend && uv run alembic revision --autogenerate -m "$(MSG)"
 
 migrate:

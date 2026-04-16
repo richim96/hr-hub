@@ -2,35 +2,32 @@
 	import { createEventDispatcher } from 'svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Skeleton from '$lib/components/ui/Skeleton.svelte';
-	import type { APIResponse, ResponseStatus } from '$lib/types';
+	import type { Ticket, TicketStatus } from '$lib/types';
 
-	export let items: APIResponse[] = [];
+	export let items: Ticket[] = [];
 	export let loading = false;
 	export let error: string | null = null;
 	export let maxHeight = 'calc(100vh - 20rem)';
 
-	const dispatch = createEventDispatcher<{ select: APIResponse }>();
+	const dispatch = createEventDispatcher<{ select: Ticket }>();
 
-	function statusVariant(status: ResponseStatus) {
-		if (status === 'completed') return 'completed';
-		if (status === 'failed') return 'failed';
+	function statusVariant(status: TicketStatus) {
+		if (status === 'Completed') return 'completed';
+		if (status === 'Canceled') return 'failed';
 		return 'pending';
 	}
 
-	function confidencePct(c: number | undefined) {
-		if (c == null) return '—';
-		return `${Math.round(c * 100)}%`;
-	}
+
 </script>
 
 <div class="overflow-auto" style="max-height: {maxHeight}">
 	<table class="w-full text-sm">
 		<thead class="sticky top-0 z-10 bg-gray-50">
 			<tr class="border-b border-gray-200">
-				<th class="px-4 py-2 text-left font-medium text-gray-600">Employee</th>
+				<th class="px-4 py-2 text-left font-medium text-gray-600">Submitted By</th>
+				<th class="px-4 py-2 text-left font-medium text-gray-600">Title</th>
 				<th class="px-4 py-2 text-left font-medium text-gray-600">Status</th>
 				<th class="px-4 py-2 text-left font-medium text-gray-600">Topics</th>
-				<th class="px-4 py-2 text-left font-medium text-gray-600">Confidence</th>
 				<th class="px-4 py-2 text-left font-medium text-gray-600">Actions</th>
 				<th class="px-4 py-2 text-left font-medium text-gray-600">Ticket ID</th>
 			</tr>
@@ -59,6 +56,7 @@
 						on:click={() => dispatch('select', ticket)}
 					>
 						<td class="px-4 py-3 text-xs text-gray-600">{ticket.submitted_by ?? '—'}</td>
+						<td class="px-4 py-3 font-medium text-gray-900">{ticket.title}</td>
 						<td class="px-4 py-2">
 							<Badge variant={statusVariant(ticket.status)}>{ticket.status}</Badge>
 						</td>
@@ -72,9 +70,6 @@
 							{:else}
 								<span class="text-gray-400 text-xs">—</span>
 							{/if}
-						</td>
-						<td class="px-4 py-3 text-gray-700">
-							{confidencePct(ticket.llm_result?.confidence)}
 						</td>
 						<td class="px-4 py-3 text-xs text-gray-500">
 							{ticket.actions.length} action{ticket.actions.length !== 1 ? 's' : ''}

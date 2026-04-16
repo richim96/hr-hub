@@ -151,9 +151,9 @@ class Ticket(Base):
     Attributes:
         request_id (str): Unique identifier for the ticket. Primary key.
         request_type (str): Always ``"people_ticket"``.
-        status (str): Processing status — one of ``"completed"``, ``"pending"``, ``"failed"``.
+        status (str): Processing status — one of ``"Pending"``, ``"Canceled"``, ``"Completed"``.
         submitted_by (str): Email of the person who submitted the ticket. Indexed.
-        subject (str): Subject line of the ticket.
+        title (str): Title of the ticket.
         text (str): Full description of the ticket issue.
         actions (list[dict[str, Any]]): JSON-serialized list of Action dicts from the processing workflow.
         llm_result (dict[str, Any] | None): JSON-serialized LLMResult, populated once the agent runs.
@@ -163,13 +163,13 @@ class Ticket(Base):
 
     request_id: Mapped[str] = mapped_column("RequestID", String, primary_key=True)
     request_type: Mapped[str] = mapped_column("RequestType", String, nullable=False)
-    status: Mapped[Literal["completed", "pending", "failed"]] = mapped_column(
+    status: Mapped[Literal["Pending", "Canceled", "Completed"]] = mapped_column(
         "Status",
-        Enum("completed", "pending", "failed"),
+        Enum("Pending", "Canceled", "Completed"),
         nullable=False,
     )
     submitted_by: Mapped[str] = mapped_column("SubmittedBy", String, index=True, nullable=False)
-    subject: Mapped[str] = mapped_column("Subject", String, nullable=False)
+    title: Mapped[str] = mapped_column("Title", String, nullable=False)
     text: Mapped[str] = mapped_column("Text", String, nullable=False)
     actions: Mapped[list[dict[str, Any]]] = mapped_column("Actions", JSON, nullable=False)
     llm_result: Mapped[dict[str, Any] | None] = mapped_column("LLMResult", JSON)

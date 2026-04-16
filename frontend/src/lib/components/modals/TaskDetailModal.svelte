@@ -145,12 +145,6 @@
 					</div>
 				</div>
 
-				<!-- Title -->
-				<div>
-					<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Title</p>
-					<p class="text-base font-semibold text-gray-900">{task.title}</p>
-				</div>
-
 				<!-- Description -->
 				{#if task.description}
 					<div>

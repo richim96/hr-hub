@@ -4,9 +4,12 @@ import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from dotenv import find_dotenv, load_dotenv
+load_dotenv(find_dotenv())
 
 from hr_hub import LOGGER
+from hr_hub.api.agent import agent_router
 from hr_hub.api.employee import employee_router
 from hr_hub.api.prediction import prediction_router
 from hr_hub.api.it_task import it_task_router
@@ -14,7 +17,7 @@ from hr_hub.api.ticketing import ticketing_router
 from hr_hub.db import build_sessionmaker, create_db_engine
 from hr_hub.service.prediction import load_model
 
-load_dotenv(find_dotenv())
+
 
 _raw = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:3000")
 ALLOWED_ORIGINS: list[str] = [o.strip() for o in _raw.split(",") if o.strip()]
@@ -49,6 +52,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(agent_router, prefix="/hr-hub/api/v0.1")
 app.include_router(employee_router, prefix="/hr-hub/api/v0.1")
 app.include_router(prediction_router, prefix="/hr-hub/api/v0.1")
 app.include_router(it_task_router, prefix="/hr-hub/api/v0.1")

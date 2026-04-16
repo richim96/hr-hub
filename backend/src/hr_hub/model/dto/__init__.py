@@ -1,31 +1,42 @@
 """Data Transfer Objects (DTOs) used in HR Hub."""
 
-from hr_hub.model.dto.employee import EmployeeDTO, EmployeeEquipmentDTO, EmployeeInfoDTO, FullEmployeeDTO
-from hr_hub.model.dto.prediction import AttritionFeaturesDTO
-from hr_hub.model.dto.requests import NewHireRequest
-from hr_hub.model.dto.requests import UpdateEmployeeRequest
-from hr_hub.model.dto.requests import NewTicketRequest
-from hr_hub.model.dto.requests import UpdateTicketRequest
-from hr_hub.model.dto.requests import ScoreAllAttritionRequest
-from hr_hub.model.dto.requests import NewITTaskRequest
-from hr_hub.model.dto.requests import UpdateITTaskRequest
-from hr_hub.model.dto.response import APIResponseDTO
-from hr_hub.model.dto.it_task import ITTaskDTO
+from hr_hub.model.dto.employee import (
+    EmployeeDTO,
+    EmployeeEquipmentDTO,
+    EmployeeInfoDTO,
+    FullEmployeeDTO,
+    NewHireRequest,
+    UpdateEmployeeRequest,
+)
+from hr_hub.model.dto.ticket import TicketDTO, NewTicketRequest, UpdateTicketRequest
+from hr_hub.model.dto.it_task import ITTaskDTO, NewITTaskRequest, UpdateITTaskRequest
+from hr_hub.model.dto.prediction import AttritionFeaturesDTO, ScoreAllAttritionRequest
+from hr_hub.model.dto.agent import AgentChatRequest, AgentChatResponse
+from hr_hub.model.dto.response import APIResponse
 
 
 __all__ = [
+    # Employee
     "EmployeeDTO",
     "EmployeeEquipmentDTO",
     "EmployeeInfoDTO",
     "FullEmployeeDTO",
-    "AttritionFeaturesDTO",
-    "ScoreAllAttritionRequest",
     "NewHireRequest",
     "UpdateEmployeeRequest",
+    # Ticket
+    "TicketDTO",
     "NewTicketRequest",
     "UpdateTicketRequest",
+    # IT task
+    "ITTaskDTO",
     "NewITTaskRequest",
     "UpdateITTaskRequest",
-    "APIResponseDTO",
-    "ITTaskDTO",
+    # Prediction
+    "AttritionFeaturesDTO",
+    "ScoreAllAttritionRequest",
+    # Agent
+    "AgentChatRequest",
+    "AgentChatResponse",
+    # Shared response
+    "APIResponse",
 ]
