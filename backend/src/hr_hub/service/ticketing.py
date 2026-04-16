@@ -4,28 +4,28 @@ from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
+from hr_hub.agent.ticketing import ticket_agent
 from hr_hub.model import Ticket
-from hr_hub.model.dto import APIResponseDTO, NewTicketRequest, UpdateTicketRequest
+from hr_hub.model.dto import APIResponse, NewTicketRequest, UpdateTicketRequest
 from hr_hub.model.dto.ticket import TicketDTO
 from hr_hub.service import LOGGER
 
 
-def create_ticket(request: NewTicketRequest, session: Session) -> TicketDTO | None:
-    """Persist a new people-team ticket and return the created record.
+async def create_ticket(request: NewTicketRequest, session: Session) -> TicketDTO | None:
+    """Persist a new people-team ticket, classify it with the ticket agent, and return the record.
 
     Args:
         request (NewTicketRequest): Inbound ticket request from the frontend.
         session (Session): Active SQLAlchemy session. Caller owns commit/rollback.
 
     Returns:
-        TicketDTO: The newly created ticket, or None if the insert failed.
+        TicketDTO: The newly created ticket with LLM classification, or None if the insert failed.
     """
-    action = APIResponseDTO.Action(
+    action = APIResponse.Action(
         action="create_ticket",
         success=True,
         details=f"Ticket '{request.title}' submitted by {request.submitted_by}.",
     )
-
     row = Ticket(
         request_id=request.request_id,
         request_type=request.request_type,
@@ -42,10 +42,35 @@ def create_ticket(request: NewTicketRequest, session: Session) -> TicketDTO | No
         session.add(row)
         session.flush()
         LOGGER.info(f"Ticket created [ {request.request_id} -> {request.title!r} ]")
-        return TicketDTO.model_validate(row)
     except Exception as e:
         LOGGER.error(f"Could not persist ticket {request.request_id}: {e}")
         return None
+
+    await _run_classification(row, session)
+    return TicketDTO.model_validate(row)
+
+
+async def classify_ticket(request_id: str, session: Session) -> TicketDTO | None:
+    """Run ticket classification on an existing ticket and persist the result.
+
+    Args:
+        request_id (str): Primary key of the ticket to classify.
+        session (Session): Active SQLAlchemy session. Caller owns commit/rollback.
+
+    Returns:
+        TicketDTO: The updated ticket with LLM classification, or None if not found or classification failed.
+    """
+    try:
+        row: Ticket | None = session.get(Ticket, request_id)
+    except Exception as e:
+        LOGGER.error(f"DB error fetching ticket {request_id} for classification: {e}")
+        return None
+
+    if row is None:
+        return None
+
+    await _run_classification(row, session)
+    return TicketDTO.model_validate(row)
 
 
 def delete_ticket(request_id: str, session: Session) -> bool:
@@ -132,3 +157,29 @@ def list_tickets(session: Session) -> list[TicketDTO]:
     except Exception as e:
         LOGGER.error(f"DB error fetching tickets: {e}")
         return []
+
+# --------------------
+# Private helper functions
+# --------------------
+async def _run_classification(row: Ticket, session: Session) -> None:
+    """Classify a ticket row in-place using the ticket agent.
+
+    Writes the classification result to ``row.llm_result`` and flushes the
+    session. On failure the row is left unchanged and the error is logged.
+
+    Args:
+        row (Ticket): ORM row to classify (mutated in-place).
+        session (Session): Active SQLAlchemy session. Caller owns commit/rollback.
+    """
+    ticket_text = f"Submitted by: {row.submitted_by} -> {row.title}\n\n{row.text}"
+    try:
+        result = await ticket_agent.run(ticket_text)
+        c = result.output
+        row.llm_result = {
+            "topics": c.topics,
+            "summary": c.summary,
+        }
+        session.flush()
+        LOGGER.info(f"Ticket classified [ {row.request_id} -> topics={c.topics!r} ]")
+    except Exception as e:
+        LOGGER.error(f"Ticket classification failed for {row.request_id}: {e}")

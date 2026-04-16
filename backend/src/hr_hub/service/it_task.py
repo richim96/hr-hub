@@ -7,9 +7,8 @@ from typing import Literal
 from sqlalchemy.orm import Session
 
 from hr_hub.model import ITTask
-from hr_hub.model.dto import APIResponseDTO
-from hr_hub.model.dto.it_task import ITTaskDTO
-from hr_hub.model.dto.requests import NewITTaskRequest, UpdateITTaskRequest
+from hr_hub.model.dto import APIResponse
+from hr_hub.model.dto.it_task import ITTaskDTO, NewITTaskRequest, UpdateITTaskRequest
 from hr_hub.service import LOGGER
 
 
@@ -130,7 +129,7 @@ def create_onboarding_tasks(
         "marketing", "product_management", "r&d", "sales", "support",
     ],
     session: Session,
-) -> list[APIResponseDTO.Action]:
+) -> list[APIResponse.Action]:
     """Create the default onboarding IT tasks for a newly hired employee.
 
     Inserts 3 tasks common to all employees plus department-specific tasks
@@ -175,7 +174,7 @@ def create_onboarding_tasks(
             f"(department={department})"
         )
         return [
-            APIResponseDTO.Action(
+            APIResponse.Action(
                 action="create_task",
                 success=True,
                 details=f"Task '{row.title}' created for {employee_id}.",
@@ -185,7 +184,7 @@ def create_onboarding_tasks(
     except Exception as e:
         LOGGER.error(f"Could not create onboarding tasks for {employee_id}: {e}")
         return [
-            APIResponseDTO.Action(
+            APIResponse.Action(
                 action="create_task",
                 success=False,
                 details=f"Could not create onboarding tasks: {e}",

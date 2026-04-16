@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from hr_hub.model import Employee, EmployeeInfo, ITTask
 from hr_hub.model.dto import (
-    APIResponseDTO,
+    APIResponse,
     EmployeeDTO,
     EmployeeEquipmentDTO,
     EmployeeInfoDTO,
@@ -24,7 +24,7 @@ def start_onboarding(
     request: NewHireRequest,
     session: Session,
     attrition_model: Any | None,
-) -> APIResponseDTO:
+) -> APIResponse:
     """Start the new hire workflow.
 
     Persists the new employee (core record + employment info) to the database.
@@ -40,7 +40,7 @@ def start_onboarding(
         APIResponseDTO: Status and per-step actions describing what happened.
     """
     LOGGER.info(f"Starting onboarding for {request.employee.email}")
-    actions: list[APIResponseDTO.Action] = []
+    actions: list[APIResponse.Action] = []
     create_action = _create_employee(
         session, request.employee, request.equipment, request.info
     )
@@ -55,7 +55,7 @@ def start_onboarding(
         )
         actions.append(score_employee(request.employee.employee_id, session, attrition_model))
 
-    return APIResponseDTO(
+    return APIResponse(
         request_id=request.request_id,
         request_type=request.request_type,
         status="completed" if create_action.success else "failed",
@@ -68,7 +68,7 @@ def update_employee(
     request: UpdateEmployeeRequest,
     session: Session,
     attrition_model: Any | None = None,
-) -> APIResponseDTO:
+) -> APIResponse:
     """Apply a partial update to an employee's identity, equipment, and/or employment info.
 
     Only non-None fields in the request are written to the database. After a
@@ -89,11 +89,11 @@ def update_employee(
 
     employee = session.get(Employee, employee_id)
     if employee is None:
-        return APIResponseDTO(
+        return APIResponse(
             request_id=request_id,
             request_type="employee_change",
             status="failed",
-            actions=[APIResponseDTO.Action(
+            actions=[APIResponse.Action(
                 action="update_employee",
                 success=False,
                 details=f"Employee {employee_id!r} not found.",
@@ -119,25 +119,25 @@ def update_employee(
         session.flush()
     except Exception as e:
         LOGGER.error(f"Could not update employee {employee_id}: {e}")
-        return APIResponseDTO(
+        return APIResponse(
             request_id=request_id,
             request_type="employee_change",
             status="failed",
-            actions=[APIResponseDTO.Action(
+            actions=[APIResponse.Action(
                 action="update_employee",
                 success=False,
                 details=f"Could not update employee {employee_id}: {e}",
             )],
         )
 
-    actions: list[APIResponseDTO.Action] = [APIResponseDTO.Action(
+    actions: list[APIResponse.Action] = [APIResponse.Action(
         action="update_employee",
         success=True,
         details=f"Employee {employee_id} updated successfully.",
     )]
     actions.append(score_employee(employee_id, session, attrition_model))
 
-    return APIResponseDTO(
+    return APIResponse(
         request_id=request_id,
         request_type="employee_change",
         status="completed",
@@ -145,7 +145,7 @@ def update_employee(
     )
 
 
-def delete_employee(employee_id: str, session: Session) -> APIResponseDTO:
+def delete_employee(employee_id: str, session: Session) -> APIResponse:
     """Hard-delete an employee and all related records from the database.
 
     Deletes ITTask and EmployeeInfo child rows before removing the Employee row
@@ -162,11 +162,11 @@ def delete_employee(employee_id: str, session: Session) -> APIResponseDTO:
 
     employee = session.get(Employee, employee_id)
     if employee is None:
-        return APIResponseDTO(
+        return APIResponse(
             request_id=request_id,
             request_type="employee_change",
             status="failed",
-            actions=[APIResponseDTO.Action(
+            actions=[APIResponse.Action(
                 action="delete_employee",
                 success=False,
                 details=f"Employee {employee_id!r} not found.",
@@ -182,22 +182,22 @@ def delete_employee(employee_id: str, session: Session) -> APIResponseDTO:
         session.flush()
     except Exception as e:
         LOGGER.error(f"Could not delete employee {employee_id}: {e}")
-        return APIResponseDTO(
+        return APIResponse(
             request_id=request_id,
             request_type="employee_change",
             status="failed",
-            actions=[APIResponseDTO.Action(
+            actions=[APIResponse.Action(
                 action="delete_employee",
                 success=False,
                 details=f"Could not delete employee {employee_id}: {e}",
             )],
         )
 
-    return APIResponseDTO(
+    return APIResponse(
         request_id=request_id,
         request_type="employee_change",
         status="completed",
-        actions=[APIResponseDTO.Action(
+        actions=[APIResponse.Action(
             action="delete_employee",
             success=True,
             details=f"Employee {employee_id} deleted successfully.",
@@ -289,7 +289,7 @@ def _create_employee(
     employee: EmployeeDTO,
     equipment: EmployeeEquipmentDTO,
     info: EmployeeInfoDTO,
-) -> APIResponseDTO.Action:
+) -> APIResponse.Action:
     """Insert an `Employee` and its `EmployeeInfo` row in the same flush.
 
     Args:
@@ -318,13 +318,13 @@ def _create_employee(
         LOGGER.error(
             f"Could not create employee {employee.email}: {e}"
         )
-        return APIResponseDTO.Action(
+        return APIResponse.Action(
             action="create_employee",
             success=False,
             details=f"Could not create employee {employee.email}: {e}",
         )
 
-    return APIResponseDTO.Action(
+    return APIResponse.Action(
         action="create_employee",
         success=True,
         details=f"Employee {employee.email} created successfully.",

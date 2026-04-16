@@ -1,9 +1,9 @@
-"""Pydantic response schema for people-team tickets."""
+"""People-team ticket schemas — read DTO and request envelopes."""
 
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 class TicketDTO(BaseModel):
@@ -32,3 +32,37 @@ class TicketDTO(BaseModel):
     actions: list[dict[str, Any]]
     llm_result: dict[str, Any] | None = None
     created_at: datetime
+
+
+class NewTicketRequest(BaseModel):
+    """Inbound payload for submitting a new people-team ticket.
+
+    Attributes:
+        request_id (str): Unique identifier for the request (e.g., ``"evt_003"``).
+        request_type (Literal["people_ticket"]): Must be ``"people_ticket"``.
+        submitted_by (EmailStr): Email of the submitting employee.
+        title (str): Short title of the issue.
+        text (str): Full description of the ticket issue.
+    """
+
+    request_id: str
+    request_type: Literal["people_ticket"]
+    submitted_by: EmailStr
+    title: str
+    text: str
+
+
+class UpdateTicketRequest(BaseModel):
+    """Partial-update payload for an existing people-team ticket.
+
+    All fields are optional — only non-None values are written to the database.
+
+    Attributes:
+        title (str | None): Updated ticket title.
+        text (str | None): Updated ticket description.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    title: str | None = None
+    text: str | None = None

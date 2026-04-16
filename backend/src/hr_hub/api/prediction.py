@@ -7,19 +7,19 @@ from fastapi import APIRouter, Depends
 
 from hr_hub.api import LOGGER
 from hr_hub.db import get_session
-from hr_hub.model.dto import ScoreAllAttritionRequest, APIResponseDTO
+from hr_hub.model.dto import ScoreAllAttritionRequest, APIResponse
 from hr_hub.service.prediction import score_all, get_attrition_model
 
 
 prediction_router: APIRouter = APIRouter(prefix="/prediction", tags=["Prediction"])
 
 
-@prediction_router.post("/attrition/score-all", response_model=APIResponseDTO)
+@prediction_router.post("/attrition/score-all", response_model=APIResponse)
 async def predict_all_attrition(
     request: ScoreAllAttritionRequest,
     session: Session = Depends(get_session),
     attrition_model: Any | None = Depends(get_attrition_model),
-) -> APIResponseDTO:
+) -> APIResponse:
     """Re-score attrition risk for all current (non-attrited) employees.
 
     Employees who have already left (``attrition == True``) are skipped.

@@ -8,8 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from hr_hub.api import LOGGER
 from hr_hub.db import get_session
 from hr_hub.service.prediction import get_attrition_model
-from hr_hub.model.dto import NewHireRequest, UpdateEmployeeRequest, FullEmployeeDTO
-from hr_hub.model.dto import APIResponseDTO
+from hr_hub.model.dto import NewHireRequest, UpdateEmployeeRequest, FullEmployeeDTO, APIResponse
 from hr_hub.service.employee import start_onboarding, list_employees, get_employee, update_employee, delete_employee
 
 
@@ -47,12 +46,12 @@ async def get_employee_by_id(
     return emp
 
 
-@employee_router.post("/new-hire", response_model=APIResponseDTO)
+@employee_router.post("/new-hire", response_model=APIResponse)
 async def create_employee(
     request: NewHireRequest,
     session: Session = Depends(get_session),
     attrition_model: Any | None = Depends(get_attrition_model),
-) -> APIResponseDTO:
+) -> APIResponse:
     """Create a new employee.
 
     Args:
@@ -66,13 +65,13 @@ async def create_employee(
     return start_onboarding(request, session, attrition_model)
 
 
-@employee_router.patch("/{employee_id}", response_model=APIResponseDTO)
+@employee_router.patch("/{employee_id}", response_model=APIResponse)
 async def patch_employee(
     employee_id: str,
     request: UpdateEmployeeRequest,
     session: Session = Depends(get_session),
     attrition_model: Any | None = Depends(get_attrition_model),
-) -> APIResponseDTO:
+) -> APIResponse:
     """Partially update an employee's identity, equipment, or employment info.
 
     Triggers attrition re-scoring after a successful update.
@@ -87,11 +86,11 @@ async def patch_employee(
     return update_employee(employee_id, request, session, attrition_model)
 
 
-@employee_router.delete("/{employee_id}", response_model=APIResponseDTO)
+@employee_router.delete("/{employee_id}", response_model=APIResponse)
 async def remove_employee(
     employee_id: str,
     session: Session = Depends(get_session),
-) -> APIResponseDTO:
+) -> APIResponse:
     """Hard-delete an employee and all their related records.
 
     Args:
