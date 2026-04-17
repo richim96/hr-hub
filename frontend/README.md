@@ -11,6 +11,7 @@ SvelteKit single-page application for the HR Hub platform. Provides three operat
 | Styling | [Tailwind CSS](https://tailwindcss.com/) 3 |
 | Icons | Custom + [lucide-svelte](https://lucide.dev/) |
 | HTTP | Native `fetch` via typed API client |
+| Markdown | [marked](https://marked.js.org/) |
 | State | Svelte writable stores |
 | Package manager | yarn |
 
@@ -53,7 +54,9 @@ src/
     │   ├── employees.ts        # Employee state + actions
     │   ├── tasks.ts            # Task state + actions
     │   ├── tickets.ts          # Ticket state + actions
-    │   └── toast.ts            # Toast queue
+    │   ├── toast.ts            # Toast queue
+    │   ├── cache.ts            # Request cache
+    │   └── ui.ts               # UI state (sidebar, modals)
     ├── types/
     │   └── index.ts            # TypeScript interfaces (mirrors backend DTOs)
     └── components/
@@ -81,16 +84,18 @@ yarn test           # Vitest unit tests
 
 All requests go to `PUBLIC_API_BASE_URL/hr-hub/api/v0.1`.
 
-| Status | Endpoint | Description |
-|--------|----------|-------------|
-| Ready | `POST /employee/new-hire` | Create employee + IT tasks |
-| Stub | `PATCH /employee/change` | Update employee (returns null) |
-| TODO | `GET /employee` | List employees |
-| TODO | `GET /tasks` | List IT tasks |
-| TODO | `POST /ticketing` | Submit people ticket |
-| TODO | `POST /agent/query` | Chat / LLM query |
-
-Dashboards that hit unimplemented endpoints display an inline empty state rather than crashing. The New Hire form (implemented) is fully functional.
+| Endpoint | Description |
+|----------|-------------|
+| `GET /employee` | List employees |
+| `POST /employee/new-hire` | Create employee + IT tasks |
+| `PATCH /employee/{id}` | Update employee |
+| `GET /it-tasks` | List IT tasks |
+| `POST /it-tasks` | Create IT task |
+| `PATCH /it-tasks/{id}` | Update IT task |
+| `DELETE /it-tasks/{id}` | Delete IT task |
+| `GET /ticketing` | List tickets |
+| `POST /ticketing` | Submit people ticket |
+| `POST /agent/chat` | Chat / LLM query |
 
 ### Payload notes
 
@@ -126,7 +131,7 @@ Drop these files in `static/` (served at the root URL). The app references them 
 - Sortable table: ID, name, department, manager, laptop, attrition risk %
 - Search by name/email, filter by department and attrition risk range
 - **New Hire** modal — full form (employee details, equipment, department/salary), POSTs to `/employee/new-hire`, shows `APIResponse` actions on success
-- **Employee Detail** modal — view all fields + performance metrics; Edit mode sends `PATCH /employee/change`
+- **Employee Detail** modal — view all fields + performance metrics; Edit mode sends `PATCH /employee/{id}`
 - Pagination (50 rows/page)
 
 ### IT Tasks dashboard (`/tasks`)
@@ -145,7 +150,6 @@ Drop these files in `static/` (served at the root URL). The app references them 
 ### Chat Widget
 - Floating button (bottom-right, all pages)
 - Passes current route as context with every message
-- Graceful error when backend chat endpoint is not yet available
 - Typing indicator (bouncing dots)
 
 ## Claude Code guidance

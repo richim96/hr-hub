@@ -2,6 +2,8 @@
 
 AI-augmented HR workflow automation. HR Hub lets an HR team manage employees, IT tasks, and support tickets through a web dashboard backed by an LLM agent that classifies requests and triggers downstream actions.
 
+![HR Hub homepage](mock-cloud/storage/homepage.png)
+
 ## What it does
 
 - **Employee management** — onboard new hires, view and edit employee records, track attrition risk scores
@@ -35,7 +37,7 @@ make prod       # builds frontend, then starts both prod servers
 
 **Docker**
 ```bash
-# Copy .env.example to .env and fill in secrets (OPENAI_API_KEY etc.)
+# Copy backend/.env.example to backend/.env and fill in secrets (GROQ_API_KEY etc.)
 make docker-up-build   # build images and start containers
 # backend → :8000  |  frontend → :3000
 ```

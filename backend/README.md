@@ -7,7 +7,7 @@ FastAPI backend for the HR Hub platform. Handles employee onboarding, IT task ma
 | Layer | Technology |
 |-------|-----------|
 | Framework | [FastAPI](https://fastapi.tiangolo.com/) |
-| AI agent | [PydanticAI](https://ai.pydantic.dev/) + OpenAI |
+| AI agent | [PydanticAI](https://ai.pydantic.dev/) + Groq |
 | ORM | [SQLAlchemy](https://www.sqlalchemy.org/) 2 |
 | Database | SQLite (via `mock-cloud/db/hr_hub.db`) |
 | Migrations | [Alembic](https://alembic.sqlalchemy.org/) |
@@ -19,7 +19,7 @@ FastAPI backend for the HR Hub platform. Handles employee onboarding, IT task ma
 uv sync
 ```
 
-Copy `.env_example` to `.env` and fill in the values (see [Environment variables](#environment-variables)).
+Copy `.env.example` to `.env` and fill in the values (see [Environment variables](#environment-variables)).
 
 ## Commands
 
@@ -48,10 +48,9 @@ API docs (Swagger UI) available at `http://127.0.0.1:8000/docs` when the server 
 | Variable | Description |
 |----------|-------------|
 | `SQL_DB_HOST` | SQLAlchemy database URL (e.g. `sqlite:///./mock-cloud/db/hr_hub.db`) |
-| `OPENAI_API_KEY` | OpenAI API key for the PydanticAI agent |
-| `VECTOR_DB_PATH` | ChromaDB directory path for RAG / vector search |
+| `GROQ_API_KEY` | Groq API key for the PydanticAI agent |
+| `OPENAI_API_KEY` | OpenAI API key (optional, for embedding / auxiliary calls) |
 | `SOTA_PATH` | Path to the attrition prediction model |
-| `TAVILY_API_KEY` | Tavily API key for the agent's web search tool |
 | `ALLOWED_ORIGINS` | Comma-separated CORS origins (default: `http://localhost:5173,http://localhost:3000`) |
 
 ## Architecture

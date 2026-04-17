@@ -91,7 +91,7 @@ prod:
 	@trap 'kill 0' SIGINT; \
 	  (cd backend && uv run fastapi run src/hr_hub/main.py) & \
 	  (until curl -sf http://127.0.0.1:8000/docs >/dev/null 2>&1; do sleep 0.5; done \
-	  (cd frontend && node build) & \
+	    && cd frontend && node build) & \
 	  wait
 
 # ── Docker ────────────────────────────────────────────────────────────────────
