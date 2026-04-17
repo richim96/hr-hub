@@ -49,7 +49,7 @@ async def run_agent(
     if not safe:
         LOGGER.warning(f"Prompt guard blocked message: {message[:120]!r}")
         return AgentChatResponse(
-            answer="You are not as smart as you think.",
+            answer="You cannot fool a Goomba 🍄",
             blocked=True,
         )
 

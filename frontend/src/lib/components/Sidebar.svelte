@@ -28,7 +28,7 @@
 			class="{collapsed ? 'w-8 h-8' : 'w-10 h-10'} object-contain shrink-0 transition-all duration-200"
 		/>
 		{#if !collapsed}
-			<span class="flex-1 font-semibold text-gray-800 text-base whitespace-nowrap overflow-hidden tracking-tight">HR Hub</span>
+			<span class="flex-1 font-semibold text-gray-800 text-lg whitespace-nowrap overflow-hidden tracking-tight">HR Hub</span>
 		{/if}
 	</div>
 
@@ -53,9 +53,9 @@
 			<div
 				class="absolute left-2 right-2 rounded-2xl pointer-events-none"
 				style="
-					height: 40px;
+					height: 48px;
 					top: 16px;
-					transform: translateY({activeIndex * 44}px);
+					transform: translateY({activeIndex * 52}px);
 					transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 					background: rgba(192,91,40,0.12);
 					border: 1px solid rgba(192,91,40,0.2);
@@ -74,9 +74,9 @@
 				style="z-index: 1;"
 				title={collapsed ? item.label : undefined}
 			>
-				<img src={item.img} alt={item.label} class="w-5 h-5 object-contain shrink-0" />
+				<img src={item.img} alt={item.label} class="w-6 h-6 object-contain shrink-0" />
 				{#if !collapsed}
-					<span class="whitespace-nowrap">{item.label}</span>
+					<span class="whitespace-nowrap text-base">{item.label}</span>
 				{/if}
 			</a>
 		{/each}

@@ -109,7 +109,7 @@
 <!-- Page header -->
 <div class="flex items-center justify-between mb-6 shrink-0">
 	<div>
-		<h2 class="text-xl font-medium text-gray-900 tracking-tight">Employees</h2>
+		<h2 class="text-xl font-bold text-gray-900 tracking-tight">Employees</h2>
 		<p class="text-sm text-gray-500 mt-0.5">
 			{#if store.loading}Loading…{:else}{filtered.length} employees{/if}
 		</p>
