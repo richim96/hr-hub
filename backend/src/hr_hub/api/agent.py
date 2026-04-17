@@ -24,5 +24,5 @@ async def chat(
         request (AgentChatRequest): User message payload.
         session (Session): SQLAlchemy session — injected by FastAPI.
     """
-    LOGGER.info(f"Agent chat: {request.message[:60]!r}")
-    return await run_agent(request.message, session)
+    LOGGER.info(f"Agent chat: {request.message[:60]!r} (history={len(request.history)} turns)")
+    return await run_agent(request.message, session, request.history)

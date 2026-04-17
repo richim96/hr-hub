@@ -24,12 +24,13 @@ async def is_prompt_safe(message: str) -> bool:
 
     try:
         response = await client.chat.completions.create(
-            model="meta-llama/llama-prompt-guard-2-22m",
+            model="meta-llama/llama-prompt-guard-2-86m",
             messages=[{"role": "user", "content": message}],
         )
-        label: str = (response.choices[0].message.content or "").strip().upper()
-        LOGGER.info(f"Prompt guard verdict: {label!r}")
-        return label == "BENIGN"
-    except Exception as exc:
-        LOGGER.warning(f"Prompt guard API call failed: {exc} — defaulting to UNSAFE")
+        content: str | None = response.choices[0].message.content
+        injection_score: float = float(content.strip()) if content else 0.
+        LOGGER.info(f"Prompt guard injection score: {injection_score:.6f}")
+        return injection_score < 0.5
+    except Exception as e:
+        LOGGER.warning(f"Prompt guard API call failed: {e} — defaulting to UNSAFE")
         return False

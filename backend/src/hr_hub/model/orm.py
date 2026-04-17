@@ -3,6 +3,9 @@
 from datetime import datetime, timezone
 from typing import Any, Literal
 
+from hr_hub.model.dto.employee import Department, Salary
+from hr_hub.model.dto.response import Status
+
 from sqlalchemy import (
     CheckConstraint,
     Enum,
@@ -73,10 +76,7 @@ class EmployeeInfo(Base):
         primary_key=True,
         index=True,
     )
-    department: Mapped[Literal[
-        "accounting", "engineering", "hr", "IT", "management",
-        "marketing", "product_management", "r&d", "sales", "support",
-    ]] = mapped_column(
+    department: Mapped[Department] = mapped_column(
         "Department",
         Enum(
             "accounting", "engineering", "hr", "IT", "management",
@@ -84,7 +84,7 @@ class EmployeeInfo(Base):
         ),
         nullable=False,
     )
-    salary: Mapped[Literal["low", "medium", "high"]] = mapped_column("Salary", Enum("low", "medium", "high"))
+    salary: Mapped[Salary] = mapped_column("Salary", Enum("low", "medium", "high"))
     active_projects: Mapped[int | None] = mapped_column("ActiveProjects", SmallInteger)
     avg_monthly_hours: Mapped[int | None] = mapped_column("AvgMonthlyHours", SmallInteger)
     years_at_company: Mapped[int | None] = mapped_column("YearsAtCompany", SmallInteger)
@@ -139,7 +139,7 @@ class ITTask(Base):
     description: Mapped[str | None] = mapped_column("Description", String)
     assignee: Mapped[str | None] = mapped_column("Assignee", String)
     due_date: Mapped[datetime | None] = mapped_column("DueDate", DateTime)
-    status: Mapped[Literal["Pending", "Canceled", "Completed"] | None] = mapped_column("Status", Enum("Pending", "Canceled", "Completed"))
+    status: Mapped[Status | None] = mapped_column("Status", Enum("Pending", "Canceled", "Completed"))
     task_metadata: Mapped[dict[str, Any] | None] = mapped_column("Metadata", JSON)
 
     employee: Mapped["Employee"] = relationship("Employee", back_populates="tasks")
@@ -163,7 +163,7 @@ class Ticket(Base):
 
     request_id: Mapped[str] = mapped_column("RequestID", String, primary_key=True)
     request_type: Mapped[str] = mapped_column("RequestType", String, nullable=False)
-    status: Mapped[Literal["Pending", "Canceled", "Completed"]] = mapped_column(
+    status: Mapped[Status] = mapped_column(
         "Status",
         Enum("Pending", "Canceled", "Completed"),
         nullable=False,

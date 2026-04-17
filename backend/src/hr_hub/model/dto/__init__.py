@@ -1,6 +1,8 @@
 """Data Transfer Objects (DTOs) used in HR Hub."""
 
 from hr_hub.model.dto.employee import (
+    Department,
+    Salary,
     EmployeeDTO,
     EmployeeEquipmentDTO,
     EmployeeInfoDTO,
@@ -12,11 +14,13 @@ from hr_hub.model.dto.ticket import TicketDTO, NewTicketRequest, UpdateTicketReq
 from hr_hub.model.dto.it_task import ITTaskDTO, NewITTaskRequest, UpdateITTaskRequest
 from hr_hub.model.dto.prediction import AttritionFeaturesDTO, ScoreAllAttritionRequest
 from hr_hub.model.dto.agent import AgentChatRequest, AgentChatResponse
-from hr_hub.model.dto.response import APIResponse
+from hr_hub.model.dto.response import APIResponse, Status
 
 
 __all__ = [
     # Employee
+    "Department",
+    "Salary",
     "EmployeeDTO",
     "EmployeeEquipmentDTO",
     "EmployeeInfoDTO",
@@ -39,4 +43,5 @@ __all__ = [
     "AgentChatResponse",
     # Shared response
     "APIResponse",
+    "Status",
 ]

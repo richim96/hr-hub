@@ -3,6 +3,8 @@
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
+from hr_hub.model.dto.employee import Department, Salary
+
 
 class AttritionFeaturesDTO(BaseModel):
     """Employee features required to compute attrition risk.
@@ -11,8 +13,8 @@ class AttritionFeaturesDTO(BaseModel):
     inference time so partial records can still receive a score.
 
     Attributes:
-        department (Literal["sales", "engineering", "support", "IT", "product_management", "marketing", "r&d", "accounting", "hr", "management"]): Employee's department.
-        salary (Literal["low", "medium", "high"]): Salary tier.
+        department (Department): Employee's department.
+        salary (Salary): Salary tier.
         active_projects (int | None): Number of currently active projects.
         avg_monthly_hours (int | None): Average hours worked per month.
         years_at_company (int | None): Tenure in years.
@@ -24,19 +26,8 @@ class AttritionFeaturesDTO(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    department: Literal[
-        "sales",
-        "engineering",
-        "support",
-        "IT",
-        "product_management",
-        "marketing",
-        "r&d",
-        "accounting",
-        "hr",
-        "management",
-    ]
-    salary: Literal["low", "medium", "high"]
+    department: Department
+    salary: Salary
     active_projects: int | None = Field(default=None, ge=0)
     avg_monthly_hours: int | None = Field(default=None, ge=0)
     years_at_company: int | None = Field(default=None, ge=0)

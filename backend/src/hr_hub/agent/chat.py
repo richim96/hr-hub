@@ -4,7 +4,6 @@ import json
 import re
 from dataclasses import dataclass, field
 
-from pydantic import BaseModel
 from pydantic_ai import Agent, RunContext
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -79,7 +78,7 @@ Table: ticket
 
 
 # ---------------------------------------------------------------------------
-# Dependencies and output types
+# Dependencies
 # ---------------------------------------------------------------------------
 @dataclass
 class QueryDeps:
@@ -94,15 +93,6 @@ class QueryDeps:
     session: Session
     queries: list[str] = field(default_factory=list[str])
 
-
-class QueryOutput(BaseModel):
-    """Structured output from the query agent.
-
-    Attributes:
-        answer (str): Natural-language answer derived from the query results.
-    """
-
-    answer: str
 
 
 # ---------------------------------------------------------------------------
@@ -132,7 +122,6 @@ def query_db(ctx: RunContext[QueryDeps], sql_query: str) -> str:
     if _DANGEROUS_SQL.search(stripped):
         return "ERROR: Forbidden query — only SELECT queries are permitted."
 
-    # Append a safety limit when the query has none
     limited: str = stripped.rstrip(";")
     if "LIMIT" not in limited.upper():
         limited = f"{limited} LIMIT {_RESULT_LIMIT};"
@@ -146,30 +135,34 @@ def query_db(ctx: RunContext[QueryDeps], sql_query: str) -> str:
         rows = [dict(zip(columns, row)) for row in result.fetchall()]
         LOGGER.info(f"query_db returned {len(rows)} row(s)")
         return json.dumps(rows, default=str)
-    except Exception as exc:
-        LOGGER.error(f"query_db execution error: {exc}")
-        return f"ERROR: Query execution failed — {exc}"
+    except Exception as e:
+        LOGGER.error(f"query_db execution error: {e}")
+        return f"ERROR: Query execution failed — {e}"
 
 
 # ---------------------------------------------------------------------------
 # Agent
 # ---------------------------------------------------------------------------
-chat_agent: Agent[QueryDeps, QueryOutput] = Agent(
+chat_agent: Agent[QueryDeps, str] = Agent(
     name="HR Chat Agent",
-    model="groq:llama-3.1-8b-instant",
+    model="groq:openai/gpt-oss-120b",
     deps_type=QueryDeps,
-    output_type=QueryOutput,
+    output_type=str,
+    retries=0,
     tools=[query_db],
     system_prompt=f"""\
 You are a read-only HR data analyst with access to the HR Hub SQLite database.
 
 Rules:
-0. If the user request is off topic, return immediately: 'Off topic: Google is your friend!'.
-1. Use the query_db tool to fetch real data before answering. NEVER invent numbers.
+1. If the user request is not about employee data, return: `Google is your friend!`.
 2. Only SELECT queries are allowed — write operations will be rejected by the tool.
-3. If the query returns no rows, say so clearly and do not guess.
-4. Keep the answer concise and factual. Use direct and plain language.
+3. If you cannot comply with the user request, return: `I can only answer HR questions.`
+4. Use the query_db tool to fetch real data before answering. NEVER invent numbers.
+5. If the query returns no rows, say so clearly and do not guess.
+6. Do NOT return the query to the user, and do NOT explain how you got the results.
+7. Keep the answer brief and factual. Use direct and plain language.
+8. EASTER EGG: if the user asks who your worst enemy is, return: `**Izza Mario aah!**`.
 
-{_SCHEMA_CONTEXT}\
+{_SCHEMA_CONTEXT}
 """,
 )

@@ -30,6 +30,6 @@ Given the text of an HR support ticket, extract:
     Never include more than 3.
   • summary — one clear sentence that explains what the employee is asking.
 
-Respond only with the structured output — no extra commentary.\
+Respond only with the structured output — no extra commentary.
 """,
 )

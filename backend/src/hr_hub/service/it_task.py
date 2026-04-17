@@ -2,41 +2,17 @@
 
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Literal
 
 from sqlalchemy.orm import Session
 
 from hr_hub.model import ITTask
 from hr_hub.model.dto import APIResponse
+from hr_hub.model.dto.employee import Department
 from hr_hub.model.dto.it_task import ITTaskDTO, NewITTaskRequest, UpdateITTaskRequest
 from hr_hub.service import LOGGER
 
 
-_DEFAULT_ASSIGNEE = "it-team@company.com"
-
-
-def _due_in_business_days(days: int) -> datetime:
-    """Return a UTC datetime that is ``days`` business days from now.
-
-    Args:
-        days (int): Number of business days (Monday–Friday) to add.
-
-    Returns:
-        datetime: UTC timestamp ``days`` working days in the future.
-    """
-    current = datetime.now(timezone.utc)
-    count = 0
-    while count < days:
-        current += timedelta(days=1)
-        if current.weekday() < 5:
-            count += 1
-    return current
-
-
-# ---------------------------------------------------------------------------
-# Onboarding task definitions
-# ---------------------------------------------------------------------------
-
+_DEFAULT_ASSIGNEE: str = "it-team@company.com"
 _DEFAULT_TASKS: list[tuple[str, str]] = [
     (
         "Provision hardware",
@@ -51,8 +27,6 @@ _DEFAULT_TASKS: list[tuple[str, str]] = [
         "Book the HR onboarding session and the first 1:1 with the direct manager.",
     ),
 ]
-
-# One tuple per department (title, description). Engineering gets two entries.
 _DEPARTMENT_TASKS: dict[str, list[tuple[str, str]]] = {
     "accounting": [
         (
@@ -124,23 +98,15 @@ _DEPARTMENT_TASKS: dict[str, list[tuple[str, str]]] = {
 def create_onboarding_tasks(
     employee_id: str,
     employee_email: str,
-    department: Literal[
-        "accounting", "engineering", "hr", "IT", "management",
-        "marketing", "product_management", "r&d", "sales", "support",
-    ],
+    department: Department,
     session: Session,
 ) -> list[APIResponse.Action]:
     """Create the default onboarding IT tasks for a newly hired employee.
 
-    Inserts 3 tasks common to all employees plus department-specific tasks
-    (1 per department, 2 for engineering).  Each task produces one
-    ``create_task`` action in the returned list.  On DB failure a single
-    failure action is returned instead.
-
     Args:
         employee_id (str): Primary key of the new employee.
         employee_email (str): Email address of the new employee.
-        department (Literal["accounting", "engineering", "hr", "IT", "management", "marketing", "product_management", "r&d", "sales", "support"]): The employee's department, used to select extra tasks.
+        department (Department): The employee's department, used to select extra tasks.
         session (Session): Active SQLAlchemy session. Caller owns commit/rollback.
 
     Returns:
@@ -265,9 +231,7 @@ def create_it_task(payload: NewITTaskRequest, session: Session) -> ITTaskDTO | N
 
 
 def update_it_task(task_id: str, payload: UpdateITTaskRequest, session: Session) -> ITTaskDTO | None:
-    """Apply a partial update to an existing IT task.
-
-    Only fields explicitly set in the payload (non-None) are written to the DB.
+    """Update an existing IT task.
 
     Args:
         task_id (str): Primary key of the task to update.
@@ -324,3 +288,23 @@ def delete_it_task(task_id: str, session: Session) -> bool:
         return False
     
     return True
+
+# ---------------------------------------------------------------------------
+# Private functions
+# ---------------------------------------------------------------------------
+def _due_in_business_days(days: int) -> datetime:
+    """Return a UTC datetime that is ``days`` business days from now.
+
+    Args:
+        days (int): Number of business days (Monday–Friday) to add.
+
+    Returns:
+        datetime: UTC timestamp ``days`` working days in the future.
+    """
+    current = datetime.now(timezone.utc)
+    count = 0
+    while count < days:
+        current += timedelta(days=1)
+        if current.weekday() < 5:
+            count += 1
+    return current

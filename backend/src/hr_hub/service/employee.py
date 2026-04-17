@@ -19,6 +19,13 @@ from hr_hub.service import LOGGER
 from hr_hub.service.it_task import create_onboarding_tasks
 from hr_hub.service.prediction import score_employee
 
+_EMPLOYEE_FIELDS = {"first_name", "last_name", "gender", "email", "manager_email", "laptop", "monitor", "headset"}
+_INFO_FIELDS = {
+    "department", "salary", "active_projects", "avg_monthly_hours",
+    "years_at_company", "work_accidents", "received_promotion",
+    "last_evaluation", "satisfaction_score", "attrition", "attrition_risk",
+}
+
 
 def start_onboarding(
     request: NewHireRequest,
@@ -26,10 +33,6 @@ def start_onboarding(
     attrition_model: Any | None,
 ) -> APIResponse:
     """Start the new hire workflow.
-
-    Persists the new employee (core record + employment info) to the database.
-    The caller owns the transaction — this function only `flush` to surface
-    integrity errors early; commit happens in the `get_session` dependency.
 
     Args:
         request (NewHireRequestDTO): The new hire request containing employee details.
@@ -58,7 +61,7 @@ def start_onboarding(
     return APIResponse(
         request_id=request.request_id,
         request_type=request.request_type,
-        status="completed" if create_action.success else "failed",
+        status="Completed" if create_action.success else "Canceled",
         actions=actions,
     )
 
@@ -70,11 +73,6 @@ def update_employee(
     attrition_model: Any | None = None,
 ) -> APIResponse:
     """Apply a partial update to an employee's identity, equipment, and/or employment info.
-
-    Only non-None fields in the request are written to the database. After a
-    successful flush the attrition model is re-run for that employee so the
-    risk score stays current. The caller owns the transaction — this function
-    only flushes.
 
     Args:
         employee_id (str): Primary key of the employee to update.
@@ -92,7 +90,7 @@ def update_employee(
         return APIResponse(
             request_id=request_id,
             request_type="employee_change",
-            status="failed",
+            status="Canceled",
             actions=[APIResponse.Action(
                 action="update_employee",
                 success=False,
@@ -101,13 +99,6 @@ def update_employee(
         )
 
     info = session.get(EmployeeInfo, employee_id)
-
-    _EMPLOYEE_FIELDS = {"first_name", "last_name", "gender", "email", "manager_email", "laptop", "monitor", "headset"}
-    _INFO_FIELDS = {
-        "department", "salary", "active_projects", "avg_monthly_hours",
-        "years_at_company", "work_accidents", "received_promotion",
-        "last_evaluation", "satisfaction_score", "attrition", "attrition_risk",
-    }
 
     for field, value in request.model_dump(exclude_none=True).items():
         if field in _EMPLOYEE_FIELDS:
@@ -122,7 +113,7 @@ def update_employee(
         return APIResponse(
             request_id=request_id,
             request_type="employee_change",
-            status="failed",
+            status="Canceled",
             actions=[APIResponse.Action(
                 action="update_employee",
                 success=False,
@@ -140,16 +131,13 @@ def update_employee(
     return APIResponse(
         request_id=request_id,
         request_type="employee_change",
-        status="completed",
+        status="Completed",
         actions=actions,
     )
 
 
 def delete_employee(employee_id: str, session: Session) -> APIResponse:
     """Hard-delete an employee and all related records from the database.
-
-    Deletes ITTask and EmployeeInfo child rows before removing the Employee row
-    to satisfy foreign-key constraints. The caller owns the transaction.
 
     Args:
         employee_id (str): Primary key of the employee to delete.
@@ -165,7 +153,7 @@ def delete_employee(employee_id: str, session: Session) -> APIResponse:
         return APIResponse(
             request_id=request_id,
             request_type="employee_change",
-            status="failed",
+            status="Canceled",
             actions=[APIResponse.Action(
                 action="delete_employee",
                 success=False,
@@ -185,7 +173,7 @@ def delete_employee(employee_id: str, session: Session) -> APIResponse:
         return APIResponse(
             request_id=request_id,
             request_type="employee_change",
-            status="failed",
+            status="Canceled",
             actions=[APIResponse.Action(
                 action="delete_employee",
                 success=False,
@@ -196,7 +184,7 @@ def delete_employee(employee_id: str, session: Session) -> APIResponse:
     return APIResponse(
         request_id=request_id,
         request_type="employee_change",
-        status="completed",
+        status="Completed",
         actions=[APIResponse.Action(
             action="delete_employee",
             success=True,
@@ -206,9 +194,7 @@ def delete_employee(employee_id: str, session: Session) -> APIResponse:
 
 
 def list_employees(session: Session) -> list[FullEmployeeDTO]:
-    """Return all current employees (attrition=False) as flat FullEmployeeDTO records.
-
-    Former employees (attrition=True) are excluded.
+    """Return all current employees (attrition=False).
 
     Args:
         session (Session): Active SQLAlchemy session. Caller owns commit/rollback.

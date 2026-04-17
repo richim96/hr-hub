@@ -5,6 +5,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr
 
+from hr_hub.model.dto.response import Status
+
 
 class TicketDTO(BaseModel):
     """Full ticket record — used for all ticket read responses.
@@ -12,7 +14,7 @@ class TicketDTO(BaseModel):
     Attributes:
         request_id (str): Unique identifier for the ticket.
         request_type (str): Always ``"people_ticket"``.
-        status (Literal["Pending", "Canceled", "Completed"]): Current processing status.
+        status (Status): Current processing status.
         submitted_by (str): Email of the person who submitted the ticket.
         title (str): Title of the ticket.
         text (str): Full description of the ticket issue.
@@ -25,7 +27,7 @@ class TicketDTO(BaseModel):
 
     request_id: str
     request_type: str
-    status: Literal["Pending", "Canceled", "Completed"]
+    status: Status
     submitted_by: str
     title: str
     text: str

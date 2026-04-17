@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
-from hr_hub.agent.ticketing import ticket_agent
+from hr_hub.agent.ticketing import ticket_agent, TicketClassification
 from hr_hub.model import Ticket
 from hr_hub.model.dto import APIResponse, NewTicketRequest, UpdateTicketRequest
 from hr_hub.model.dto.ticket import TicketDTO
@@ -103,9 +103,7 @@ def delete_ticket(request_id: str, session: Session) -> bool:
 
 
 def update_ticket(request_id: str, request: UpdateTicketRequest, session: Session) -> TicketDTO | None:
-    """Partially update a ticket's subject and/or text.
-
-    Only fields explicitly set in the request (non-None) are written to the DB.
+    """Update a ticket's subject and/or text.
 
     Args:
         request_id (str): Primary key of the ticket to update.
@@ -159,27 +157,22 @@ def list_tickets(session: Session) -> list[TicketDTO]:
         return []
 
 # --------------------
-# Private helper functions
+# Private functions
 # --------------------
 async def _run_classification(row: Ticket, session: Session) -> None:
     """Classify a ticket row in-place using the ticket agent.
-
-    Writes the classification result to ``row.llm_result`` and flushes the
-    session. On failure the row is left unchanged and the error is logged.
 
     Args:
         row (Ticket): ORM row to classify (mutated in-place).
         session (Session): Active SQLAlchemy session. Caller owns commit/rollback.
     """
-    ticket_text = f"Submitted by: {row.submitted_by} -> {row.title}\n\n{row.text}"
+    content = f"Submitted by: {row.submitted_by} -> {row.title}\n\n{row.text}"
+
     try:
-        result = await ticket_agent.run(ticket_text)
-        c = result.output
-        row.llm_result = {
-            "topics": c.topics,
-            "summary": c.summary,
-        }
+        result = await ticket_agent.run(content)
+        o: TicketClassification = result.output
+        row.llm_result = {"topics": o.topics, "summary": o.summary}
         session.flush()
-        LOGGER.info(f"Ticket classified [ {row.request_id} -> topics={c.topics!r} ]")
+        LOGGER.info(f"Ticket classified [ {row.request_id} -> topics={o.topics!r} ]")
     except Exception as e:
         LOGGER.error(f"Ticket classification failed for {row.request_id}: {e}")

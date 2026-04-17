@@ -1,8 +1,14 @@
 """Employee schemas — identity, equipment, employment info, and request envelopes."""
 
-from typing import Literal
+from typing import Literal, TypeAlias
 from uuid import uuid4
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
+
+Department: TypeAlias = Literal[
+    "accounting", "engineering", "hr", "IT", "management",
+    "marketing", "product_management", "r&d", "sales", "support",
+]
+Salary: TypeAlias = Literal["low", "medium", "high"]
 
 
 class EmployeeDTO(BaseModel):
@@ -50,9 +56,8 @@ class EmployeeInfoDTO(BaseModel):
     that are nullable in the database.
 
     Attributes:
-        department (Literal["sales", "engineering", "support", "IT", "product_management", "marketing", "r&d", "accounting", "hr", "management"]):
-            Department the employee belongs to.
-        salary (Literal["low", "medium", "high"]): Salary tier of the employee.
+        department (Department): Department the employee belongs to.
+        salary (Salary): Salary tier of the employee.
         active_projects (int | None): Number of active projects.
         avg_monthly_hours (int | None): Average monthly hours worked.
         years_at_company (int | None): Number of years at the company.
@@ -66,11 +71,8 @@ class EmployeeInfoDTO(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    department: Literal[
-        "sales", "engineering", "support", "IT", "product_management",
-        "marketing", "r&d", "accounting", "hr", "management",
-    ]
-    salary: Literal["low", "medium", "high"]
+    department: Department
+    salary: Salary
     active_projects: int | None = Field(default=None, ge=0)
     avg_monthly_hours: int | None = Field(default=None, ge=0)
     years_at_company: int | None = Field(default=None, ge=0)
@@ -95,9 +97,8 @@ class FullEmployeeDTO(BaseModel):
         laptop (str | None): Laptop model assigned.
         monitor (bool | None): Whether a monitor is provided.
         headset (bool | None): Whether a headset is provided.
-        department (Literal["sales", "engineering", "support", "IT", "product_management", "marketing", "r&d", "accounting", "hr", "management"]):
-            Department the employee belongs to.
-        salary (Literal["low", "medium", "high"]): Salary tier.
+        department (Department): Department the employee belongs to.
+        salary (Salary): Salary tier.
         active_projects (int | None): Number of active projects.
         avg_monthly_hours (int | None): Average monthly hours worked.
         years_at_company (int | None): Years at the company.
@@ -125,11 +126,8 @@ class FullEmployeeDTO(BaseModel):
     headset: bool | None = None
 
     # Employment info
-    department: Literal[
-        "sales", "engineering", "support", "IT", "product_management",
-        "marketing", "r&d", "accounting", "hr", "management",
-    ]
-    salary: Literal["low", "medium", "high"]
+    department: Department
+    salary: Salary
     active_projects: int | None = Field(default=None, ge=0)
     avg_monthly_hours: int | None = Field(default=None, ge=0)
     years_at_company: int | None = Field(default=None, ge=0)
@@ -173,8 +171,8 @@ class UpdateEmployeeRequest(BaseModel):
         laptop (str | None): Updated laptop model.
         monitor (bool | None): Updated monitor flag.
         headset (bool | None): Updated headset flag.
-        department (Literal["sales", "engineering", "support", "IT", "product_management", "marketing", "r&d", "accounting", "hr", "management"] | None): Updated department.
-        salary (Literal["low", "medium", "high"] | None): Updated salary tier.
+        department (Department | None): Updated department.
+        salary (Salary | None): Updated salary tier.
         active_projects (int | None): Updated active project count.
         avg_monthly_hours (int | None): Updated average monthly hours.
         years_at_company (int | None): Updated years at company.
@@ -201,11 +199,8 @@ class UpdateEmployeeRequest(BaseModel):
     headset: bool | None = None
 
     # Employment info
-    department: Literal[
-        "sales", "engineering", "support", "IT", "product_management",
-        "marketing", "r&d", "accounting", "hr", "management",
-    ] | None = None
-    salary: Literal["low", "medium", "high"] | None = None
+    department: Department | None = None
+    salary: Salary | None = None
     active_projects: int | None = Field(default=None, ge=0)
     avg_monthly_hours: int | None = Field(default=None, ge=0)
     years_at_company: int | None = Field(default=None, ge=0)

@@ -1,8 +1,11 @@
 """IT task schemas — read DTO and request envelopes."""
 
 from datetime import datetime
-from typing import Any, Literal
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict
+
+from hr_hub.model.dto.response import Status
 
 
 class ITTaskDTO(BaseModel):
@@ -16,7 +19,7 @@ class ITTaskDTO(BaseModel):
         description (str | None): Detailed description of the work required.
         assignee (str | None): Email of the person or team assigned to this task.
         due_date (datetime | None): Optional deadline for the task.
-        status (Literal["Pending", "Completed", "Canceled"] | None): Current task status.
+        status (Status | None): Current task status.
         task_metadata (dict[str, Any] | None): Arbitrary additional metadata.
     """
 
@@ -29,7 +32,7 @@ class ITTaskDTO(BaseModel):
     description: str | None = None
     assignee: str | None = None
     due_date: datetime | None = None
-    status: Literal["Pending", "Completed", "Canceled"] | None = None
+    status: Status | None = None
     task_metadata: dict[str, Any] | None = None
 
 
@@ -43,7 +46,7 @@ class NewITTaskRequest(BaseModel):
         description (str): Detailed description of the work required.
         assignee (str): Email of the person or team assigned to this task.
         due_date (datetime): Deadline for the task.
-        status (Literal["Pending", "Completed", "Canceled"]): Initial task status.
+        status (Status): Initial task status.
         task_metadata (dict[str, Any] | None): Arbitrary additional metadata.
     """
 
@@ -55,7 +58,7 @@ class NewITTaskRequest(BaseModel):
     description: str
     assignee: str
     due_date: datetime
-    status: Literal["Pending", "Completed", "Canceled"] = "Pending"
+    status: Status = "Pending"
     task_metadata: dict[str, Any] | None = None
 
 
@@ -67,7 +70,7 @@ class UpdateITTaskRequest(BaseModel):
         description (str): Updated task description.
         assignee (str): Updated assignee.
         due_date (datetime): Updated deadline.
-        status (Literal["Pending", "Completed", "Canceled"]): Updated status.
+        status (Status): Updated status.
     """
 
     model_config = ConfigDict(from_attributes=True)
@@ -76,4 +79,4 @@ class UpdateITTaskRequest(BaseModel):
     description: str
     assignee: str
     due_date: datetime
-    status: Literal["Pending", "Completed", "Canceled"]
+    status: Status

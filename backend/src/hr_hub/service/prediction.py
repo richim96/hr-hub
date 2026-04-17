@@ -1,14 +1,9 @@
-"""Attrition prediction service.
-
-The SOTA gradient-boosted pipeline is loaded once at application startup
-via `load_model()` and cached on ``app.state``. All inference requests receive
-the pipeline via dependency injection.
-"""
+"""Attrition prediction service."""
 
 import os
 from typing import Any
 
-import joblib
+import joblib # pyright: ignore[reportMissingTypeStubs]
 import pandas as pd
 from fastapi import Request
 from sqlalchemy.orm import Session
@@ -22,20 +17,16 @@ _SALARY_ENCODING: dict[str, float] = {"low": 0., "medium": 0.5, "high": 1.}
 _DEFAULTS: dict[str, Any] = {
     "ActiveProjects": 1,
     "AvgMonthlyHours": 160,
-    "YearsAtCompany": 1,
+    "YearsAtCompany": 0,
     "WorkAccidents": 0,
     "ReceivedPromotion": 0,
     "LastEvaluation": 0.75,
     "SatisfactionScore": 0.75,
-} # Base data for new employees used as fallback on null input
+}
 
 
 def get_attrition_model(request: Request) -> Any | None:
     """FastAPI dependency that returns the cached attrition prediction pipeline.
-
-    Reads the attrition model stored on ``app.state.attrition_model`` at startup.
-    Returns ``None`` if the model was not loaded (e.g. ``SOTA_PATH`` unset or
-    file missing); service functions receiving ``None`` return a failure response.
 
     Usage::
 
@@ -50,18 +41,14 @@ def get_attrition_model(request: Request) -> Any | None:
 
 
 def load_model() -> Any | None:
-    """Load the attrition pipeline from SOTA_PATH and return it.
-
-    Called once during application startup (lifespan in main.py); the result
-    is stored on ``app.state.attrition_model``.
-    """
+    """Load the attrition pipeline from SOTA_PATH and return it."""
     model_path = os.getenv("SOTA_PATH")
     if not model_path:
         LOGGER.warning("SOTA_PATH is not set; attrition modal unavailable.")
         return None
 
     try:
-        attrition_model: Any = joblib.load(model_path)
+        attrition_model: Any = joblib.load(model_path) # pyright: ignore[reportUnknownMemberType]
         LOGGER.info(f"Attrition model loaded from {model_path}")
         return attrition_model
     except Exception as e:
@@ -79,9 +66,6 @@ def score_employee(
     attrition_model: Any | None,
 ) -> APIResponse.Action:
     """Score an existing employee and persist the updated attrition_risk to the DB.
-
-    Fetches the employee's ``EmployeeInfo`` row, runs the attrition model,
-    and writes the resulting risk score back to the database.
 
     Args:
         employee_id (str): Primary key of the employee to score.
@@ -138,12 +122,7 @@ def score_all(
     request_id: str,
     attrition_model: Any | None,
 ) -> APIResponse:
-    """Score attrition risk for all current employees.
-
-    Employees with ``attrition == True`` are excluded — they have already left
-    and their risk score is not actionable.  All remaining employees are fetched
-    in a single query and scored in one vectorized attrition model call, then their
-    ``attrition_risk`` columns are updated in bulk before a single flush.
+    """Score attrition risk for all current employees (`attrition == False`)
 
     Args:
         session (Session): Active SQLAlchemy session. Caller owns commit/rollback.
@@ -153,10 +132,7 @@ def score_all(
     if attrition_model is None:
         return _response(request_id, "Prediction model could not be loaded", False)
 
-    # ------------------------------------------------------------------
-    # 1. Fetch current employees only (attrition is False or unset).
-    # ------------------------------------------------------------------
-    try:
+    try: # fetch employees
         rows: list[EmployeeInfo] = (
             session.query(EmployeeInfo)
             .filter(EmployeeInfo.attrition.isnot(True))
@@ -169,11 +145,8 @@ def score_all(
     if not rows:
         return _response(request_id, "No current employees found to score.", False)
 
-    # ------------------------------------------------------------------
-    # 2. Build a multi-row DataFrame and run vectorized inference.
-    # ------------------------------------------------------------------
-    try:
-        records: list[dict[str, Any]] = [
+    try: # run model inference
+        df: pd.DataFrame = pd.DataFrame([
             {
                 "Department": row.department,
                 "Salary": _SALARY_ENCODING[row.salary],
@@ -184,13 +157,9 @@ def score_all(
                 "ReceivedPromotion": row.received_promotion if row.received_promotion is not None else _DEFAULTS["ReceivedPromotion"],
                 "LastEvaluation": row.last_evaluation if row.last_evaluation is not None else _DEFAULTS["LastEvaluation"],
                 "SatisfactionScore": row.satisfaction_score if row.satisfaction_score is not None else _DEFAULTS["SatisfactionScore"],
-            }
-            for row in rows
-        ]
-        df = pd.DataFrame(records)
-        # pandas 3.x infers Arrow-backed StringDtype for string columns, which
-        # scikit-learn's transformers cannot handle — cast to object explicitly.
-        df["Department"] = df["Department"].astype(object)
+            } for row in rows
+        ])
+        df["Department"] = df["Department"].astype(object) # scikit-learn's transformers cannot handle StringDtype from pandas 3.x.
         probabilities: list[float] = [
             float(p).__round__(4) for p in attrition_model.predict_proba(df)[:, 1]
         ]
@@ -198,10 +167,7 @@ def score_all(
         LOGGER.error(f"Batch inference failed [{request_id}]: {e}")
         return _response(request_id, f"Inference error: {e}", False)
 
-    # ------------------------------------------------------------------
-    # 3. Persist updated risk scores.
-    # ------------------------------------------------------------------
-    try:
+    try: # persist scores
         for row, risk in zip(rows, probabilities):
             row.attrition_risk = risk
         session.flush()
@@ -214,9 +180,8 @@ def score_all(
 
 
 # ---------------------------------------------------------------------------
-# Private helpers
+# Private functions
 # ---------------------------------------------------------------------------
-
 def _run_inference(features: AttritionFeaturesDTO, attrition_model: Any) -> float:
     """Build a single-row feature DataFrame and return the predicted attrition probability.
 
@@ -260,6 +225,6 @@ def _response(request_id: str, message: str, success: bool) -> APIResponse:
     return APIResponse(
         request_id=request_id,
         request_type="prediction",
-        status="completed" if success else "failed",
+        status="Completed" if success else "Canceled",
         actions=[_action(success, message)],
     )
