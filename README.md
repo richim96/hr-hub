@@ -1,6 +1,6 @@
 # HR Hub
 
-AI-augmented HR workflow automation. HR Hub lets an HR team manage employees, IT tasks, and support tickets through a web dashboard backed by an LLM agent that classifies requests and triggers downstream actions.
+AI-enabled people management system. HR Hub lets an HR team manage employees, IT tasks, and support tickets through a web dashboard backed by an LLM agent that classifies requests and triggers downstream actions.
 
 ![HR Hub homepage](mock-cloud/storage/homepage.png)
 
