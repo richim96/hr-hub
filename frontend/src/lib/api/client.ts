@@ -38,6 +38,7 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
 	};
 
 	const init: RequestInit = {
+		cache: 'no-store',
 		...rest,
 		headers,
 		body: json !== undefined ? JSON.stringify(json) : rest.body

@@ -2,7 +2,7 @@ import { writable } from 'svelte/store';
 import { createEmployee, deleteEmployee, listEmployees, updateEmployee } from '$lib/api/employees';
 import { scoreAll } from '$lib/api/prediction';
 import { addToast } from './toast';
-import { isWarm, readCache, writeCache, appendToCache, patchInCache, removeFromCache } from './cache';
+import { isWarm, readCache, writeCache, invalidateCache } from './cache';
 import type { Department, FullEmployee, NewHireRequest, UpdateEmployeeRequest } from '$lib/types';
 
 interface EmployeeFilters {
@@ -86,24 +86,14 @@ export function setEmployeeFilter(partial: Partial<EmployeeFilters>): void {
 export async function hireEmployee(payload: NewHireRequest): Promise<boolean> {
 	try {
 		const response = await createEmployee(payload);
-		if (response.status === 'failed') {
+		if (response.status === 'Canceled') {
 			addToast('error', `New hire failed: ${response.actions.find((a) => !a.success)?.details ?? 'unknown error'}`);
 			return false;
 		}
 		addToast('success', `Employee ${payload.employee.first_name} ${payload.employee.last_name} onboarded successfully.`);
 
-		// Build FullEmployee from the request payload and add to cache.
-		const newEmployee: FullEmployee = {
-			...payload.employee,
-			...payload.equipment,
-			...payload.info
-		};
-		appendToCache('employees', newEmployee);
-		employeeStore.update((s) => ({
-			...s,
-			items: [...s.items, newEmployee],
-			total: s.total + 1
-		}));
+		invalidateCache('employees');
+		await fetchEmployees();
 		return true;
 	} catch (err) {
 		const message = err instanceof Error ? err.message : 'Failed to create employee';
@@ -117,11 +107,8 @@ export async function changeEmployee(employeeId: string, payload: UpdateEmployee
 		await updateEmployee(employeeId, payload);
 		addToast('success', 'Employee updated successfully.');
 
-		patchInCache<FullEmployee>('employees', 'employee_id', employeeId, payload);
-		employeeStore.update((s) => ({
-			...s,
-			items: s.items.map((e) => (e.employee_id === employeeId ? { ...e, ...payload } : e))
-		}));
+		invalidateCache('employees');
+		await fetchEmployees();
 		return true;
 	} catch (err) {
 		const message = err instanceof Error ? err.message : 'Failed to update employee';
@@ -135,12 +122,8 @@ export async function removeEmployee(employeeId: string): Promise<boolean> {
 		await deleteEmployee(employeeId);
 		addToast('success', 'Employee deleted successfully.');
 
-		removeFromCache('employees', 'employee_id', employeeId);
-		employeeStore.update((s) => ({
-			...s,
-			items: s.items.filter((e) => e.employee_id !== employeeId),
-			total: s.total - 1
-		}));
+		invalidateCache('employees');
+		await fetchEmployees();
 		return true;
 	} catch (err) {
 		const message = err instanceof Error ? err.message : 'Failed to delete employee';
@@ -154,7 +137,7 @@ export async function refreshRiskScores(): Promise<boolean> {
 	try {
 		const requestId = `req_${crypto.randomUUID()}`;
 		const response = await scoreAll({ request_id: requestId, request_type: 'prediction' });
-		if (response.status === 'failed') {
+		if (response.status === 'Canceled') {
 			addToast('error', `Batch scoring failed: ${response.actions.find((a) => !a.success)?.details ?? 'model unavailable'}`);
 			return false;
 		}

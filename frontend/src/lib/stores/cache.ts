@@ -68,44 +68,10 @@ export function writeCache<T>(domain: string, items: T[]): void {
 // Granular in-place mutations (called after backend writes)
 // ---------------------------------------------------------------------------
 
-/** Append one new item to the cached list. */
-export function appendToCache<T>(domain: string, item: T): void {
-	writeCache(domain, [...(readCache<T>(domain) ?? []), item]);
-}
-
-/**
- * Merge `partial` fields into the cached item whose `idField === id`.
- * No-op if not found.
- */
-export function patchInCache<T>(
-	domain: string,
-	idField: string,
-	id: unknown,
-	partial: Partial<T>
-): void {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const current = (readCache<any>(domain) ?? []) as any[];
-	writeCache(domain, current.map((item) => item[idField] === id ? { ...item, ...partial } : item));
-}
-
-/**
- * Swap the cached item whose `idField === id` with `replacement`.
- * No-op if not found.
- */
-export function replaceInCache<T>(
-	domain: string,
-	idField: string,
-	id: unknown,
-	replacement: T
-): void {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const current = (readCache<any>(domain) ?? []) as any[];
-	writeCache(domain, current.map((item) => item[idField] === id ? replacement : item));
-}
-
-/** Remove the cached item whose `idField === id`. No-op if not found. */
-export function removeFromCache(domain: string, idField: string, id: unknown): void {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const current = (readCache<any>(domain) ?? []) as any[];
-	writeCache(domain, current.filter((item) => item[idField] !== id));
+/** Mark a domain cold so the next fetch* call hits the backend. */
+export function invalidateCache(domain: string): void {
+	_mem.delete(domain);
+	if (typeof localStorage !== 'undefined' && LS_KEY[domain]) {
+		localStorage.removeItem(LS_KEY[domain]);
+	}
 }

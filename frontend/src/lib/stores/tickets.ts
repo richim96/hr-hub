@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 import { listTickets, createTicket, updateTicket, deleteTicket, classifyTicket } from '$lib/api/tickets';
 import { addToast } from './toast';
-import { isWarm, readCache, writeCache, appendToCache, patchInCache, removeFromCache } from './cache';
+import { isWarm, readCache, writeCache, invalidateCache } from './cache';
 import type { Ticket, Status, TicketRequest, UpdateTicketRequest } from '$lib/types';
 
 interface TicketFilters {
@@ -85,12 +85,8 @@ export async function submitTicket(payload: TicketRequest): Promise<Ticket | nul
 		const ticket = await createTicket(payload);
 		addToast('success', 'Ticket submitted successfully.');
 
-		appendToCache('tickets', ticket);
-		ticketStore.update((s) => ({
-			...s,
-			items: [ticket, ...s.items],
-			total: s.total + 1
-		}));
+		invalidateCache('tickets');
+		await fetchTickets();
 		return ticket;
 	} catch (err) {
 		addToast('error', err instanceof Error ? err.message : 'Failed to submit ticket');
@@ -100,21 +96,11 @@ export async function submitTicket(payload: TicketRequest): Promise<Ticket | nul
 
 export async function editTicket(requestId: string, payload: UpdateTicketRequest): Promise<void> {
 	try {
-		const ticket = await updateTicket(requestId, payload);
+		await updateTicket(requestId, payload);
 		addToast('success', 'Ticket updated.');
 
-		patchInCache<Ticket>('tickets', 'request_id', requestId, {
-			title: ticket.title,
-			text: ticket.text
-		});
-		ticketStore.update((s) => ({
-			...s,
-			items: s.items.map((t) =>
-				t.request_id === requestId
-					? { ...t, title: ticket.title, text: ticket.text }
-					: t
-			)
-		}));
+		invalidateCache('tickets');
+		await fetchTickets();
 	} catch (err) {
 		addToast('error', err instanceof Error ? err.message : 'Failed to update ticket');
 	}
@@ -125,12 +111,8 @@ export async function removeTicket(requestId: string): Promise<void> {
 		await deleteTicket(requestId);
 		addToast('success', 'Ticket deleted.');
 
-		removeFromCache('tickets', 'request_id', requestId);
-		ticketStore.update((s) => ({
-			...s,
-			items: s.items.filter((t) => t.request_id !== requestId),
-			total: s.total - 1
-		}));
+		invalidateCache('tickets');
+		await fetchTickets();
 	} catch (err) {
 		addToast('error', err instanceof Error ? err.message : 'Failed to delete ticket');
 	}
@@ -141,11 +123,8 @@ export async function runClassification(requestId: string): Promise<Ticket | nul
 		const ticket = await classifyTicket(requestId);
 		addToast('success', 'Ticket classified.');
 
-		patchInCache<Ticket>('tickets', 'request_id', requestId, { llm_result: ticket.llm_result });
-		ticketStore.update((s) => ({
-			...s,
-			items: s.items.map((t) => (t.request_id === requestId ? { ...t, llm_result: ticket.llm_result } : t))
-		}));
+		invalidateCache('tickets');
+		await fetchTickets();
 		return ticket;
 	} catch (err) {
 		addToast('error', err instanceof Error ? err.message : 'Classification failed');
