@@ -23,13 +23,9 @@ export type SalaryTier = 'low' | 'medium' | 'high';
 
 export type Gender = 'M' | 'F';
 
-export type TaskStatus = 'Pending' | 'Completed' | 'Canceled';
+export type Status = 'Pending' | 'Completed' | 'Canceled';
 
-export type TicketStatus = 'Pending' | 'Canceled' | 'Completed';
-
-export type RequestType = 'new_hire' | 'employee_change' | 'people_ticket' | 'prediction';
-
-export type ResponseStatus = 'completed' | 'pending' | 'failed';
+export type RequestType = 'new_hire' | 'employee_change' | 'prediction';
 
 export type ActionType =
 	| 'create_employee'
@@ -93,7 +89,7 @@ export interface ITTask {
 	description?: string | null;
 	assignee?: string | null;
 	due_date?: string | null;
-	status?: TaskStatus | null;
+	status?: Status | null;
 	task_metadata?: Record<string, unknown> | null;
 }
 
@@ -179,16 +175,15 @@ export interface LLMResult {
 export interface APIResponse {
 	request_id: string;
 	request_type: RequestType;
-	status: ResponseStatus;
+	status: Status;
 	actions: APIAction[];
-	llm_result?: LLMResult | null;
 }
 
 /** Mirrors backend TicketDTO. */
 export interface Ticket {
 	request_id: string;
 	request_type: string;
-	status: TicketStatus;
+	status: Status;
 	submitted_by: string;
 	title: string;
 	text: string;

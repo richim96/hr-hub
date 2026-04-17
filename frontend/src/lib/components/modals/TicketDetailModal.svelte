@@ -8,7 +8,7 @@
 	import Input from '$lib/components/ui/Input.svelte';
 	import Textarea from '$lib/components/ui/Textarea.svelte';
 	import { editTicket, runClassification } from '$lib/stores/tickets';
-	import type { Ticket, TicketStatus } from '$lib/types';
+	import type { Ticket, Status } from '$lib/types';
 
 	export let open = false;
 	export let ticket: Ticket | null = null;
@@ -62,7 +62,7 @@
 		confirmOpen = false;
 	}
 
-	function statusVariant(status: TicketStatus) {
+	function statusVariant(status: Status) {
 		if (status === 'Completed') return 'completed';
 		if (status === 'Canceled') return 'failed';
 		return 'pending';

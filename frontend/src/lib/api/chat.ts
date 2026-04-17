@@ -14,12 +14,15 @@ export interface ChatMessage {
 
 export interface ChatRequest {
 	message: string;
+	history?: Array<{ role: 'user' | 'assistant'; content: string }>;
 	context?: Record<string, unknown>;
 	request_id: string;
 }
 
 export interface ChatResponse {
-	reply: string;
+	answer: string;
+	sql_query: string | null;
+	blocked: boolean;
 }
 
 /** Send a natural-language query to the HR agent. */

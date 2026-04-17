@@ -2,11 +2,11 @@ import { writable } from 'svelte/store';
 import { listTickets, createTicket, updateTicket, deleteTicket, classifyTicket } from '$lib/api/tickets';
 import { addToast } from './toast';
 import { isWarm, readCache, writeCache, appendToCache, patchInCache, removeFromCache } from './cache';
-import type { Ticket, TicketStatus, TicketRequest, UpdateTicketRequest } from '$lib/types';
+import type { Ticket, Status, TicketRequest, UpdateTicketRequest } from '$lib/types';
 
 interface TicketFilters {
 	search: string;
-	status: TicketStatus | '';
+	status: Status | '';
 	submittedBy: string;
 }
 

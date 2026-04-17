@@ -3,7 +3,7 @@
 	import { ChevronUp, ChevronDown } from 'lucide-svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Skeleton from '$lib/components/ui/Skeleton.svelte';
-	import type { ITTask, TaskStatus } from '$lib/types';
+	import type { ITTask, Status } from '$lib/types';
 
 	export let items: ITTask[] = [];
 	export let loading = false;
@@ -14,7 +14,7 @@
 
 	const dispatch = createEventDispatcher<{ select: ITTask; sort: keyof ITTask }>();
 
-	function statusVariant(status: TaskStatus | null | undefined) {
+	function statusVariant(status: Status | null | undefined) {
 		if (status === 'Completed') return 'completed';
 		if (status === 'Canceled') return 'canceled';
 		return 'pending';

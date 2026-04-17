@@ -2,7 +2,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Skeleton from '$lib/components/ui/Skeleton.svelte';
-	import type { Ticket, TicketStatus } from '$lib/types';
+	import type { Ticket, Status } from '$lib/types';
 
 	export let items: Ticket[] = [];
 	export let loading = false;
@@ -11,7 +11,7 @@
 
 	const dispatch = createEventDispatcher<{ select: Ticket }>();
 
-	function statusVariant(status: TicketStatus) {
+	function statusVariant(status: Status) {
 		if (status === 'Completed') return 'completed';
 		if (status === 'Canceled') return 'failed';
 		return 'pending';

@@ -9,7 +9,7 @@
 	import TaskDetailModal from '$lib/components/modals/TaskDetailModal.svelte';
 	import { taskStore, fetchTasks, setTaskFilter, filterTasks, removeTask } from '$lib/stores/tasks';
 	import Pagination from '$lib/components/ui/Pagination.svelte';
-	import type { ITTask, TaskStatus } from '$lib/types';
+	import type { ITTask, Status } from '$lib/types';
 
 	onMount(() => {
 		fetchTasks();
@@ -44,7 +44,7 @@
 	$: displayed = sortedFiltered.slice((store.page - 1) * store.pageSize, store.page * store.pageSize);
 	$: totalPages = Math.max(1, Math.ceil(filtered.length / store.pageSize));
 
-	const statusOptions: { value: TaskStatus | ''; label: string }[] = [
+	const statusOptions: { value: Status | ''; label: string }[] = [
 		{ value: '', label: 'All statuses' },
 		{ value: 'Pending', label: 'Pending' },
 		{ value: 'Completed', label: 'Completed' },
@@ -56,7 +56,7 @@
 	}
 
 	function handleStatusChange(e: Event) {
-		setTaskFilter({ status: (e.target as HTMLSelectElement).value as TaskStatus | '' });
+		setTaskFilter({ status: (e.target as HTMLSelectElement).value as Status | '' });
 	}
 
 	function handleEmployeeEmailInput(e: Event) {

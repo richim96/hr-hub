@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { X, User } from 'lucide-svelte';
+	import { marked } from 'marked';
 	import { sendChatMessage, type ChatMessage } from '$lib/api/chat';
 	import { modalOpen } from '$lib/stores/ui';
 
@@ -12,6 +13,8 @@
 	let loading = false;
 	let messages: ChatMessage[] = [];
 	let chatContainer: HTMLElement;
+	let textarea: HTMLTextAreaElement;
+	let widgetRoot: HTMLElement;
 
 	$: context = { current_page: $page.url.pathname };
 
@@ -24,15 +27,22 @@
 		const text = input.trim();
 		if (!text || loading) return;
 
+		// Capture history before pushing the current message
+		const history = messages
+			.slice(1)
+			.filter((_, i, arr) => !(arr[i].role === 'assistant' && (i === 0 || arr[i - 1].role === 'assistant')))
+			.map(({ role, content }) => ({ role, content }));
+
 		messages = [...messages, { role: 'user', content: text }];
 		input = '';
+		if (textarea) { textarea.style.height = 'auto'; }
 		loading = true;
 		await scrollToBottom();
 
 		try {
 			const request_id = `req_${crypto.randomUUID()}`;
-			const res = await sendChatMessage({ message: text, context, request_id });
-			messages = [...messages, { role: 'assistant', content: res.reply }];
+			const res = await sendChatMessage({ message: text, history, context, request_id });
+			messages = [...messages, { role: 'assistant', content: res.answer }];
 		} catch (err) {
 			const msg =
 				err instanceof Error && err.message.includes('404')
@@ -54,6 +64,10 @@
 		}
 	}
 
+	function handleDocumentMouseDown(e: MouseEvent) {
+		if (open && widgetRoot && !widgetRoot.contains(e.target as Node)) open = false;
+	}
+
 	function toggleOpen() {
 		open = !open;
 		if (open && messages.length === 0) {
@@ -68,7 +82,11 @@
 </script>
 
 <!-- Floating button -->
-<div class="fixed bottom-6 right-6 flex flex-col items-end gap-3 {$modalOpen ? 'z-40 pointer-events-none' : 'z-50'}">
+<svelte:window on:mousedown={handleDocumentMouseDown} />
+<div
+	bind:this={widgetRoot}
+	class="fixed bottom-6 right-6 flex flex-col items-end gap-3 {$modalOpen ? 'z-40 pointer-events-none' : 'z-50'}"
+>
 	{#if open}
 		<!-- Chat panel -->
 		<div
@@ -100,12 +118,16 @@
 							</div>
 						{/if}
 						<div
-							class="max-w-[75%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap
+							class="max-w-[75%] px-3 py-2 rounded-2xl text-sm leading-relaxed
 							       {msg.role === 'user'
-								? 'bg-[#C05B28] text-white rounded-br-sm'
-								: 'bg-gray-100 text-gray-800 rounded-bl-sm'}"
+								? 'bg-[#C05B28] text-white rounded-br-sm whitespace-pre-wrap'
+								: 'bg-gray-100 text-gray-800 rounded-bl-sm prose prose-sm prose-neutral max-w-none'}"
 						>
-							{msg.content}
+							{#if msg.role === 'assistant'}
+								{@html marked(msg.content)}
+							{:else}
+								{msg.content}
+							{/if}
 						</div>
 						{#if msg.role === 'user'}
 							<div class="w-6 h-6 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center shrink-0 mt-0.5">
@@ -135,13 +157,15 @@
 			<div class="px-3 pb-3 pt-2 border-t border-gray-100 shrink-0">
 				<div class="flex gap-2 items-end">
 					<textarea
+						bind:this={textarea}
 						bind:value={input}
 						on:keydown={handleKeydown}
+						on:input={(e) => { const t = e.currentTarget; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }}
 						placeholder="Ask about employees, tasks, tickets…"
 						rows={1}
 						class="flex-1 px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl resize-none
 						       focus:outline-none focus:ring-2 focus:ring-[#C05B28] focus:bg-white
-						       max-h-24 transition-colors"
+						       max-h-48 transition-colors overflow-y-auto"
 						disabled={loading}
 					/>
 					<button

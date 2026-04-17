@@ -9,7 +9,7 @@
 	import Select from '$lib/components/ui/Select.svelte';
 	import Textarea from '$lib/components/ui/Textarea.svelte';
 	import { editTask } from '$lib/stores/tasks';
-	import type { ITTask, TaskStatus } from '$lib/types';
+	import type { ITTask, Status } from '$lib/types';
 
 	export let open = false;
 	export let task: ITTask | null = null;
@@ -25,7 +25,7 @@
 	let description = '';
 	let assignee = '';
 	let dueDate = '';
-	let status: TaskStatus | '' = '';
+	let status: Status | '' = '';
 
 	const statusOptions = [
 		{ value: 'Pending', label: 'Pending' },
@@ -70,7 +70,7 @@
 			description,
 			assignee,
 			due_date: dueDate,
-			status: status as TaskStatus
+			status: status as Status
 		});
 		submitting = false;
 		editing = false;
@@ -82,7 +82,7 @@
 		confirmOpen = false;
 	}
 
-	function statusVariant(s: TaskStatus | null | undefined) {
+	function statusVariant(s: Status | null | undefined) {
 		if (s === 'Completed') return 'completed';
 		if (s === 'Canceled') return 'canceled';
 		return 'pending';

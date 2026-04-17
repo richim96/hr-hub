@@ -2,11 +2,11 @@ import { writable } from 'svelte/store';
 import { listTasks, createTask, updateTask, deleteTask } from '$lib/api/tasks';
 import { addToast } from './toast';
 import { isWarm, readCache, writeCache, appendToCache, replaceInCache, removeFromCache } from './cache';
-import type { ITTask, TaskStatus } from '$lib/types';
+import type { ITTask, Status } from '$lib/types';
 
 interface TaskFilters {
 	search: string;
-	status: TaskStatus | '';
+	status: Status | '';
 	employeeEmail: string;
 	assignee: string;
 }

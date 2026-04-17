@@ -9,7 +9,7 @@
 	import TicketDetailModal from '$lib/components/modals/TicketDetailModal.svelte';
 	import { ticketStore, fetchTickets, setTicketFilter, filterTickets, removeTicket } from '$lib/stores/tickets';
 	import Pagination from '$lib/components/ui/Pagination.svelte';
-	import type { Ticket, TicketStatus } from '$lib/types';
+	import type { Ticket, Status } from '$lib/types';
 
 	onMount(() => {
 		fetchTickets();
@@ -24,7 +24,7 @@
 	$: displayed = filtered.slice((store.page - 1) * store.pageSize, store.page * store.pageSize);
 	$: totalPages = Math.max(1, Math.ceil(filtered.length / store.pageSize));
 
-	const statusOptions: { value: TicketStatus | ''; label: string }[] = [
+	const statusOptions: { value: Status | ''; label: string }[] = [
 		{ value: '', label: 'All statuses' },
 		{ value: 'Completed', label: 'Completed' },
 		{ value: 'Pending', label: 'Pending' },
@@ -36,7 +36,7 @@
 	}
 
 	function handleStatusChange(e: Event) {
-		setTicketFilter({ status: (e.target as HTMLSelectElement).value as TicketStatus | '' });
+		setTicketFilter({ status: (e.target as HTMLSelectElement).value as Status | '' });
 	}
 
 	function handleSubmitterInput(e: Event) {
