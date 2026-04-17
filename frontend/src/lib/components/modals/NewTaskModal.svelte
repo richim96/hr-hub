@@ -78,9 +78,8 @@
 
 <Modal {open} title="New Task" maxWidth="lg" on:close={() => { reset(); dispatch('close'); }}>
 	<form on:submit|preventDefault={handleSubmit} class="space-y-4">
-		<!-- Employee email searchable select -->
 		<div class="flex flex-col gap-1 relative">
-			<label for="ntEmail" class="text-sm font-medium text-gray-700">Employee Email</label>
+			<label for="ntEmail" class="text-sm font-medium text-gray-600">Employee Email</label>
 			<input
 				id="ntEmail"
 				type="text"
@@ -90,19 +89,19 @@
 				on:input={handleEmailInput}
 				on:focus={() => (dropdownOpen = true)}
 				on:blur={() => setTimeout(() => (dropdownOpen = false), 150)}
-				class="w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C05B28]
-				       {errors.email ? 'border-red-400' : 'border-gray-300'}"
+				class="w-full px-3 py-2 text-sm rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#C05B28]/50 transition-all"
+				style="background: var(--glass-bg-input); backdrop-filter: var(--glass-blur-sm); -webkit-backdrop-filter: var(--glass-blur-sm); border: 1px solid {errors.email ? 'rgba(248,113,113,0.6)' : 'var(--glass-border-subtle)'};"
 			/>
 			{#if errors.email}
 				<p class="text-xs text-red-500">{errors.email}</p>
 			{/if}
 			{#if dropdownOpen && filtered.length > 0}
-				<ul class="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+				<ul class="absolute top-full left-0 right-0 z-50 mt-1 rounded-2xl max-h-48 overflow-y-auto" style="background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 8px 24px rgba(0,0,0,0.1);">
 					{#each filtered.slice(0, 50) as emp}
 						<li>
 							<button
 								type="button"
-								class="w-full text-left px-3 py-2 text-sm hover:bg-[#fdf4ef] transition-colors"
+								class="w-full text-left px-3 py-2 text-sm transition-colors hover:bg-white/50 first:rounded-t-2xl last:rounded-b-2xl"
 								on:mousedown={() => selectEmail(emp.email)}
 							>
 								<span class="font-medium text-gray-900">{emp.first_name} {emp.last_name}</span>

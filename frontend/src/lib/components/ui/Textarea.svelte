@@ -11,7 +11,7 @@
 
 <div class="flex flex-col gap-1">
 	{#if label}
-		<label for={id} class="text-sm font-medium text-gray-700">
+		<label for={id} class="text-sm font-medium text-gray-600">
 			{label}{#if required}<span class="text-red-500 ml-0.5">*</span>{/if}
 		</label>
 	{/if}
@@ -22,15 +22,16 @@
 		{required}
 		{disabled}
 		bind:value
-		class="w-full px-3 py-2 text-sm bg-white border rounded-lg shadow-sm resize-y transition-colors
-			   focus:outline-none focus:ring-2 focus:ring-[#C05B28]-500 focus:border-transparent
-			   disabled:bg-gray-50 disabled:text-gray-400
-			   {error ? 'border-red-400' : 'border-gray-300'}"
+		class="w-full px-3 py-2 text-sm rounded-2xl resize-y transition-all
+			   focus:outline-none focus:ring-2 focus:ring-[#C05B28]/50
+			   disabled:opacity-50
+			   {error ? 'ring-1 ring-red-400' : ''}"
+		style="background: var(--glass-bg-input); backdrop-filter: var(--glass-blur-sm); -webkit-backdrop-filter: var(--glass-blur-sm); border: 1px solid {error ? 'rgba(248,113,113,0.6)' : 'var(--glass-border-subtle)'};"
 		on:input
 		on:change
 		{...$$restProps}
 	/>
 	{#if error}
-		<p class="text-xs text-red-600">{error}</p>
+		<p class="text-xs text-red-500">{error}</p>
 	{/if}
 </div>

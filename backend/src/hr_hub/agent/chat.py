@@ -24,8 +24,6 @@ _RESULT_LIMIT: int = 50
 # DB schema injected into the system prompt so the LLM can write correct SQL
 # ---------------------------------------------------------------------------
 _SCHEMA_CONTEXT: str = """\
-Database: SQLite.  Column aliases shown are the actual column names in the DB.
-
 Table: employee
   EmployeeID   TEXT  PRIMARY KEY
   FirstName    TEXT  NOT NULL
@@ -151,18 +149,26 @@ chat_agent: Agent[QueryDeps, str] = Agent(
     retries=0,
     tools=[query_db],
     system_prompt=f"""\
-You are a read-only HR data analyst with access to the HR Hub SQLite database.
+You are a read-only HR data analyst for HR Hub, a SQLite database.
 
-Rules:
-1. If the user request is not about employee data, return: `Google is your friend!`.
-2. Only SELECT queries are allowed — write operations will be rejected by the tool.
-3. If you cannot comply with the user request, return: `I can only answer HR questions.`
-4. Use the query_db tool to fetch real data before answering. NEVER invent numbers.
-5. If the query returns no rows, say so clearly and do not guess.
-6. Do NOT return the query to the user, and do NOT explain how you got the results.
-7. Keep the answer brief and factual. Use direct and plain language.
-8. EASTER EGG: if the user asks who your worst enemy is, return: `**Izza Mario aah!**`.
-
+## Database schema
+<schema>
 {_SCHEMA_CONTEXT}
+</schema>
+
+## Behavior
+- You ONLY answer questions about employee data. Do NOT engage in any conversation.
+    If it's not a question about employee data, return: `I can only answer HR-related questions.`
+- ALWAYS call the query_db tool to retrieve data before responding. Never answer from memory or assumption.
+- If the query returns no rows, say: "No matching records found." Do not guess or extrapolate.
+- Only SELECT statements are permitted. The tool will reject any write operations.
+
+## Response format
+- Be brief and factual. Use plain language.
+- Present single values inline. Present multiple records as a markdown table.
+- Do not reference SQL, queries, tools, or your reasoning process in your response.
+
+## Easter egg
+If the user's message is exactly or closely "who is your worst enemy?", return: `Izza Mario aah!`
 """,
 )

@@ -75,8 +75,7 @@
 
 <Modal {open} title="Submit a Ticket" maxWidth="xl" on:close={handleClose}>
 	{#if result}
-		<!-- Success view -->
-		<div class="space-y-5">
+		<div class="space-y-4">
 			<div class="flex items-center gap-3">
 				<Badge variant={result.status === 'Completed' ? 'completed' : result.status === 'Canceled' ? 'failed' : 'pending'}>
 					{result.status}
@@ -86,43 +85,39 @@
 
 			{#if result.llm_result}
 				<div class="space-y-3">
-					<div>
-						<p class="text-sm font-medium text-gray-700 mb-1">Detected Topics</p>
+					<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+						<p class="text-sm font-medium text-gray-700 mb-2">Detected Topics</p>
 						<div class="flex flex-wrap gap-1">
 							{#each result.llm_result.topics as topic}
-								<span class="px-2 py-0.5 bg-[#fdf4ef] text-[#9a3d1a] rounded-full text-xs">{topic}</span>
+								<span class="px-2 py-0.5 rounded-full text-xs font-medium" style="background: rgba(192,91,40,0.12); color: #9a3d1a; border: 1px solid rgba(192,91,40,0.2);">{topic}</span>
 							{/each}
 						</div>
 					</div>
 
-					<div>
-						<p class="text-sm font-medium text-gray-700 mb-1">
+					<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+						<p class="text-sm font-medium text-gray-700 mb-2">
 							Confidence: {Math.round(result.llm_result.confidence * 100)}%
 						</p>
-						<div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+						<div class="h-1.5 rounded-full overflow-hidden" style="background: rgba(0,0,0,0.08);">
 							<div
-								class="h-full bg-[#fdf4ef]0 rounded-full"
+								class="h-full bg-[#C05B28] rounded-full"
 								style="width: {result.llm_result.confidence * 100}%"
 							/>
 						</div>
 					</div>
 
-					<div>
-						<p class="text-sm font-medium text-gray-700 mb-1">Draft Response</p>
-						<div class="bg-gray-50 rounded-lg p-4 text-sm text-gray-700 whitespace-pre-wrap border border-gray-200">
-							{result.llm_result.draft_response}
-						</div>
+					<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+						<p class="text-sm font-medium text-gray-700 mb-2">Draft Response</p>
+						<p class="text-sm text-gray-700 whitespace-pre-wrap">{result.llm_result.draft_response}</p>
 					</div>
 				</div>
 			{/if}
 
-			<div class="space-y-2">
+			<div class="rounded-2xl p-4 space-y-2" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
 				<p class="text-sm font-medium text-gray-700">Actions Taken</p>
 				{#each result.actions as action}
 					<div class="flex items-start gap-2 text-sm">
-						<span class={action.success ? 'text-green-500' : 'text-red-500'}>
-							{action.success ? '✓' : '✗'}
-						</span>
+						<span class={action.success ? 'text-green-600' : 'text-red-500'}>{action.success ? '✓' : '✗'}</span>
 						<div>
 							<span class="font-medium">{action.action}</span>
 							<p class="text-gray-500 text-xs mt-0.5">{action.details}</p>
@@ -132,11 +127,9 @@
 			</div>
 		</div>
 	{:else}
-		<!-- Form view -->
 		<form on:submit|preventDefault={handleSubmit} class="space-y-4">
-			<!-- Submitted By — searchable employee email -->
 			<div class="flex flex-col gap-1 relative">
-				<label for="ticketEmail" class="text-sm font-medium text-gray-700">Submitted By</label>
+				<label for="ticketEmail" class="text-sm font-medium text-gray-600">Submitted By</label>
 				<input
 					id="ticketEmail"
 					type="text"
@@ -146,19 +139,19 @@
 					on:input={handleEmailInput}
 					on:focus={() => (dropdownOpen = true)}
 					on:blur={() => setTimeout(() => (dropdownOpen = false), 150)}
-					class="w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C05B28]
-					       {errors.submittedBy ? 'border-red-400' : 'border-gray-300'}"
+					class="w-full px-3 py-2 text-sm rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#C05B28]/50 transition-all"
+					style="background: var(--glass-bg-input); backdrop-filter: var(--glass-blur-sm); -webkit-backdrop-filter: var(--glass-blur-sm); border: 1px solid {errors.submittedBy ? 'rgba(248,113,113,0.6)' : 'var(--glass-border-subtle)'};"
 				/>
 				{#if errors.submittedBy}
 					<p class="text-xs text-red-500">{errors.submittedBy}</p>
 				{/if}
 				{#if dropdownOpen && filtered.length > 0}
-					<ul class="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+					<ul class="absolute top-full left-0 right-0 z-50 mt-1 rounded-2xl max-h-48 overflow-y-auto" style="background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 8px 24px rgba(0,0,0,0.1);">
 						{#each filtered.slice(0, 50) as emp}
 							<li>
 								<button
 									type="button"
-									class="w-full text-left px-3 py-2 text-sm hover:bg-[#fdf4ef] transition-colors"
+									class="w-full text-left px-3 py-2 text-sm transition-colors hover:bg-white/50 first:rounded-t-2xl last:rounded-b-2xl"
 									on:mousedown={() => selectEmail(emp.email)}
 								>
 									<span class="font-medium text-gray-900">{emp.first_name} {emp.last_name}</span>
@@ -169,23 +162,9 @@
 					</ul>
 				{/if}
 			</div>
-			<Input
-				id="ticketTitle"
-				label="Title"
-				bind:value={title}
-				required
-				error={errors.title}
-				placeholder="Address change and documentation"
-			/>
-			<Textarea
-				id="ticketText"
-				label="Description"
-				bind:value={text}
-				required
-				error={errors.text}
-				rows={6}
-				placeholder="Describe your request in detail…"
-			/>
+
+			<Input id="ticketTitle" label="Title" bind:value={title} required error={errors.title} placeholder="Address change and documentation" />
+			<Textarea id="ticketText" label="Description" bind:value={text} required error={errors.text} rows={6} placeholder="Describe your request in detail…" />
 		</form>
 	{/if}
 

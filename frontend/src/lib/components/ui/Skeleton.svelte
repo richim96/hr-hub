@@ -4,13 +4,12 @@
 </script>
 
 <div class="animate-pulse">
-	<!-- Table skeleton -->
 	{#each Array(rows) as _, i}
-		<div class="flex gap-4 py-3 border-b border-gray-100 {i === 0 ? 'opacity-80' : ''}">
+		<div class="flex gap-4 py-3 {i === 0 ? 'opacity-80' : ''}" style="border-bottom: 1px solid rgba(255,255,255,0.3);">
 			{#each Array(cols) as _, _j}
 				<div
-					class="h-4 bg-gray-200 rounded flex-1"
-					style="width: {60 + Math.random() * 30}%"
+					class="h-4 rounded-full flex-1"
+					style="background: rgba(255,255,255,0.5); width: {60 + Math.random() * 30}%"
 				/>
 			{/each}
 		</div>

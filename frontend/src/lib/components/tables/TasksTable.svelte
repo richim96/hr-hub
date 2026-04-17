@@ -37,11 +37,11 @@
 
 <div class="overflow-auto" style="max-height: {maxHeight}">
 	<table class="w-full text-sm">
-		<thead class="sticky top-0 z-10 bg-gray-50">
-			<tr class="border-b border-gray-200">
+		<thead class="sticky top-0 z-10" style="background: rgba(255,255,255,0.92); backdrop-filter: blur(16px) saturate(180%); -webkit-backdrop-filter: blur(16px) saturate(180%);">
+			<tr style="border-bottom: 1px solid rgba(255,255,255,0.5);">
 				{#each columns as col}
-					<th class="px-4 py-2 text-left font-medium text-gray-600 whitespace-nowrap">
-						<button class="flex items-center gap-1 hover:text-gray-900" on:click={() => dispatch('sort', col.key)}>
+					<th class="px-4 py-2 text-left font-medium text-gray-500 whitespace-nowrap">
+						<button class="flex items-center gap-1 hover:text-gray-800 transition-colors" on:click={() => dispatch('sort', col.key)}>
 							{col.label}
 							{#if sortKey === col.key}
 								{#if sortDir === 'asc'}<ChevronUp size={14} />{:else}<ChevronDown size={14} />{/if}
@@ -71,8 +71,11 @@
 			{:else}
 				{#each items as task}
 					<tr
-						class="border-b border-gray-100 hover:bg-[#fdf4ef]/30 transition-colors cursor-pointer"
+						class="transition-all cursor-pointer"
+						style="border-bottom: 1px solid rgba(255,255,255,0.35);"
 						on:click={() => dispatch('select', task)}
+						on:mouseenter={(e) => { e.currentTarget.style.background = 'rgba(192,91,40,0.08)'; e.currentTarget.style.backdropFilter = 'blur(8px)'; }}
+						on:mouseleave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.backdropFilter = ''; }}
 					>
 						<td class="px-4 py-3 text-xs text-gray-600">{task.employee_email ?? '—'}</td>
 						<td class="px-4 py-3 font-medium text-gray-900">

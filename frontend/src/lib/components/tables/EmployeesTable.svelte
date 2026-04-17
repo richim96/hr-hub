@@ -26,7 +26,7 @@
 		return `${Math.round(risk * 100)}%`;
 	}
 
-const columns: { key: keyof FullEmployee; label: string }[] = [
+	const columns: { key: keyof FullEmployee; label: string }[] = [
 		{ key: 'last_name', label: 'Name' },
 		{ key: 'email', label: 'Email' },
 		{ key: 'department', label: 'Department' },
@@ -41,12 +41,12 @@ const columns: { key: keyof FullEmployee; label: string }[] = [
 
 <div class="overflow-auto" style="max-height: {maxHeight}">
 	<table class="w-full text-sm">
-		<thead class="sticky top-0 z-10 bg-gray-50">
-			<tr class="border-b border-gray-200">
+		<thead class="sticky top-0 z-10" style="background: rgba(255,255,255,0.92); backdrop-filter: blur(16px) saturate(180%); -webkit-backdrop-filter: blur(16px) saturate(180%);">
+			<tr style="border-bottom: 1px solid rgba(255,255,255,0.5);">
 				{#each columns as col}
-					<th class="px-4 py-2 text-left font-medium text-gray-600 whitespace-nowrap">
+					<th class="px-4 py-2 text-left font-medium text-gray-500 whitespace-nowrap">
 						<button
-							class="flex items-center gap-1 hover:text-gray-900"
+							class="flex items-center gap-1 hover:text-gray-800 transition-colors"
 							on:click={() => dispatch('sort', col.key)}
 						>
 							{col.label}
@@ -83,18 +83,17 @@ const columns: { key: keyof FullEmployee; label: string }[] = [
 			{:else}
 				{#each items as emp}
 					<tr
-						class="border-b border-gray-100 hover:bg-[#fdf4ef]/40 cursor-pointer transition-colors"
+						class="cursor-pointer transition-all"
+						style="border-bottom: 1px solid rgba(255,255,255,0.35);"
 						on:click={() => dispatch('select', emp)}
+						on:mouseenter={(e) => { e.currentTarget.style.background = 'rgba(192,91,40,0.08)'; e.currentTarget.style.backdropFilter = 'blur(8px)'; }}
+						on:mouseleave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.backdropFilter = ''; }}
 					>
-						<!-- Name -->
 						<td class="px-4 py-2">
-							<div class="font-semibold text-gray-900">{emp.last_name}</div>
+							<div class="font-medium text-gray-900">{emp.last_name}</div>
 							<div class="text-xs text-gray-500">{emp.first_name}</div>
 						</td>
-						<!-- Email -->
 						<td class="px-4 py-3 text-sm text-gray-600">{emp.email}</td>
-
-						<!-- EmployeeInfo fields -->
 						<td class="px-4 py-2">
 							<Badge variant="info">{emp.department ?? '—'}</Badge>
 						</td>
@@ -104,10 +103,7 @@ const columns: { key: keyof FullEmployee; label: string }[] = [
 						</td>
 						<td class="px-4 py-3 text-gray-700">{emp.avg_monthly_hours ?? '—'}</td>
 						<td class="px-4 py-3 text-gray-700">{emp.active_projects ?? '—'}</td>
-						<!-- Manager -->
 						<td class="px-4 py-3 text-gray-600 text-xs">{emp.manager_email}</td>
-
-						<!-- Attrition risk -->
 						<td class="px-4 py-2">
 							{#if emp.attrition_risk != null}
 								<Badge variant={riskBadgeVariant(emp.attrition_risk)}>
@@ -117,8 +113,6 @@ const columns: { key: keyof FullEmployee; label: string }[] = [
 								<span class="text-gray-400">—</span>
 							{/if}
 						</td>
-
-
 					</tr>
 				{/each}
 			{/if}

@@ -33,9 +33,7 @@
 		{ value: 'Canceled', label: 'Canceled' }
 	];
 
-	$: if (task && open) {
-		editing = false;
-	}
+	$: if (task && open) { editing = false; }
 
 	function startEdit() {
 		if (!task) return;
@@ -65,13 +63,7 @@
 	async function handleSave() {
 		if (!task || !validate()) return;
 		submitting = true;
-		await editTask(task.task_id, {
-			title,
-			description,
-			assignee,
-			due_date: dueDate,
-			status: status as Status
-		});
+		await editTask(task.task_id, { title, description, assignee, due_date: dueDate, status: status as Status });
 		submitting = false;
 		editing = false;
 	}
@@ -105,16 +97,16 @@
 			{task.title}
 			{#if !editing}
 				<button
-					class="p-1 rounded text-gray-400 hover:text-[#C05B28] hover:bg-[#fdf4ef] transition-colors"
-					on:click={startEdit}
-					aria-label="Edit task"
+					class="p-1 rounded-lg transition-colors text-gray-400 hover:text-[#C05B28]"
+					style="background: rgba(0,0,0,0.04); border: 1px solid rgba(255,255,255,0.4);"
+					on:click={startEdit} aria-label="Edit task"
 				>
 					<Pencil size={14} />
 				</button>
 				<button
-					class="p-1 rounded text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-					on:click={() => (confirmOpen = true)}
-					aria-label="Delete task"
+					class="p-1 rounded-lg transition-colors text-red-400 hover:text-red-600"
+					style="background: rgba(0,0,0,0.04); border: 1px solid rgba(255,255,255,0.4);"
+					on:click={() => (confirmOpen = true)} aria-label="Delete task"
 				>
 					<Trash2 size={14} />
 				</button>
@@ -133,42 +125,43 @@
 			</form>
 		{:else}
 			<div class="space-y-4">
-				<!-- ID + status -->
-				<div class="space-y-2">
-					<div>
-						<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Task ID</p>
-						<p class="text-sm font-mono text-gray-600">{task.task_id}</p>
-					</div>
-					<div>
-						<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Status</p>
-						<Badge variant={statusVariant(task.status)}>{task.status ?? 'Pending'}</Badge>
+				<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+					<div class="space-y-3">
+						<div>
+							<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Task ID</p>
+							<p class="text-sm font-mono text-gray-600">{task.task_id}</p>
+						</div>
+						<div>
+							<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Status</p>
+							<Badge variant={statusVariant(task.status)}>{task.status ?? 'Pending'}</Badge>
+						</div>
 					</div>
 				</div>
 
-				<!-- Description -->
 				{#if task.description}
-					<div>
+					<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
 						<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Description</p>
 						<p class="text-sm text-gray-700 whitespace-pre-wrap">{task.description}</p>
 					</div>
 				{/if}
 
-				<!-- Meta grid -->
-				<div class="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
-					<div>
-						<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Assignee</p>
-						<p class="text-sm text-gray-700">{task.assignee ?? '—'}</p>
-					</div>
-					<div>
-						<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Due Date</p>
-						<p class="text-sm text-gray-700">{formatDate(task.due_date)}</p>
-					</div>
-					{#if task.employee_email}
-						<div class="col-span-2">
-							<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Employee Email</p>
-							<p class="text-sm text-gray-700">{task.employee_email}</p>
+				<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+					<div class="grid grid-cols-2 gap-4">
+						<div>
+							<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Assignee</p>
+							<p class="text-sm text-gray-700">{task.assignee ?? '—'}</p>
 						</div>
-					{/if}
+						<div>
+							<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Due Date</p>
+							<p class="text-sm text-gray-700">{formatDate(task.due_date)}</p>
+						</div>
+						{#if task.employee_email}
+							<div class="col-span-2">
+								<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Employee Email</p>
+								<p class="text-sm text-gray-700">{task.employee_email}</p>
+							</div>
+						{/if}
+					</div>
 				</div>
 			</div>
 		{/if}

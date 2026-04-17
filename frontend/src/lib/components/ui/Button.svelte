@@ -6,14 +6,17 @@
 	export let loading = false;
 
 	const base =
-		'inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed';
+		'inline-flex items-center justify-center gap-2 font-medium rounded-2xl transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed';
 
 	const variants = {
-		primary: 'bg-[#C05B28] text-white hover:bg-[#9a3d1a] focus:ring-[#C05B28]-500',
+		primary:
+			'text-white focus:ring-[#C05B28] shadow-sm hover:brightness-110 active:scale-[0.98]',
 		secondary:
-			'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-[#C05B28]-500',
-		danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-		ghost: 'text-gray-600 hover:bg-gray-100 focus:ring-gray-400'
+			'glass text-gray-700 hover:bg-white/70 focus:ring-[#C05B28]',
+		danger:
+			'text-white focus:ring-red-400 shadow-sm hover:brightness-110 active:scale-[0.98]',
+		ghost:
+			'text-gray-600 hover:bg-white/50 focus:ring-gray-400 backdrop-blur-sm'
 	};
 
 	const sizes = {
@@ -22,10 +25,24 @@
 		lg: 'px-5 py-2.5 text-base'
 	};
 
+	const inlineStyles = {
+		primary: 'background: rgba(192,91,40,0.88); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.35); box-shadow: 0 4px 16px rgba(192,91,40,0.3), inset 0 1px 0 rgba(255,255,255,0.3);',
+		secondary: '',
+		danger: 'background: rgba(220,38,38,0.82); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 4px 16px rgba(220,38,38,0.25), inset 0 1px 0 rgba(255,255,255,0.25);',
+		ghost: ''
+	};
+
 	$: cls = `${base} ${variants[variant]} ${sizes[size]}`;
 </script>
 
-<button {type} {disabled} class={`${cls} ${$$restProps.class ?? ''}`} on:click {...$$restProps}>
+<button
+	{type}
+	{disabled}
+	class={`${cls} ${$$restProps.class ?? ''}`}
+	style={inlineStyles[variant]}
+	on:click
+	{...$$restProps}
+>
 	{#if loading}
 		<svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
 			<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />

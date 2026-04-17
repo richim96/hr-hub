@@ -23,9 +23,7 @@
 	let title = '';
 	let text = '';
 
-	$: if (ticket && open) {
-		editing = false;
-	}
+	$: if (ticket && open) { editing = false; }
 
 	function startEdit() {
 		if (!ticket) return;
@@ -34,17 +32,12 @@
 		editing = true;
 	}
 
-	function cancelEdit() {
-		editing = false;
-	}
+	function cancelEdit() { editing = false; }
 
 	async function handleSave() {
 		if (!ticket) return;
 		submitting = true;
-		await editTicket(ticket.request_id, {
-			title: title || null,
-			text: text || null
-		});
+		await editTicket(ticket.request_id, { title: title || null, text: text || null });
 		submitting = false;
 		editing = false;
 	}
@@ -80,16 +73,16 @@
 			{ticket.title}
 			{#if !editing}
 				<button
-					class="p-1 rounded text-gray-400 hover:text-[#C05B28] hover:bg-[#fdf4ef] transition-colors"
-					on:click={startEdit}
-					aria-label="Edit ticket"
+					class="p-1 rounded-lg transition-colors text-gray-400 hover:text-[#C05B28]"
+					style="background: rgba(0,0,0,0.04); border: 1px solid rgba(255,255,255,0.4);"
+					on:click={startEdit} aria-label="Edit ticket"
 				>
 					<Pencil size={14} />
 				</button>
 				<button
-					class="p-1 rounded text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-					on:click={() => (confirmOpen = true)}
-					aria-label="Delete ticket"
+					class="p-1 rounded-lg transition-colors text-red-400 hover:text-red-600"
+					style="background: rgba(0,0,0,0.04); border: 1px solid rgba(255,255,255,0.4);"
+					on:click={() => (confirmOpen = true)} aria-label="Delete ticket"
 				>
 					<Trash2 size={14} />
 				</button>
@@ -105,43 +98,41 @@
 			</form>
 		{:else}
 			<div class="space-y-4">
-				<!-- ID + status -->
-				<div class="space-y-2">
-					<div>
-						<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Ticket ID</p>
-						<p class="text-sm font-mono text-gray-600">{ticket.request_id}</p>
-					</div>
-					<div>
-						<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Status</p>
-						<Badge variant={statusVariant(ticket.status)}>{ticket.status}</Badge>
+				<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+					<div class="space-y-2">
+						<div>
+							<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Ticket ID</p>
+							<p class="text-sm font-mono text-gray-600">{ticket.request_id}</p>
+						</div>
+						<div>
+							<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Status</p>
+							<Badge variant={statusVariant(ticket.status)}>{ticket.status}</Badge>
+						</div>
 					</div>
 				</div>
 
-				<!-- Description -->
-				<div>
+				<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
 					<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Description</p>
 					<p class="text-sm text-gray-700 whitespace-pre-wrap">{ticket.text}</p>
 				</div>
 
-				<!-- Meta -->
-				<div class="pt-2 border-t border-gray-100">
+				<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
 					<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Submitted By</p>
 					<p class="text-sm text-gray-700">{ticket.submitted_by}</p>
 				</div>
 
-				<!-- LLM result -->
 				{#if ticket.llm_result}
-					<div class="space-y-3 pt-2 border-t border-gray-100">
-						<p class="text-sm font-semibold text-gray-700">AI Analysis</p>
+					<div class="rounded-2xl p-4 space-y-3" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+						<p class="text-sm font-medium text-gray-700">AI Analysis</p>
 						<div class="flex flex-wrap gap-1">
 							{#each ticket.llm_result.topics as topic}
-								<span class="px-2 py-0.5 bg-[#fdf4ef] text-[#9a3d1a] rounded-full text-xs">{topic}</span>
+								<span class="px-2 py-0.5 rounded-full text-xs font-medium" style="background: rgba(192,91,40,0.12); color: #9a3d1a; border: 1px solid rgba(192,91,40,0.2);">{topic}</span>
 							{/each}
 						</div>
 						{#if ticket.llm_result.confidence != null}
 							<div class="flex items-center gap-2 text-sm text-gray-600">
 								<span>Confidence:</span>
-								<div class="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden max-w-32">
+								<div class="flex-1 h-1.5 rounded-full overflow-hidden max-w-32" style="background: rgba(0,0,0,0.08);">
 									<div class="h-full bg-[#C05B28] rounded-full" style="width: {ticket.llm_result.confidence * 100}%" />
 								</div>
 								<span class="font-medium">{Math.round(ticket.llm_result.confidence * 100)}%</span>
@@ -153,7 +144,7 @@
 						{#if ticket.llm_result.draft_response}
 							<div>
 								<p class="text-sm font-medium text-gray-700 mb-1">Draft Response</p>
-								<div class="bg-gray-50 rounded-lg p-4 text-sm text-gray-700 whitespace-pre-wrap border border-gray-200">
+								<div class="rounded-xl p-3 text-sm text-gray-700 whitespace-pre-wrap" style="background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.5);">
 									{ticket.llm_result.draft_response}
 								</div>
 							</div>
@@ -161,24 +152,21 @@
 					</div>
 				{/if}
 
-				<!-- Actions -->
-				<div class="pt-2 border-t border-gray-100">
-					<p class="text-sm font-semibold text-gray-700 mb-2">Actions</p>
-					<div class="space-y-2">
-						{#each ticket.actions as action}
-							<div class="flex items-start gap-2 p-3 rounded-lg border border-gray-100 bg-gray-50">
-								<span class={`text-base ${action.success ? 'text-green-500' : 'text-red-500'}`}>
-									{action.success ? '✓' : '✗'}
-								</span>
-								<div class="flex-1 min-w-0">
-									<p class="text-sm font-medium text-gray-800">{action.action}</p>
-									<p class="text-xs text-gray-500 mt-0.5">{action.details}</p>
-								</div>
+				<div class="rounded-2xl p-4 space-y-2" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+					<p class="text-sm font-medium text-gray-700 mb-2">Actions</p>
+					{#each ticket.actions as action}
+						<div class="flex items-start gap-2 p-3 rounded-xl" style="background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.5);">
+							<span class={`text-base ${action.success ? 'text-green-600' : 'text-red-500'}`}>
+								{action.success ? '✓' : '✗'}
+							</span>
+							<div class="flex-1 min-w-0">
+								<p class="text-sm font-medium text-gray-800">{action.action}</p>
+								<p class="text-xs text-gray-500 mt-0.5">{action.details}</p>
 							</div>
-						{:else}
-							<p class="text-sm text-gray-400">No actions recorded.</p>
-						{/each}
-					</div>
+						</div>
+					{:else}
+						<p class="text-sm text-gray-400">No actions recorded.</p>
+					{/each}
 				</div>
 			</div>
 		{/if}

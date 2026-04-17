@@ -109,7 +109,7 @@
 <!-- Page header -->
 <div class="flex items-center justify-between mb-6 shrink-0">
 	<div>
-		<h2 class="text-xl font-semibold text-gray-900">Employees</h2>
+		<h2 class="text-xl font-medium text-gray-900 tracking-tight">Employees</h2>
 		<p class="text-sm text-gray-500 mt-0.5">
 			{#if store.loading}Loading…{:else}{filtered.length} employees{/if}
 		</p>
@@ -136,11 +136,12 @@
 				placeholder="Search by name or email…"
 				value={store.filters.search}
 				on:input={handleSearchInput}
-				class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C05B28]-500"
+				class="w-full pl-9 pr-4 py-2 text-sm rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#C05B28]/50 transition-all"
+				style="background: var(--glass-bg-input); backdrop-filter: var(--glass-blur-sm); -webkit-backdrop-filter: var(--glass-blur-sm); border: 1px solid var(--glass-border-subtle);"
 			/>
 		</div>
 
-		<div class="grid grid-cols-2 md:grid-cols-3 gap-3 pt-2 border-t border-gray-100">
+		<div class="grid grid-cols-2 md:grid-cols-3 gap-3 pt-2" style="border-top: 1px solid rgba(255,255,255,0.4);">
 			<Select
 				id="deptFilter"
 				label="Department"
@@ -149,7 +150,7 @@
 				on:change={handleDeptChange}
 			/>
 			<div class="flex flex-col gap-1">
-				<label for="riskMin" class="text-sm font-medium text-gray-700">Min Attrition Risk</label>
+				<label for="riskMin" class="text-sm font-medium text-gray-600">Min Attrition Risk</label>
 				<input
 					id="riskMin"
 					type="range"
@@ -163,7 +164,7 @@
 				<span class="text-xs text-gray-500">{Math.round(store.filters.attritionRiskMin * 100)}%</span>
 			</div>
 			<div class="flex flex-col gap-1">
-				<label for="riskMax" class="text-sm font-medium text-gray-700">Max Attrition Risk</label>
+				<label for="riskMax" class="text-sm font-medium text-gray-600">Max Attrition Risk</label>
 				<input
 					id="riskMax"
 					type="range"

@@ -76,7 +76,7 @@
 <!-- Page header -->
 <div class="flex items-center justify-between mb-6 shrink-0">
 	<div>
-		<h2 class="text-xl font-semibold text-gray-900">IT Tasks</h2>
+		<h2 class="text-xl font-medium text-gray-900 tracking-tight">IT Tasks</h2>
 		<p class="text-sm text-gray-500 mt-0.5">
 			{#if store.loading}Loading…{:else}{filtered.length} tasks{/if}
 		</p>
@@ -99,11 +99,12 @@
 				placeholder="Search by title…"
 				value={store.filters.search}
 				on:input={handleSearchInput}
-				class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C05B28]-500"
+				class="w-full pl-9 pr-4 py-2 text-sm rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#C05B28]/50 transition-all"
+				style="background: var(--glass-bg-input); backdrop-filter: var(--glass-blur-sm); -webkit-backdrop-filter: var(--glass-blur-sm); border: 1px solid var(--glass-border-subtle);"
 			/>
 		</div>
 
-		<div class="grid grid-cols-2 md:grid-cols-3 gap-3 pt-2 border-t border-gray-100">
+		<div class="grid grid-cols-2 md:grid-cols-3 gap-3 pt-2" style="border-top: 1px solid rgba(255,255,255,0.4);">
 			<Select
 				id="statusFilter"
 				label="Status"
@@ -112,25 +113,27 @@
 				on:change={handleStatusChange}
 			/>
 			<div class="flex flex-col gap-1">
-				<label for="empFilter" class="text-sm font-medium text-gray-700">Employee Email</label>
+				<label for="empFilter" class="text-sm font-medium text-gray-600">Employee Email</label>
 				<input
 					id="empFilter"
 					type="text"
 					placeholder="employee@company.com"
 					value={store.filters.employeeEmail}
 					on:input={handleEmployeeEmailInput}
-					class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C05B28]-500"
+					class="px-3 py-2 text-sm rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#C05B28]/50 transition-all"
+					style="background: var(--glass-bg-input); backdrop-filter: var(--glass-blur-sm); -webkit-backdrop-filter: var(--glass-blur-sm); border: 1px solid var(--glass-border-subtle);"
 				/>
 			</div>
 			<div class="flex flex-col gap-1">
-				<label for="assigneeFilter" class="text-sm font-medium text-gray-700">Assignee</label>
+				<label for="assigneeFilter" class="text-sm font-medium text-gray-600">Assignee</label>
 				<input
 					id="assigneeFilter"
 					type="text"
 					placeholder="it-team@company.com"
 					value={store.filters.assignee}
 					on:input={handleAssigneeInput}
-					class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C05B28]-500"
+					class="px-3 py-2 text-sm rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#C05B28]/50 transition-all"
+					style="background: var(--glass-bg-input); backdrop-filter: var(--glass-blur-sm); -webkit-backdrop-filter: var(--glass-blur-sm); border: 1px solid var(--glass-border-subtle);"
 				/>
 			</div>
 		</div>

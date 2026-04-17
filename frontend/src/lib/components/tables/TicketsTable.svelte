@@ -16,20 +16,18 @@
 		if (status === 'Canceled') return 'failed';
 		return 'pending';
 	}
-
-
 </script>
 
 <div class="overflow-auto" style="max-height: {maxHeight}">
 	<table class="w-full text-sm">
-		<thead class="sticky top-0 z-10 bg-gray-50">
-			<tr class="border-b border-gray-200">
-				<th class="px-4 py-2 text-left font-medium text-gray-600">Submitted By</th>
-				<th class="px-4 py-2 text-left font-medium text-gray-600">Title</th>
-				<th class="px-4 py-2 text-left font-medium text-gray-600">Status</th>
-				<th class="px-4 py-2 text-left font-medium text-gray-600">Topics</th>
-				<th class="px-4 py-2 text-left font-medium text-gray-600">Actions</th>
-				<th class="px-4 py-2 text-left font-medium text-gray-600">Ticket ID</th>
+		<thead class="sticky top-0 z-10" style="background: rgba(255,255,255,0.92); backdrop-filter: blur(16px) saturate(180%); -webkit-backdrop-filter: blur(16px) saturate(180%);">
+			<tr style="border-bottom: 1px solid rgba(255,255,255,0.5);">
+				<th class="px-4 py-2 text-left font-medium text-gray-500">Submitted By</th>
+				<th class="px-4 py-2 text-left font-medium text-gray-500">Title</th>
+				<th class="px-4 py-2 text-left font-medium text-gray-500">Status</th>
+				<th class="px-4 py-2 text-left font-medium text-gray-500">Topics</th>
+				<th class="px-4 py-2 text-left font-medium text-gray-500">Actions</th>
+				<th class="px-4 py-2 text-left font-medium text-gray-500">Ticket ID</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -52,8 +50,11 @@
 			{:else}
 				{#each items as ticket}
 					<tr
-						class="border-b border-gray-100 hover:bg-[#fdf4ef]/30 cursor-pointer transition-colors"
+						class="cursor-pointer transition-all"
+						style="border-bottom: 1px solid rgba(255,255,255,0.35);"
 						on:click={() => dispatch('select', ticket)}
+						on:mouseenter={(e) => { e.currentTarget.style.background = 'rgba(192,91,40,0.08)'; e.currentTarget.style.backdropFilter = 'blur(8px)'; }}
+						on:mouseleave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.backdropFilter = ''; }}
 					>
 						<td class="px-4 py-3 text-xs text-gray-600">{ticket.submitted_by ?? '—'}</td>
 						<td class="px-4 py-3 font-medium text-gray-900">{ticket.title}</td>
@@ -64,7 +65,10 @@
 							{#if ticket.llm_result?.topics?.length}
 								<div class="flex flex-wrap gap-1">
 									{#each ticket.llm_result.topics as topic}
-										<span class="px-1.5 py-0.5 bg-[#fdf4ef] text-[#9a3d1a] rounded text-xs">{topic}</span>
+										<span
+											class="px-1.5 py-0.5 rounded-full text-xs font-medium"
+											style="background: rgba(192,91,40,0.12); color: #9a3d1a; border: 1px solid rgba(192,91,40,0.2);"
+										>{topic}</span>
 									{/each}
 								</div>
 							{:else}

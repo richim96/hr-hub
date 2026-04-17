@@ -53,7 +53,7 @@
 <!-- Page header -->
 <div class="flex items-center justify-between mb-6 shrink-0">
 	<div>
-		<h2 class="text-xl font-semibold text-gray-900">Tickets</h2>
+		<h2 class="text-xl font-medium text-gray-900 tracking-tight">Tickets</h2>
 		<p class="text-sm text-gray-500 mt-0.5">
 			{#if store.loading}Loading…{:else}{filtered.length} tickets{/if}
 		</p>
@@ -76,11 +76,12 @@
 				placeholder="Search by topic…"
 				value={store.filters.search}
 				on:input={handleSearchInput}
-				class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C05B28]-500"
+				class="w-full pl-9 pr-4 py-2 text-sm rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#C05B28]/50 transition-all"
+				style="background: var(--glass-bg-input); backdrop-filter: var(--glass-blur-sm); -webkit-backdrop-filter: var(--glass-blur-sm); border: 1px solid var(--glass-border-subtle);"
 			/>
 		</div>
 
-		<div class="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100">
+		<div class="grid grid-cols-2 gap-3 pt-2" style="border-top: 1px solid rgba(255,255,255,0.4);">
 			<Select
 				id="ticketStatusFilter"
 				label="Status"
@@ -89,14 +90,15 @@
 				on:change={handleStatusChange}
 			/>
 			<div class="flex flex-col gap-1">
-				<label for="submitterFilter" class="text-sm font-medium text-gray-700">Submitted By</label>
+				<label for="submitterFilter" class="text-sm font-medium text-gray-600">Submitted By</label>
 				<input
 					id="submitterFilter"
 					type="text"
 					placeholder="employee@company.com"
 					value={store.filters.submittedBy}
 					on:input={handleSubmitterInput}
-					class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C05B28]-500"
+					class="px-3 py-2 text-sm rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#C05B28]/50 transition-all"
+					style="background: var(--glass-bg-input); backdrop-filter: var(--glass-blur-sm); -webkit-backdrop-filter: var(--glass-blur-sm); border: 1px solid var(--glass-border-subtle);"
 				/>
 			</div>
 		</div>

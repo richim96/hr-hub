@@ -21,7 +21,6 @@
 
 	$: if (!open) editing = false;
 
-	// --- Edit shadow copies ---
 	let editFirstName = '';
 	let editLastName = '';
 	let editGender: Gender | '' = '';
@@ -175,14 +174,16 @@
 			{employee.first_name} {employee.last_name}
 			{#if !editing}
 				<button
-					class="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+					class="p-1 rounded-lg transition-colors text-gray-400 hover:text-[#C05B28]"
+					style="background: rgba(0,0,0,0.04); border: 1px solid rgba(255,255,255,0.4);"
 					on:click={startEdit}
 					aria-label="Edit employee"
 				>
 					<Pencil size={14} />
 				</button>
 				<button
-					class="p-1 rounded text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+					class="p-1 rounded-lg transition-colors text-red-400 hover:text-red-600"
+					style="background: rgba(0,0,0,0.04); border: 1px solid rgba(255,255,255,0.4);"
 					on:click={() => (confirmOpen = true)}
 					aria-label="Delete employee"
 				>
@@ -193,11 +194,12 @@
 	</svelte:fragment>
 
 	{#if employee}
-		<div class="space-y-6">
-			<!-- Identity -->
+		<div class="space-y-5">
+			<!-- Identity header -->
 			<div class="flex items-start gap-4">
 				<div
-					class="w-12 h-12 rounded-full bg-[#f5ddd0] text-[#9a3d1a] flex items-center justify-center text-lg font-bold shrink-0"
+					class="w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-medium shrink-0"
+					style="background: rgba(192,91,40,0.12); color: #9a3d1a; border: 1px solid rgba(192,91,40,0.2);"
 				>
 					{employee.first_name[0]}{employee.last_name[0]}
 				</div>
@@ -213,11 +215,9 @@
 			</div>
 
 			{#if editing}
-				<!-- Edit mode -->
-				<div class="space-y-5 max-h-[60vh] overflow-y-auto pr-1">
-					<!-- Identity -->
-					<fieldset class="space-y-3">
-						<legend class="text-xs font-semibold uppercase tracking-wide text-gray-400 pb-1 border-b border-gray-100 w-full">Identity</legend>
+				<div class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+					<fieldset class="space-y-3 rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+						<legend class="text-xs font-semibold uppercase tracking-wide text-gray-500 px-1">Identity</legend>
 						<div class="grid grid-cols-2 gap-3">
 							<Input id="editFirst" label="First Name" bind:value={editFirstName} />
 							<Input id="editLast" label="Last Name" bind:value={editLastName} />
@@ -229,9 +229,8 @@
 						<Select id="editGender" label="Gender" bind:value={editGender} options={genderOptions} placeholder="Select gender…" />
 					</fieldset>
 
-					<!-- Equipment -->
-					<fieldset class="space-y-3">
-						<legend class="text-xs font-semibold uppercase tracking-wide text-gray-400 pb-1 border-b border-gray-100 w-full">Equipment</legend>
+					<fieldset class="space-y-3 rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+						<legend class="text-xs font-semibold uppercase tracking-wide text-gray-500 px-1">Equipment</legend>
 						<Input id="editLaptop" label="Laptop Model" bind:value={editLaptop} placeholder='MacBook Pro 14"' />
 						<div class="flex gap-6">
 							<label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
@@ -245,9 +244,8 @@
 						</div>
 					</fieldset>
 
-					<!-- Employment Info -->
-					<fieldset class="space-y-3">
-						<legend class="text-xs font-semibold uppercase tracking-wide text-gray-400 pb-1 border-b border-gray-100 w-full">Employment Info</legend>
+					<fieldset class="space-y-3 rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+						<legend class="text-xs font-semibold uppercase tracking-wide text-gray-500 px-1">Employment Info</legend>
 						<div class="grid grid-cols-2 gap-3">
 							<Select id="editDept" label="Department" bind:value={editDepartment} options={deptOptions} placeholder="Select department…" />
 							<Select id="editSalary" label="Salary Tier" bind:value={editSalary} options={salaryOptions} placeholder="Select tier…" />
@@ -274,85 +272,54 @@
 					</fieldset>
 				</div>
 			{:else}
-				<!-- View mode: two sections — Employee identity + EmployeeInfo -->
 				<div class="space-y-4">
-					<!-- Section: Employee -->
-					<div>
-						<p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Identity</p>
+					<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+						<p class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-3">Identity</p>
 						<div class="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
 							<div>
 								<span class="text-gray-500">Employee ID</span>
-								<p class="font-mono text-gray-900 text-xs mt-0.5">{employee.employee_id}</p>
+								<p class="font-mono text-gray-800 text-xs mt-0.5">{employee.employee_id}</p>
 							</div>
 							<div>
 								<span class="text-gray-500">Gender</span>
-								<p class="text-gray-900 mt-0.5">{employee.gender === 'M' ? 'Male' : employee.gender === 'F' ? 'Female' : '—'}</p>
+								<p class="text-gray-800 mt-0.5">{employee.gender === 'M' ? 'Male' : employee.gender === 'F' ? 'Female' : '—'}</p>
 							</div>
 						</div>
 					</div>
 
-					<!-- Section: EmployeeInfo -->
-					<div class="pt-3 border-t border-gray-100">
-						<p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Employment Info</p>
+					<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+						<p class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-3">Employment Info</p>
 						<div class="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
-							<div>
-								<span class="text-gray-500">Manager</span>
-								<p class="text-gray-900 mt-0.5">{employee.manager_email ?? '—'}</p>
-							</div>
-							<div>
-								<span class="text-gray-500">Years at Company</span>
-								<p class="text-gray-900 mt-0.5">{employee.years_at_company ?? '—'}</p>
-							</div>
-							<div>
-								<span class="text-gray-500">Avg Monthly Hours</span>
-								<p class="text-gray-900 mt-0.5">{employee.avg_monthly_hours ?? '—'}</p>
-							</div>
-							<div>
-								<span class="text-gray-500">Active Projects</span>
-								<p class="text-gray-900 mt-0.5">{employee.active_projects ?? '—'}</p>
-							</div>
-							<div>
-								<span class="text-gray-500">Received Promotion</span>
-								<p class="text-gray-900 mt-0.5">{boolLabel(employee.received_promotion)}</p>
-							</div>
-							<div>
-								<span class="text-gray-500">Work Accidents</span>
-								<p class="text-gray-900 mt-0.5">{boolLabel(employee.work_accidents)}</p>
-							</div>
-							<div>
-								<span class="text-gray-500">Last Evaluation</span>
-								<p class="text-gray-900 mt-0.5">{pct(employee.last_evaluation)}</p>
-							</div>
-							<div>
-								<span class="text-gray-500">Satisfaction Score</span>
-								<p class="text-gray-900 mt-0.5">{pct(employee.satisfaction_score)}</p>
-							</div>
+							<div><span class="text-gray-500">Manager</span><p class="text-gray-800 mt-0.5">{employee.manager_email ?? '—'}</p></div>
+							<div><span class="text-gray-500">Years at Company</span><p class="text-gray-800 mt-0.5">{employee.years_at_company ?? '—'}</p></div>
+							<div><span class="text-gray-500">Avg Monthly Hours</span><p class="text-gray-800 mt-0.5">{employee.avg_monthly_hours ?? '—'}</p></div>
+							<div><span class="text-gray-500">Active Projects</span><p class="text-gray-800 mt-0.5">{employee.active_projects ?? '—'}</p></div>
+							<div><span class="text-gray-500">Received Promotion</span><p class="text-gray-800 mt-0.5">{boolLabel(employee.received_promotion)}</p></div>
+							<div><span class="text-gray-500">Work Accidents</span><p class="text-gray-800 mt-0.5">{boolLabel(employee.work_accidents)}</p></div>
+							<div><span class="text-gray-500">Last Evaluation</span><p class="text-gray-800 mt-0.5">{pct(employee.last_evaluation)}</p></div>
+							<div><span class="text-gray-500">Satisfaction Score</span><p class="text-gray-800 mt-0.5">{pct(employee.satisfaction_score)}</p></div>
 						</div>
 					</div>
 
-					<!-- Section: Attrition Risk -->
-					<div class="pt-3 border-t border-gray-100">
-						<p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Attrition Risk</p>
+					<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+						<p class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-3">Attrition Risk</p>
 						{#if employee.attrition_risk != null}
 							<div class="flex items-center gap-3">
-								<div class="flex-1 bg-gray-100 rounded-full h-2">
+								<div class="flex-1 rounded-full h-2" style="background: rgba(0,0,0,0.08);">
 									<div
 										class="h-2 rounded-full transition-all {employee.attrition_risk >= 0.7 ? 'bg-red-500' : employee.attrition_risk >= 0.4 ? 'bg-amber-400' : 'bg-green-500'}"
 										style="width: {Math.round(employee.attrition_risk * 100)}%"
 									/>
 								</div>
-								<Badge variant={riskBadgeVariant(employee.attrition_risk)}>
-									{pct(employee.attrition_risk)}
-								</Badge>
+								<Badge variant={riskBadgeVariant(employee.attrition_risk)}>{pct(employee.attrition_risk)}</Badge>
 							</div>
 						{:else}
 							<p class="text-sm text-gray-400 italic">Not scored yet — use "Score Risk" to run the prediction model.</p>
 						{/if}
 					</div>
 
-					<!-- Section: Equipment -->
-					<div class="pt-3 border-t border-gray-100">
-						<p class="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Equipment</p>
+					<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+						<p class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-3">Equipment</p>
 						<div class="flex gap-4 text-sm text-gray-700">
 							<span>💻 {employee.laptop ?? '—'}</span>
 							<span>🖥 Monitor: {boolLabel(employee.monitor)}</span>
@@ -366,9 +333,7 @@
 
 	<svelte:fragment slot="footer">
 		{#if editing}
-			<Button variant="secondary" on:click={() => (editing = false)} disabled={submitting}>
-				Cancel
-			</Button>
+			<Button variant="secondary" on:click={() => (editing = false)} disabled={submitting}>Cancel</Button>
 			<Button variant="primary" on:click={saveEdit} loading={submitting}>Save Changes</Button>
 		{:else}
 			<Button variant="secondary" on:click={() => dispatch('close')}>Close</Button>

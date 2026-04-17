@@ -11,7 +11,6 @@
 
 	const dispatch = createEventDispatcher<{ close: void }>();
 
-	// Form state
 	let firstName = '';
 	let lastName = '';
 	let email = '';
@@ -111,10 +110,10 @@
 </script>
 
 <Modal {open} title="New Hire" maxWidth="xl" on:close={handleClose}>
-	<form on:submit|preventDefault={handleSubmit} class="space-y-6">
+	<form on:submit|preventDefault={handleSubmit} class="space-y-4">
 		<!-- Employee details -->
-		<fieldset class="space-y-4">
-			<legend class="text-sm font-semibold text-gray-700 border-b pb-1 w-full">Employee Details</legend>
+		<fieldset class="space-y-4 rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+			<legend class="text-xs font-semibold uppercase tracking-wide text-gray-500 px-1">Employee Details</legend>
 			<div class="grid grid-cols-2 gap-4">
 				<Input id="firstName" label="First Name" bind:value={firstName} required error={errors.firstName} placeholder="Jane" />
 				<Input id="lastName" label="Last Name" bind:value={lastName} required error={errors.lastName} placeholder="Smith" />
@@ -125,25 +124,17 @@
 		</fieldset>
 
 		<!-- Role & compensation -->
-		<fieldset class="space-y-4">
-			<legend class="text-sm font-semibold text-gray-700 border-b pb-1 w-full">Role & Compensation</legend>
+		<fieldset class="space-y-4 rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+			<legend class="text-xs font-semibold uppercase tracking-wide text-gray-500 px-1">Role & Compensation</legend>
 			<div class="grid grid-cols-2 gap-4">
-				<Select
-					id="department"
-					label="Department"
-					bind:value={department}
-					options={deptOptions}
-					required
-					error={errors.department}
-					placeholder="Select department…"
-				/>
+				<Select id="department" label="Department" bind:value={department} options={deptOptions} required error={errors.department} placeholder="Select department…" />
 				<Select id="salary" label="Salary Tier" bind:value={salary} options={salaryOptions} required error={errors.salary} placeholder="Select tier…" />
 			</div>
 		</fieldset>
 
 		<!-- Equipment -->
-		<fieldset class="space-y-4">
-			<legend class="text-sm font-semibold text-gray-700 border-b pb-1 w-full">Equipment</legend>
+		<fieldset class="space-y-4 rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+			<legend class="text-xs font-semibold uppercase tracking-wide text-gray-500 px-1">Equipment</legend>
 			<Input id="laptop" label="Laptop Model" bind:value={laptop} placeholder='MacBook Pro 14"' />
 			<div class="flex gap-6">
 				<label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
@@ -160,8 +151,6 @@
 
 	<svelte:fragment slot="footer">
 		<Button variant="secondary" on:click={handleClose} disabled={submitting}>Cancel</Button>
-		<Button variant="primary" on:click={handleSubmit} loading={submitting}>
-			Create Employee
-		</Button>
+		<Button variant="primary" on:click={handleSubmit} loading={submitting}>Create Employee</Button>
 	</svelte:fragment>
 </Modal>
