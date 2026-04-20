@@ -5,6 +5,7 @@
 	import { marked } from 'marked';
 	import { sendChatMessage, type ChatMessage } from '$lib/api/chat';
 	import { modalOpen } from '$lib/stores/ui';
+	import { randomUUID } from '$lib/utils';
 
 	const GOOMBA = '/goomba.png';
 
@@ -41,7 +42,7 @@
 		await scrollToBottom();
 
 		try {
-			const request_id = `req_${crypto.randomUUID()}`;
+			const request_id = `req_${randomUUID()}`;
 			const res = await sendChatMessage({ message: text, history, context, request_id });
 			messages = [...messages, { role: 'assistant', content: res.answer }];
 		} catch (err) {

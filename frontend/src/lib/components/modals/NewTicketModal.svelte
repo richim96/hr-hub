@@ -6,6 +6,7 @@
 	import Textarea from '$lib/components/ui/Textarea.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { submitTicket } from '$lib/stores/tickets';
+	import { randomUUID } from '$lib/utils';
 	import { employeeStore } from '$lib/stores/employees';
 	import type { Ticket, TicketRequest } from '$lib/types';
 
@@ -52,7 +53,7 @@
 		submitting = true;
 
 		const payload: TicketRequest = {
-			request_id: `ticket_${crypto.randomUUID()}`,
+			request_id: `ticket_${randomUUID()}`,
 			request_type: 'people_ticket',
 			submitted_by: submittedBy,
 			title,

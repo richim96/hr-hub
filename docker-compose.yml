@@ -13,8 +13,8 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       TAVILY_API_KEY: ${TAVILY_API_KEY}
       SOTA_PATH: ${SOTA_PATH:-}
-      # Allow requests from the frontend container
-      ALLOWED_ORIGINS: http://localhost:3000
+      # Allow requests from the frontend container and 0.0.0.0 host access
+      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:5173,http://0.0.0.0:3000,http://0.0.0.0:5173
 
   frontend:
     build: ./frontend

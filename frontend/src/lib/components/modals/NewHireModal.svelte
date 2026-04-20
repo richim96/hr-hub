@@ -5,6 +5,7 @@
 	import Input from '$lib/components/ui/Input.svelte';
 	import Select from '$lib/components/ui/Select.svelte';
 	import { hireEmployee } from '$lib/stores/employees';
+	import { randomUUID } from '$lib/utils';
 	import type { Department, Gender, NewHireRequest, SalaryTier } from '$lib/types';
 
 	export let open = false;
@@ -65,10 +66,10 @@
 		submitting = true;
 
 		const payload: NewHireRequest = {
-			request_id: `req_${crypto.randomUUID()}`,
+			request_id: `req_${randomUUID()}`,
 			request_type: 'new_hire',
 			employee: {
-				employee_id: `emp_${crypto.randomUUID().split('-')[0]}`,
+				employee_id: `emp_${randomUUID().split('-')[0]}`,
 				first_name: firstName,
 				last_name: lastName,
 				email,

@@ -1,9 +1,7 @@
 # HR Hub Backend
-
 FastAPI backend for the HR Hub platform. Handles employee onboarding, IT task management, ticketing, and an AI agent for ad-hoc HR queries.
 
 ## Stack
-
 | Layer | Technology |
 |-------|-----------|
 | Framework | [FastAPI](https://fastapi.tiangolo.com/) |
@@ -11,10 +9,9 @@ FastAPI backend for the HR Hub platform. Handles employee onboarding, IT task ma
 | ORM | [SQLAlchemy](https://www.sqlalchemy.org/) 2 |
 | Database | SQLite (via `mock-cloud/db/hr_hub.db`) |
 | Migrations | [Alembic](https://alembic.sqlalchemy.org/) |
-| Dependency mgmt | [uv](https://docs.astral.sh/uv/) |
+| Package manager | [uv](https://docs.astral.sh/uv/) |
 
 ## Setup
-
 ```bash
 uv sync
 ```
@@ -22,7 +19,6 @@ uv sync
 Copy `.env.example` to `.env` and fill in the values (see [Environment variables](#environment-variables)).
 
 ## Commands
-
 ```bash
 # Development
 uv run fastapi dev src/hr_hub/main.py       # dev server with auto-reload on :8000
@@ -44,7 +40,6 @@ uv run alembic upgrade head                              # apply pending migrati
 API docs (Swagger UI) available at `http://127.0.0.1:8000/docs` when the server is running.
 
 ## Environment variables
-
 | Variable | Description |
 |----------|-------------|
 | `SQL_DB_HOST` | SQLAlchemy database URL (e.g. `sqlite:///./mock-cloud/db/hr_hub.db`) |
@@ -54,7 +49,6 @@ API docs (Swagger UI) available at `http://127.0.0.1:8000/docs` when the server 
 | `ALLOWED_ORIGINS` | Comma-separated CORS origins (default: `http://localhost:5173,http://localhost:3000`) |
 
 ## Architecture
-
 All routes are prefixed with `/hr-hub/api/v0.1`.
 
 ```
@@ -70,7 +64,6 @@ HTTP request
 `APIResponse` is the single outbound type for every endpoint. It carries `request_id`, `status`, a list of `actions` (one per integration step), and an optional `llm_result`.
 
 ## Migration workflow
-
 When ORM models change:
 
 ```bash

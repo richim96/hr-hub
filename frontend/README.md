@@ -1,9 +1,6 @@
 # HR Hub — Frontend
-
-SvelteKit single-page application for the HR Hub platform. Provides three operational dashboards (Employees, IT Tasks, Tickets) and a floating AI chat widget, all backed by the HR Hub FastAPI backend.
-
+SvelteKit single-page application for the HR Hub platform. Provides three operational dashboards (Employees, IT Tasks, Tickets) and a floating AI chat widget.
 ## Stack
-
 | Layer | Technology |
 |-------|-----------|
 | Framework | [SvelteKit](https://kit.svelte.dev/) 2 + Svelte 4 |
@@ -16,7 +13,6 @@ SvelteKit single-page application for the HR Hub platform. Provides three operat
 | Package manager | yarn |
 
 ## Quick start
-
 ```bash
 # from the frontend/ directory
 yarn install
@@ -26,7 +22,6 @@ yarn dev          # http://localhost:5173
 Requires the FastAPI backend to be running at `http://localhost:8000` (or the URL set in `.env`).
 
 ## Environment variables
-
 Copy `.env.example` to `.env`:
 
 ```env
@@ -34,7 +29,6 @@ PUBLIC_API_BASE_URL=http://localhost:8000
 ```
 
 ## Project structure
-
 ```
 src/
 ├── routes/
@@ -70,7 +64,6 @@ src/
 ```
 
 ## Commands
-
 ```bash
 yarn dev            # dev server with HMR
 yarn build          # production build
@@ -81,7 +74,6 @@ yarn test           # Vitest unit tests
 ```
 
 ## Backend API contract
-
 All requests go to `PUBLIC_API_BASE_URL/hr-hub/api/v0.1`.
 
 | Endpoint | Description |
@@ -98,35 +90,10 @@ All requests go to `PUBLIC_API_BASE_URL/hr-hub/api/v0.1`.
 | `POST /agent/chat` | Chat / LLM query |
 
 ### Payload notes
-
-- `request_type` is sent as `"type"` in JSON (backend `serialization_alias="type"`).
 - `employee_id` in `NewHireRequest.employee` is generated on the frontend as `emp_<uuid-prefix>`.
 - `request_id` is generated as `req_<uuid>`.
 
-## Custom static assets
-
-Drop these files in `static/` (served at the root URL). The app references them by these exact names:
-
-| File | Where it appears |
-|------|-----------------|
-| `home.png` | Favicon + sidebar logo |
-| `employees.png` | Employees nav icon |
-| `it_tasks.png` | IT Tasks nav icon |
-| `tickets.png` | Tickets nav icon |
-| `goomba_light.png` | Chat message bubble avatar |
-| `goomba_dark.png` | Chat toggle button and header avatar (inverted when open) |
-| `send_star.png` | Chat send button |
-
-## UI/UX notes
-
-- **Accent color** — `#C05B28` (burnt sienna) applied via Tailwind arbitrary-value syntax (`bg-[#C05B28]`, `text-[#C05B28]`, etc.) throughout buttons, badges, and highlights
-- **Responsive layout** — sidebar collapses to a mobile drawer at `< 768px`; hamburger button in header toggles it; drawer auto-closes on navigation
-- **Sidebar** — collapsible on desktop (chevron inline with logo); icon-only mode when collapsed; nav items use custom image icons
-- **Chat widget** — custom mascot images replace default icons; `whitespace-pre-wrap` on message bubbles for newline support
-- **Modals** — `role="presentation"` on backdrop, `role="dialog"` on panel for correct a11y semantics; Escape key closes via `svelte:window`
-
 ## Features
-
 ### Employees dashboard (`/employees`)
 - Sortable table: ID, name, department, manager, laptop, attrition risk %
 - Search by name/email, filter by department and attrition risk range
@@ -151,7 +118,3 @@ Drop these files in `static/` (served at the root URL). The app references them 
 - Floating button (bottom-right, all pages)
 - Passes current route as context with every message
 - Typing indicator (bouncing dots)
-
-## Claude Code guidance
-
-See [`.claude/CLAUDE.md`](.claude/CLAUDE.md) for module rules and backend contract notes used by Claude Code in this directory.

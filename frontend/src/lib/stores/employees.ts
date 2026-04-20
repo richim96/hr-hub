@@ -1,4 +1,5 @@
 import { writable } from 'svelte/store';
+import { randomUUID } from '$lib/utils';
 import { createEmployee, deleteEmployee, listEmployees, updateEmployee } from '$lib/api/employees';
 import { scoreAll } from '$lib/api/prediction';
 import { addToast } from './toast';
@@ -135,7 +136,7 @@ export async function removeEmployee(employeeId: string): Promise<boolean> {
 /** Batch-score all employees and refresh the list from the backend. */
 export async function refreshRiskScores(): Promise<boolean> {
 	try {
-		const requestId = `req_${crypto.randomUUID()}`;
+		const requestId = `req_${randomUUID()}`;
 		const response = await scoreAll({ request_id: requestId, request_type: 'prediction' });
 		if (response.status === 'Canceled') {
 			addToast('error', `Batch scoring failed: ${response.actions.find((a) => !a.success)?.details ?? 'model unavailable'}`);

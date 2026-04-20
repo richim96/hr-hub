@@ -19,7 +19,7 @@ from hr_hub.service.prediction import load_model
 
 
 
-_raw = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:3000")
+_raw = os.getenv("ALLOWED_ORIGINS", "")
 ALLOWED_ORIGINS: list[str] = [o.strip() for o in _raw.split(",") if o.strip()]
 
 
