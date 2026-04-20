@@ -86,7 +86,7 @@
 
 			{#if result.llm_result}
 				<div class="space-y-3">
-					<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+					<div class="rounded-2xl p-4" style="background: var(--modal-section-bg); border: 1px solid var(--modal-section-border);">
 						<p class="text-sm font-medium text-gray-700 mb-2">Detected Topics</p>
 						<div class="flex flex-wrap gap-1">
 							{#each result.llm_result.topics as topic}
@@ -95,7 +95,7 @@
 						</div>
 					</div>
 
-					<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+					<div class="rounded-2xl p-4" style="background: var(--modal-section-bg); border: 1px solid var(--modal-section-border);">
 						<p class="text-sm font-medium text-gray-700 mb-2">
 							Confidence: {Math.round(result.llm_result.confidence * 100)}%
 						</p>
@@ -107,14 +107,14 @@
 						</div>
 					</div>
 
-					<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+					<div class="rounded-2xl p-4" style="background: var(--modal-section-bg); border: 1px solid var(--modal-section-border);">
 						<p class="text-sm font-medium text-gray-700 mb-2">Draft Response</p>
 						<p class="text-sm text-gray-700 whitespace-pre-wrap">{result.llm_result.draft_response}</p>
 					</div>
 				</div>
 			{/if}
 
-			<div class="rounded-2xl p-4 space-y-2" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+			<div class="rounded-2xl p-4 space-y-2" style="background: var(--modal-section-bg); border: 1px solid var(--modal-section-border);">
 				<p class="text-sm font-medium text-gray-700">Actions Taken</p>
 				{#each result.actions as action}
 					<div class="flex items-start gap-2 text-sm">
@@ -147,7 +147,7 @@
 					<p class="text-xs text-red-500">{errors.submittedBy}</p>
 				{/if}
 				{#if dropdownOpen && filtered.length > 0}
-					<ul class="absolute top-full left-0 right-0 z-50 mt-1 rounded-2xl max-h-48 overflow-y-auto" style="background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 8px 24px rgba(0,0,0,0.1);">
+					<ul class="absolute top-full left-0 right-0 z-50 mt-1 rounded-2xl max-h-48 overflow-y-auto" style="background: var(--modal-dropdown-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--modal-section-border); box-shadow: 0 8px 24px rgba(0,0,0,0.1);">
 						{#each filtered.slice(0, 50) as emp}
 							<li>
 								<button

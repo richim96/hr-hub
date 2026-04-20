@@ -1,11 +1,64 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { tick } from 'svelte';
 	import { X, User, Maximize2, Minimize2 } from 'lucide-svelte';
 	import { marked } from 'marked';
 	import { sendChatMessage, type ChatMessage } from '$lib/api/chat';
 	import { modalOpen } from '$lib/stores/ui';
 	import { randomUUID } from '$lib/utils';
+	import { darkMode } from '$lib/stores/darkMode';
+
+	$: panelBg = $darkMode
+		? 'background: rgba(32,38,68,0.88); backdrop-filter: blur(32px) saturate(160%); -webkit-backdrop-filter: blur(32px) saturate(160%); border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);'
+		: 'background: rgba(255,255,255,0.6); backdrop-filter: blur(32px) saturate(200%); -webkit-backdrop-filter: blur(32px) saturate(200%); border: 1px solid rgba(255,255,255,0.7); box-shadow: 0 24px 64px rgba(0,0,0,0.14), 0 8px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95);';
+
+	$: assistantBubbleBg = $darkMode
+		? 'background: rgba(30,35,60,0.8); backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);'
+		: 'background: rgba(245,224,210,0.55); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border: 1px solid rgba(255,255,255,0.35); box-shadow: 0 8px 32px rgba(192,91,40,0.35), 0 2px 8px rgba(192,91,40,0.25), inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.04);';
+
+	$: inputBg = $darkMode
+		? 'background: rgba(20,25,50,0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); color: #e2e8f0;'
+		: 'background: rgba(255,255,255,0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.5);';
+
+	$: inputAreaBg = $darkMode
+		? 'border-top: 1px solid rgba(255,255,255,0.08);'
+		: 'border-top: 1px solid rgba(255,255,255,0.4);';
+
+	$: loadingBubbleBg = $darkMode
+		? 'background: rgba(30,35,60,0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1);'
+		: 'background: rgba(255,255,255,0.55); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.6);';
+
+	$: avatarBg = $darkMode
+		? 'background: rgba(30,35,60,0.8); border: 1px solid rgba(255,255,255,0.1);'
+		: 'background: rgba(245,221,208,0.8); border: 1px solid rgba(255,255,255,0.6);';
+
+	$: userAvatarBg = $darkMode
+		? 'background: rgba(30,35,60,0.8); border: 1px solid rgba(255,255,255,0.1);'
+		: 'background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.6);';
+
+	$: brandSurface = $darkMode
+		? 'rgba(155,68,24,0.72)'
+		: 'rgba(192,91,40,0.85)';
+
+	$: brandGlow = $darkMode
+		? '0 8px 24px rgba(0,0,0,0.35)'
+		: '0 8px 24px rgba(192,91,40,0.4)';
+
+	$: chatHeaderStyle = $darkMode
+		? 'background: rgba(155,68,24,0.72); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.1); box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);'
+		: 'background: rgba(192,91,40,0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.3); box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);';
+
+	$: userBubbleStyle = $darkMode
+		? 'background: rgba(155,68,24,0.72); backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);'
+		: 'background: rgba(192,91,40,0.85); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border: 1px solid rgba(255,255,255,0.35); box-shadow: 0 8px 32px rgba(192,91,40,0.2), 0 2px 8px rgba(192,91,40,0.15), inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.08);';
+
+	$: sendBtnStyle = $darkMode
+		? 'background: rgba(155,68,24,0.72); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);'
+		: 'background: rgba(192,91,40,0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 4px 12px rgba(192,91,40,0.3), inset 0 1px 0 rgba(255,255,255,0.25);';
+
+	$: tooltipStyle = $darkMode
+		? 'background: rgba(130,55,18,0.88); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 4px 12px rgba(0,0,0,0.3);'
+		: 'background: rgba(192,91,40,0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 4px 12px rgba(0,0,0,0.2);';
 
 	const GOOMBA = '/goomba.png';
 
@@ -18,7 +71,7 @@
 	let textarea: HTMLTextAreaElement;
 	let widgetRoot: HTMLElement;
 
-	$: context = { current_page: $page.url.pathname };
+	$: context = { current_page: page.url.pathname };
 
 	async function scrollToBottom() {
 		await new Promise((r) => requestAnimationFrame(r));
@@ -101,12 +154,12 @@
 		<!-- Chat panel -->
 		<div
 			class="flex flex-col overflow-hidden animate-slide-in rounded-3xl transition-all duration-300 {expanded ? 'w-[620px] sm:w-[684px]' : 'w-80 sm:w-96'}"
-			style="height: {expanded ? 580 : 480}px; background: rgba(255,255,255,0.6); backdrop-filter: blur(32px) saturate(200%); -webkit-backdrop-filter: blur(32px) saturate(200%); border: 1px solid rgba(255,255,255,0.7); box-shadow: 0 24px 64px rgba(0,0,0,0.14), 0 8px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95);"
+			style="height: {expanded ? 580 : 480}px; {panelBg}"
 		>
 			<!-- Chat header -->
 			<div
 				class="flex items-center justify-between px-4 py-3 shrink-0"
-				style="background: rgba(192,91,40,0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.3); box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);"
+				style="{chatHeaderStyle}"
 			>
 				<div class="flex items-center gap-2">
 					<span class="font-bold text-sm text-white tracking-tight">Ask Goomba</span>
@@ -138,7 +191,7 @@
 				{#each messages as msg}
 					<div class="flex gap-2 {msg.role === 'user' ? 'justify-end' : 'justify-start'}">
 						{#if msg.role === 'assistant'}
-							<div class="w-12 h-12 rounded-full shrink-0 overflow-hidden self-end" style="background: rgba(245,221,208,0.8); border: 1px solid rgba(255,255,255,0.6);">
+							<div class="w-12 h-12 rounded-full shrink-0 overflow-hidden self-end" style="{avatarBg}">
 								<img src={GOOMBA} alt="assistant" class="w-full h-full object-cover" style="transform: translate(-0.2px, -1.5px);" />
 							</div>
 						{/if}
@@ -147,9 +200,7 @@
 							       {msg.role === 'user'
 								? 'text-white rounded-br-sm whitespace-pre-wrap'
 								: 'text-gray-800 rounded-bl-sm prose prose-sm prose-neutral max-w-none'}"
-							style={msg.role === 'user'
-								? 'background: rgba(192,91,40,0.75); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border: 1px solid rgba(255,255,255,0.35); box-shadow: 0 8px 32px rgba(192,91,40,0.2), 0 2px 8px rgba(192,91,40,0.15), inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.08);'
-								: 'background: rgba(245,224,210,0.55); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border: 1px solid rgba(255,255,255,0.35); box-shadow: 0 8px 32px rgba(192,91,40,0.35), 0 2px 8px rgba(192,91,40,0.25), inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.04);'}
+							style={msg.role === 'user' ? userBubbleStyle : assistantBubbleBg}
 						>
 							{#if msg.role === 'assistant'}
 									<!-- eslint-disable-next-line svelte/no-at-html-tags -->
@@ -159,7 +210,7 @@
 							{/if}
 						</div>
 						{#if msg.role === 'user'}
-							<div class="w-12 h-12 rounded-full text-gray-600 flex items-center justify-center shrink-0 mt-0.5" style="background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.6);">
+							<div class="w-12 h-12 rounded-full text-gray-600 flex items-center justify-center shrink-0 mt-0.5" style="{userAvatarBg}">
 								<User size={20} />
 							</div>
 						{/if}
@@ -168,10 +219,10 @@
 
 				{#if loading}
 					<div class="flex gap-2 justify-start">
-						<div class="w-12 h-12 rounded-full shrink-0 overflow-hidden" style="background: rgba(245,221,208,0.8);">
+						<div class="w-12 h-12 rounded-full shrink-0 overflow-hidden" style="{avatarBg}">
 							<img src={GOOMBA} alt="assistant" class="w-full h-full object-cover" />
 						</div>
-						<div class="px-3 py-2 rounded-2xl rounded-bl-sm" style="background: rgba(255,255,255,0.55); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.6);">
+						<div class="px-3 py-2 rounded-2xl rounded-bl-sm" style="{loadingBubbleBg}">
 							<div class="flex gap-1">
 								<span class="w-1.5 h-1.5 rounded-full animate-bounce" style="background: rgba(0,0,0,0.25); animation-delay: 0ms" />
 								<span class="w-1.5 h-1.5 rounded-full animate-bounce" style="background: rgba(0,0,0,0.25); animation-delay: 150ms" />
@@ -183,7 +234,7 @@
 			</div>
 
 			<!-- Input area -->
-			<div class="px-3 pb-3 pt-2 shrink-0" style="border-top: 1px solid rgba(255,255,255,0.4);">
+			<div class="px-3 pb-3 pt-2 shrink-0" style="{inputAreaBg}">
 				<div class="flex gap-2 items-end">
 					<textarea
 						bind:this={textarea}
@@ -195,21 +246,21 @@
 						class="flex-1 px-3 py-2 text-sm rounded-2xl resize-none
 						       focus:outline-none focus:ring-2 focus:ring-[#C05B28]/50
 						       max-h-48 transition-all overflow-y-auto"
-						style="background: rgba(255,255,255,0.45); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.5);"
+						style="{inputBg}"
 						disabled={loading}
 					/>
 					<button
 						on:click={send}
 						disabled={loading || !input.trim()}
 						class="p-2.5 rounded-2xl disabled:opacity-40 transition-all shrink-0 hover:brightness-110 active:scale-95"
-						style="background: rgba(192,91,40,0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 4px 12px rgba(192,91,40,0.3), inset 0 1px 0 rgba(255,255,255,0.25);"
+						style="{sendBtnStyle}"
 						aria-label="Send message"
 					>
 						<img src="/send_star.png" alt="send" class="w-5 h-5 object-contain" />
 					</button>
 				</div>
 				<p class="text-xs text-gray-400 mt-1 text-center">
-					Context: {$page.url.pathname}
+					Context: {page.url.pathname}
 				</p>
 			</div>
 		</div>
@@ -219,7 +270,7 @@
 	<button
 		on:click={toggleOpen}
 		class="group relative w-16 h-16 rounded-full transition-all duration-200 flex items-center justify-center overflow-visible hover:brightness-110 hover:scale-105 active:scale-95"
-		style="background: rgba(192,91,40,0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.35); box-shadow: 0 8px 24px rgba(192,91,40,0.4), inset 0 1px 0 rgba(255,255,255,0.3);"
+		style="background: {brandSurface}; backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.25); box-shadow: {brandGlow}, inset 0 1px 0 rgba(255,255,255,0.2);"
 		aria-label={open ? 'Close HR Assistant' : 'Open HR Assistant'}
 	>
 		<div class="w-full h-full rounded-full overflow-hidden flex items-center justify-center">
@@ -233,7 +284,7 @@
 		{/if}
 		<span
 			class="pointer-events-none absolute bottom-full right-0 mb-2 px-2 py-1 rounded-lg text-xs font-medium text-white whitespace-nowrap transition-opacity duration-150 {open ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'}"
-			style="background: rgba(192,91,40,0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 4px 12px rgba(0,0,0,0.2);"
+			style="{tooltipStyle}"
 		>Ask, and I shall answer</span>
 	</button>
 </div>

@@ -113,7 +113,7 @@
 <Modal {open} title="New Hire" maxWidth="xl" on:close={handleClose}>
 	<form on:submit|preventDefault={handleSubmit} class="space-y-4">
 		<!-- Employee details -->
-		<fieldset class="space-y-4 rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+		<fieldset class="space-y-4 rounded-2xl p-4" style="background: var(--modal-section-bg); border: 1px solid var(--modal-section-border);">
 			<legend class="text-xs font-semibold uppercase tracking-wide text-gray-500 px-1">Employee Details</legend>
 			<div class="grid grid-cols-2 gap-4">
 				<Input id="firstName" label="First Name" bind:value={firstName} required error={errors.firstName} placeholder="Jane" />
@@ -125,7 +125,7 @@
 		</fieldset>
 
 		<!-- Role & compensation -->
-		<fieldset class="space-y-4 rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+		<fieldset class="space-y-4 rounded-2xl p-4" style="background: var(--modal-section-bg); border: 1px solid var(--modal-section-border);">
 			<legend class="text-xs font-semibold uppercase tracking-wide text-gray-500 px-1">Role & Compensation</legend>
 			<div class="grid grid-cols-2 gap-4">
 				<Select id="department" label="Department" bind:value={department} options={deptOptions} required error={errors.department} placeholder="Select department…" />
@@ -134,7 +134,7 @@
 		</fieldset>
 
 		<!-- Equipment -->
-		<fieldset class="space-y-4 rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+		<fieldset class="space-y-4 rounded-2xl p-4" style="background: var(--modal-section-bg); border: 1px solid var(--modal-section-border);">
 			<legend class="text-xs font-semibold uppercase tracking-wide text-gray-500 px-1">Equipment</legend>
 			<Input id="laptop" label="Laptop Model" bind:value={laptop} placeholder='MacBook Pro 14"' />
 			<div class="flex gap-6">

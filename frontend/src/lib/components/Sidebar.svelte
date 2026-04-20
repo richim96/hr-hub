@@ -16,12 +16,12 @@
 <aside
 	class="fixed top-0 left-0 h-full flex flex-col z-30 transition-all duration-200 ease-in-out
 	       {collapsed ? 'w-[69px]' : 'w-60'}"
-	style="background: rgba(255,255,255,0.5); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border-right: 1px solid rgba(255,255,255,0.55); box-shadow: 2px 0 16px rgba(0,0,0,0.05);"
+	style="background: var(--glass-bg); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border-right: 1px solid var(--glass-border); box-shadow: 2px 0 16px rgba(0,0,0,0.05);"
 >
 	<!-- Logo / Brand -->
 	<div
 		class="flex items-center h-16 shrink-0 px-4 gap-3"
-		style="border-bottom: 1px solid rgba(255,255,255,0.4);"
+		style="border-bottom: 1px solid var(--glass-border);"
 	>
 		<img
 			src="/home.png" alt="HR Hub"
@@ -36,7 +36,7 @@
 	<button
 		on:click={() => (collapsed = !collapsed)}
 		class="absolute p-1.5 rounded-xl transition-all text-gray-500 hover:text-gray-700"
-		style="top: 2rem; right: 0; transform: translate(50%, -50%); z-index: 40; background: rgba(255,255,255,0.85); border: 1px solid rgba(255,255,255,0.7); box-shadow: 0 2px 8px rgba(0,0,0,0.08);"
+		style="top: 2rem; right: 0; transform: translate(50%, -50%); z-index: 40; background: var(--glass-btn-bg); border: 1px solid var(--glass-btn-border); box-shadow: 0 2px 8px rgba(0,0,0,0.08);"
 		aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
 	>
 		{#if collapsed}
@@ -69,7 +69,8 @@
 			{@const active = $page.url.pathname.startsWith(item.href)}
 			<a
 				href={item.href}
-				class="relative flex items-center gap-3 px-3 py-2.5 rounded-2xl mb-1 text-sm font-medium transition-colors
+				class="relative flex items-center gap-3 py-3 rounded-2xl mb-1 text-sm font-medium transition-colors
+				       {collapsed ? 'justify-center' : 'px-3'}
 				       {active ? 'text-[#9a3d1a]' : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'}"
 				style="z-index: 1;"
 				title={collapsed ? item.label : undefined}
@@ -82,14 +83,6 @@
 		{/each}
 	</nav>
 
-	<!-- Mushroom decoration image -->
-	<img
-		src="/navbar_decoration.png"
-		alt=""
-		aria-hidden="true"
-		class="absolute bottom-0 left-0 w-full pointer-events-none select-none transition-opacity duration-200"
-		style="height: calc((100% - 4rem) * 0.8); object-fit: cover; object-position: center bottom; z-index: 0; opacity: {collapsed ? 0.08 : 0.22}; filter: sepia(1) saturate(2.5) hue-rotate(330deg) brightness(0.85); mask-image: linear-gradient(to bottom, rgba(0,0,0,0.60) 0%, black 45%); -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.60) 0%, black 45%);"
-	/>
 	<!-- Glass sheen + light spots overlay -->
 	<div
 		aria-hidden="true"
@@ -99,8 +92,14 @@
 			radial-gradient(circle 15px at 42% 15%, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.08) 60%, transparent 100%),
 			radial-gradient(circle 12px at 18% 32%, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.06) 60%, transparent 100%),
 			radial-gradient(circle 16px at 66% 30%, rgba(255,255,255,0.50) 0%, rgba(255,255,255,0.09) 60%, transparent 100%),
-			radial-gradient(circle 11px at 78% 22%, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0.06) 60%, transparent 100%),
-			radial-gradient(circle 9px  at 58% 40%, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.05) 60%, transparent 100%),
-			linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 40%, transparent 65%);"
+			radial-gradient(circle 9px  at 58% 40%, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.05) 60%, transparent 100%);"
+	/>
+	<!-- Mushroom decoration image -->
+	<img
+		src="/navbar_decoration.png"
+		alt=""
+		aria-hidden="true"
+		class="absolute bottom-0 left-0 w-full pointer-events-none select-none transition-opacity duration-200"
+		style="height: calc((100% - 4rem) * 0.8 - 12px); object-fit: cover; object-position: center bottom; z-index: 0; opacity: {collapsed ? 0.08 : 0.22}; filter: sepia(1) saturate(2.5) hue-rotate(330deg) brightness(0.85); mask-image: linear-gradient(to bottom, rgba(0,0,0,0.60) 0%, black 45%); -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.60) 0%, black 45%);"
 	/>
 </aside>

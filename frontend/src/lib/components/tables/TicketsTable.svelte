@@ -20,14 +20,14 @@
 
 <div class="overflow-auto" style="max-height: {maxHeight}">
 	<table class="w-full text-sm">
-		<thead class="sticky top-0 z-10" style="background: rgba(255,255,255,0.92); backdrop-filter: blur(16px) saturate(180%); -webkit-backdrop-filter: blur(16px) saturate(180%);">
-			<tr style="border-bottom: 1px solid rgba(255,255,255,0.5);">
-				<th class="px-4 py-2 text-left font-medium text-gray-500">Submitted By</th>
-				<th class="px-4 py-2 text-left font-medium text-gray-500">Title</th>
-				<th class="px-4 py-2 text-left font-medium text-gray-500">Status</th>
-				<th class="px-4 py-2 text-left font-medium text-gray-500">Topics</th>
-				<th class="px-4 py-2 text-left font-medium text-gray-500">Actions</th>
-				<th class="px-4 py-2 text-left font-medium text-gray-500">Ticket ID</th>
+		<thead class="sticky top-0 z-10" style="background: var(--btn-primary-bg); backdrop-filter: blur(16px) saturate(180%); -webkit-backdrop-filter: blur(16px) saturate(180%);">
+			<tr style="border-bottom: 1px solid rgba(255,255,255,0.2);">
+				<th class="px-4 py-2 text-left font-medium text-white/80">Submitted By</th>
+				<th class="px-4 py-2 text-left font-medium text-white/80">Title</th>
+				<th class="px-4 py-2 text-left font-medium text-white/80">Status</th>
+				<th class="px-4 py-2 text-left font-medium text-white/80">Topics</th>
+				<th class="px-4 py-2 text-left font-medium text-white/80">Actions</th>
+				<th class="px-4 py-2 text-left font-medium text-white/80">Ticket ID</th>
 			</tr>
 		</thead>
 		<tbody>

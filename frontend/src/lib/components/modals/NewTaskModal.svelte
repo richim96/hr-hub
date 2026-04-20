@@ -96,7 +96,7 @@
 				<p class="text-xs text-red-500">{errors.email}</p>
 			{/if}
 			{#if dropdownOpen && filtered.length > 0}
-				<ul class="absolute top-full left-0 right-0 z-50 mt-1 rounded-2xl max-h-48 overflow-y-auto" style="background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 8px 24px rgba(0,0,0,0.1);">
+				<ul class="absolute top-full left-0 right-0 z-50 mt-1 rounded-2xl max-h-48 overflow-y-auto" style="background: var(--modal-dropdown-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--modal-section-border); box-shadow: 0 8px 24px rgba(0,0,0,0.1);">
 					{#each filtered.slice(0, 50) as emp}
 						<li>
 							<button

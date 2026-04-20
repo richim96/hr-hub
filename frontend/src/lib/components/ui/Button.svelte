@@ -26,9 +26,9 @@
 	};
 
 	const inlineStyles = {
-		primary: 'background: rgba(192,91,40,0.88); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.35); box-shadow: 0 4px 16px rgba(192,91,40,0.3), inset 0 1px 0 rgba(255,255,255,0.3);',
+		primary: 'background: var(--btn-primary-bg); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.25); box-shadow: var(--btn-primary-shadow);',
 		secondary: '',
-		danger: 'background: rgba(220,38,38,0.82); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 4px 16px rgba(220,38,38,0.25), inset 0 1px 0 rgba(255,255,255,0.25);',
+		danger: 'background: var(--btn-danger-bg); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.2); box-shadow: var(--btn-danger-shadow);',
 		ghost: ''
 	};
 

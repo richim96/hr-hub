@@ -41,12 +41,12 @@
 
 <div class="overflow-auto" style="max-height: {maxHeight}">
 	<table class="w-full text-sm">
-		<thead class="sticky top-0 z-10" style="background: rgba(255,255,255,0.92); backdrop-filter: blur(16px) saturate(180%); -webkit-backdrop-filter: blur(16px) saturate(180%);">
-			<tr style="border-bottom: 1px solid rgba(255,255,255,0.5);">
+		<thead class="sticky top-0 z-10" style="background: var(--btn-primary-bg); backdrop-filter: blur(16px) saturate(180%); -webkit-backdrop-filter: blur(16px) saturate(180%);">
+			<tr style="border-bottom: 1px solid rgba(255,255,255,0.2);">
 				{#each columns as col}
-					<th class="px-4 py-2 text-left font-medium text-gray-500 whitespace-nowrap">
+					<th class="px-4 py-2 text-left font-medium text-white/80 whitespace-nowrap">
 						<button
-							class="flex items-center gap-1 hover:text-gray-800 transition-colors"
+							class="flex items-center gap-1 hover:text-white transition-colors"
 							on:click={() => dispatch('sort', col.key)}
 						>
 							{col.label}

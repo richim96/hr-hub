@@ -2,6 +2,11 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
+		<script>
+			if (localStorage.getItem('darkMode') === 'true') {
+				document.documentElement.classList.add('dark');
+			}
+		</script>
 		<link rel="icon" href="/home.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />

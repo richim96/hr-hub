@@ -2,6 +2,7 @@
 	import '../app.css';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import { darkMode } from '$lib/stores/darkMode';
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Toast from '$lib/components/Toast.svelte';
@@ -20,6 +21,7 @@
 	// Each fetch is deduplicated — the page's own onMount calling the same function
 	// will attach to the in-flight promise rather than issuing a second request.
 	onMount(() => {
+		document.documentElement.classList.toggle('dark', $darkMode);
 		fetchEmployees();
 		fetchTasks();
 		fetchTickets();

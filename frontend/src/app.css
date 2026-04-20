@@ -22,17 +22,73 @@
 			inset 0 1px 0 rgba(255, 255, 255, 0.9);
 		--glass-blur: blur(24px) saturate(180%);
 		--glass-blur-sm: blur(12px) saturate(160%);
+		--glass-btn-bg: rgba(255, 255, 255, 0.85);
+		--glass-btn-border: rgba(255, 255, 255, 0.7);
 		--page-bg: linear-gradient(135deg, #f5e6de 0%, #ede8f5 40%, #dce8f5 100%);
+
+		/* Brand action buttons */
+		--btn-primary-bg: rgba(192, 91, 40, 0.88);
+		--btn-primary-shadow: 0 4px 16px rgba(192, 91, 40, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+		--btn-danger-bg: rgba(220, 38, 38, 0.82);
+		--btn-danger-shadow: 0 4px 16px rgba(220, 38, 38, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+
+		/* Modal / overlay surfaces */
+		--modal-bg: rgba(255, 255, 255, 0.65);
+		--modal-section-bg: rgba(255, 255, 255, 0.3);
+		--modal-section-border: rgba(255, 255, 255, 0.4);
+		--modal-subtle-bg: rgba(0, 0, 0, 0.04);
+		--modal-dropdown-bg: rgba(255, 255, 255, 0.88);
+		--modal-item-bg: rgba(255, 255, 255, 0.4);
+		--modal-item-border: rgba(255, 255, 255, 0.5);
+	}
+
+	html.dark {
+		color-scheme: dark;
+		--page-bg: linear-gradient(135deg, #1e1523 0%, #151c2e 40%, #0e1822 100%);
+		--glass-bg: rgba(15, 20, 40, 0.65);
+		--glass-bg-dark: rgba(10, 15, 30, 0.72);
+		--glass-bg-input: rgba(20, 25, 50, 0.6);
+		--glass-border: rgba(255, 255, 255, 0.1);
+		--glass-border-subtle: rgba(100, 120, 180, 0.25);
+		--glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3),
+			inset 0 1px 0 rgba(255, 255, 255, 0.06);
+		--glass-shadow-heavy: 0 16px 48px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4),
+			inset 0 1px 0 rgba(255, 255, 255, 0.08);
+		--glass-btn-bg: rgba(25, 30, 58, 0.9);
+		--glass-btn-border: rgba(255, 255, 255, 0.12);
+
+		/* Brand action buttons */
+		--btn-primary-bg: rgba(155, 68, 24, 0.72);
+		--btn-primary-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+		--btn-danger-bg: rgba(180, 30, 30, 0.7);
+		--btn-danger-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+		/* Modal / overlay surfaces */
+		--modal-bg: rgba(22, 27, 52, 0.93);
+		--modal-section-bg: rgba(255, 255, 255, 0.05);
+		--modal-section-border: rgba(255, 255, 255, 0.09);
+		--modal-subtle-bg: rgba(255, 255, 255, 0.05);
+		--modal-dropdown-bg: rgba(20, 25, 50, 0.97);
+		--modal-item-bg: rgba(255, 255, 255, 0.07);
+		--modal-item-border: rgba(255, 255, 255, 0.11);
 	}
 
 	* {
 		border-color: rgba(255, 255, 255, 0.3);
 	}
 
+	html.dark * {
+		border-color: rgba(255, 255, 255, 0.08);
+	}
+
 	body {
 		@apply text-gray-900 font-sans antialiased min-h-screen;
 		background: var(--page-bg);
 		background-attachment: fixed;
+	}
+
+	html.dark body {
+		color: #e2e8f0;
 	}
 
 	/* Scrollbar styling */
@@ -49,6 +105,11 @@
 	::-webkit-scrollbar-thumb:hover {
 		background: rgba(0, 0, 0, 0.25);
 	}
+}
+
+/* Align sidebar brand area height with header so border-bottom separators are flush */
+aside > div:first-child {
+	height: var(--header-height);
 }
 
 /* Responsive layout offset — zero on mobile, sidebar-width on md+ */
@@ -133,4 +194,87 @@
 	.risk-high {
 		@apply text-red-700;
 	}
+}
+
+/* Dark mode text color overrides */
+html.dark .text-gray-900,
+html.dark .text-gray-800 {
+	color: #f1f5f9;
+}
+html.dark .text-gray-700 {
+	color: #e2e8f0;
+}
+html.dark .text-gray-600 {
+	color: #cbd5e1;
+}
+html.dark .text-gray-500 {
+	color: #94a3b8;
+}
+html.dark .text-gray-400 {
+	color: #64748b;
+}
+
+/* Dark mode active sidebar link */
+html.dark .text-\[\#9a3d1a\] {
+	color: #e8713a;
+}
+
+/* Dark mode hover on nav items */
+html.dark .hover\:bg-white\/50:hover {
+	background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Dark mode badge overrides */
+html.dark .badge-completed {
+	background: rgba(22, 163, 74, 0.2);
+	color: #4ade80;
+	border-color: rgba(22, 163, 74, 0.3);
+}
+html.dark .badge-pending {
+	background: rgba(217, 119, 6, 0.2);
+	color: #fbbf24;
+	border-color: rgba(217, 119, 6, 0.3);
+}
+html.dark .badge-failed,
+html.dark .badge-canceled {
+	background: rgba(220, 38, 38, 0.2);
+	color: #f87171;
+	border-color: rgba(220, 38, 38, 0.3);
+}
+html.dark .badge-info {
+	background: rgba(59, 130, 246, 0.2);
+	color: #93c5fd;
+	border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* Dark mode risk colors */
+html.dark .risk-low {
+	color: #4ade80;
+}
+html.dark .risk-medium {
+	color: #fbbf24;
+}
+html.dark .risk-high {
+	color: #f87171;
+}
+
+/* Dark mode prose (chat assistant messages) */
+html.dark .prose {
+	--tw-prose-body: #e2e8f0;
+	--tw-prose-headings: #f1f5f9;
+	--tw-prose-bold: #f1f5f9;
+	--tw-prose-bullets: #94a3b8;
+	--tw-prose-counters: #94a3b8;
+	--tw-prose-links: #fb923c;
+	--tw-prose-code: #e2e8f0;
+	--tw-prose-quotes: #cbd5e1;
+	color: var(--tw-prose-body);
+}
+
+/* Dark mode scrollbar */
+html.dark ::-webkit-scrollbar-thumb {
+	background: rgba(255, 255, 255, 0.15);
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+	background: rgba(255, 255, 255, 0.25);
 }

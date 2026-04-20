@@ -98,14 +98,14 @@
 			{#if !editing}
 				<button
 					class="p-1 rounded-lg transition-colors text-gray-400 hover:text-[#C05B28]"
-					style="background: rgba(0,0,0,0.04); border: 1px solid rgba(255,255,255,0.4);"
+					style="background: var(--modal-subtle-bg); border: 1px solid var(--modal-section-border);"
 					on:click={startEdit} aria-label="Edit task"
 				>
 					<Pencil size={14} />
 				</button>
 				<button
 					class="p-1 rounded-lg transition-colors text-red-400 hover:text-red-600"
-					style="background: rgba(0,0,0,0.04); border: 1px solid rgba(255,255,255,0.4);"
+					style="background: var(--modal-subtle-bg); border: 1px solid var(--modal-section-border);"
 					on:click={() => (confirmOpen = true)} aria-label="Delete task"
 				>
 					<Trash2 size={14} />
@@ -125,7 +125,7 @@
 			</form>
 		{:else}
 			<div class="space-y-4">
-				<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+				<div class="rounded-2xl p-4" style="background: var(--modal-section-bg); border: 1px solid var(--modal-section-border);">
 					<div class="space-y-3">
 						<div>
 							<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Task ID</p>
@@ -139,13 +139,13 @@
 				</div>
 
 				{#if task.description}
-					<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+					<div class="rounded-2xl p-4" style="background: var(--modal-section-bg); border: 1px solid var(--modal-section-border);">
 						<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Description</p>
 						<p class="text-sm text-gray-700 whitespace-pre-wrap">{task.description}</p>
 					</div>
 				{/if}
 
-				<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+				<div class="rounded-2xl p-4" style="background: var(--modal-section-bg); border: 1px solid var(--modal-section-border);">
 					<div class="grid grid-cols-2 gap-4">
 						<div>
 							<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Assignee</p>

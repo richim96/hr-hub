@@ -74,14 +74,14 @@
 			{#if !editing}
 				<button
 					class="p-1 rounded-lg transition-colors text-gray-400 hover:text-[#C05B28]"
-					style="background: rgba(0,0,0,0.04); border: 1px solid rgba(255,255,255,0.4);"
+					style="background: var(--modal-subtle-bg); border: 1px solid var(--modal-section-border);"
 					on:click={startEdit} aria-label="Edit ticket"
 				>
 					<Pencil size={14} />
 				</button>
 				<button
 					class="p-1 rounded-lg transition-colors text-red-400 hover:text-red-600"
-					style="background: rgba(0,0,0,0.04); border: 1px solid rgba(255,255,255,0.4);"
+					style="background: var(--modal-subtle-bg); border: 1px solid var(--modal-section-border);"
 					on:click={() => (confirmOpen = true)} aria-label="Delete ticket"
 				>
 					<Trash2 size={14} />
@@ -98,7 +98,7 @@
 			</form>
 		{:else}
 			<div class="space-y-4">
-				<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+				<div class="rounded-2xl p-4" style="background: var(--modal-section-bg); border: 1px solid var(--modal-section-border);">
 					<div class="space-y-2">
 						<div>
 							<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Ticket ID</p>
@@ -111,18 +111,18 @@
 					</div>
 				</div>
 
-				<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+				<div class="rounded-2xl p-4" style="background: var(--modal-section-bg); border: 1px solid var(--modal-section-border);">
 					<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Description</p>
 					<p class="text-sm text-gray-700 whitespace-pre-wrap">{ticket.text}</p>
 				</div>
 
-				<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+				<div class="rounded-2xl p-4" style="background: var(--modal-section-bg); border: 1px solid var(--modal-section-border);">
 					<p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Submitted By</p>
 					<p class="text-sm text-gray-700">{ticket.submitted_by}</p>
 				</div>
 
 				{#if ticket.llm_result}
-					<div class="rounded-2xl p-4 space-y-3" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+					<div class="rounded-2xl p-4 space-y-3" style="background: var(--modal-section-bg); border: 1px solid var(--modal-section-border);">
 						<p class="text-sm font-medium text-gray-700">AI Analysis</p>
 						<div class="flex flex-wrap gap-1">
 							{#each ticket.llm_result.topics as topic}
@@ -144,7 +144,7 @@
 						{#if ticket.llm_result.draft_response}
 							<div>
 								<p class="text-sm font-medium text-gray-700 mb-1">Draft Response</p>
-								<div class="rounded-xl p-3 text-sm text-gray-700 whitespace-pre-wrap" style="background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.5);">
+								<div class="rounded-xl p-3 text-sm text-gray-700 whitespace-pre-wrap" style="background: var(--modal-item-bg); border: 1px solid var(--modal-item-border);">
 									{ticket.llm_result.draft_response}
 								</div>
 							</div>
@@ -152,10 +152,10 @@
 					</div>
 				{/if}
 
-				<div class="rounded-2xl p-4 space-y-2" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+				<div class="rounded-2xl p-4 space-y-2" style="background: var(--modal-section-bg); border: 1px solid var(--modal-section-border);">
 					<p class="text-sm font-medium text-gray-700 mb-2">Actions</p>
 					{#each ticket.actions as action}
-						<div class="flex items-start gap-2 p-3 rounded-xl" style="background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.5);">
+						<div class="flex items-start gap-2 p-3 rounded-xl" style="background: var(--modal-item-bg); border: 1px solid var(--modal-item-border);">
 							<span class={`text-base ${action.success ? 'text-green-600' : 'text-red-500'}`}>
 								{action.success ? '✓' : '✗'}
 							</span>

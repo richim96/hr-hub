@@ -37,7 +37,7 @@
 		<!-- Panel -->
 		<div
 			class="relative w-full {widths[maxWidth]} rounded-3xl animate-slide-in max-h-[90vh] flex flex-col"
-			style="background: rgba(255,255,255,0.65); backdrop-filter: blur(32px) saturate(200%); -webkit-backdrop-filter: blur(32px) saturate(200%); border: 1px solid rgba(255,255,255,0.7); box-shadow: 0 24px 64px rgba(0,0,0,0.15), 0 8px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95);"
+			style="background: var(--modal-bg); backdrop-filter: blur(32px) saturate(200%); -webkit-backdrop-filter: blur(32px) saturate(200%); border: 1px solid var(--modal-section-border); box-shadow: 0 24px 64px rgba(0,0,0,0.15), 0 8px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95);"
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby="modal-title"
@@ -50,7 +50,7 @@
 				<button
 					on:click={close}
 					class="p-1.5 rounded-xl text-gray-400 hover:text-gray-600 transition-colors"
-					style="background: rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.4);"
+					style="background: var(--modal-subtle-bg); border: 1px solid var(--modal-section-border);"
 					aria-label="Close modal"
 				>
 					<X size={18} />

@@ -61,8 +61,6 @@ HTTP request
             └─ db/             engine, session lifecycle, Alembic wiring
 ```
 
-`APIResponse` is the single outbound type for every endpoint. It carries `request_id`, `status`, a list of `actions` (one per integration step), and an optional `llm_result`.
-
 ## Migration workflow
 When ORM models change:
 

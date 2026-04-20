@@ -175,7 +175,7 @@
 			{#if !editing}
 				<button
 					class="p-1 rounded-lg transition-colors text-gray-400 hover:text-[#C05B28]"
-					style="background: rgba(0,0,0,0.04); border: 1px solid rgba(255,255,255,0.4);"
+					style="background: var(--modal-subtle-bg); border: 1px solid var(--modal-section-border);"
 					on:click={startEdit}
 					aria-label="Edit employee"
 				>
@@ -183,7 +183,7 @@
 				</button>
 				<button
 					class="p-1 rounded-lg transition-colors text-red-400 hover:text-red-600"
-					style="background: rgba(0,0,0,0.04); border: 1px solid rgba(255,255,255,0.4);"
+					style="background: var(--modal-subtle-bg); border: 1px solid var(--modal-section-border);"
 					on:click={() => (confirmOpen = true)}
 					aria-label="Delete employee"
 				>
@@ -216,7 +216,7 @@
 
 			{#if editing}
 				<div class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-					<fieldset class="space-y-3 rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+					<fieldset class="space-y-3 rounded-2xl p-4" style="background: var(--modal-section-bg); border: 1px solid var(--modal-section-border);">
 						<legend class="text-xs font-semibold uppercase tracking-wide text-gray-500 px-1">Identity</legend>
 						<div class="grid grid-cols-2 gap-3">
 							<Input id="editFirst" label="First Name" bind:value={editFirstName} />
@@ -229,7 +229,7 @@
 						<Select id="editGender" label="Gender" bind:value={editGender} options={genderOptions} placeholder="Select gender…" />
 					</fieldset>
 
-					<fieldset class="space-y-3 rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+					<fieldset class="space-y-3 rounded-2xl p-4" style="background: var(--modal-section-bg); border: 1px solid var(--modal-section-border);">
 						<legend class="text-xs font-semibold uppercase tracking-wide text-gray-500 px-1">Equipment</legend>
 						<Input id="editLaptop" label="Laptop Model" bind:value={editLaptop} placeholder='MacBook Pro 14"' />
 						<div class="flex gap-6">
@@ -244,7 +244,7 @@
 						</div>
 					</fieldset>
 
-					<fieldset class="space-y-3 rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+					<fieldset class="space-y-3 rounded-2xl p-4" style="background: var(--modal-section-bg); border: 1px solid var(--modal-section-border);">
 						<legend class="text-xs font-semibold uppercase tracking-wide text-gray-500 px-1">Employment Info</legend>
 						<div class="grid grid-cols-2 gap-3">
 							<Select id="editDept" label="Department" bind:value={editDepartment} options={deptOptions} placeholder="Select department…" />
@@ -273,7 +273,7 @@
 				</div>
 			{:else}
 				<div class="space-y-4">
-					<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+					<div class="rounded-2xl p-4" style="background: var(--modal-section-bg); border: 1px solid var(--modal-section-border);">
 						<p class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-3">Identity</p>
 						<div class="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
 							<div>
@@ -287,7 +287,7 @@
 						</div>
 					</div>
 
-					<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+					<div class="rounded-2xl p-4" style="background: var(--modal-section-bg); border: 1px solid var(--modal-section-border);">
 						<p class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-3">Employment Info</p>
 						<div class="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
 							<div><span class="text-gray-500">Manager</span><p class="text-gray-800 mt-0.5">{employee.manager_email ?? '—'}</p></div>
@@ -301,7 +301,7 @@
 						</div>
 					</div>
 
-					<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+					<div class="rounded-2xl p-4" style="background: var(--modal-section-bg); border: 1px solid var(--modal-section-border);">
 						<p class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-3">Attrition Risk</p>
 						{#if employee.attrition_risk != null}
 							<div class="flex items-center gap-3">
@@ -318,7 +318,7 @@
 						{/if}
 					</div>
 
-					<div class="rounded-2xl p-4" style="background: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.4);">
+					<div class="rounded-2xl p-4" style="background: var(--modal-section-bg); border: 1px solid var(--modal-section-border);">
 						<p class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-3">Equipment</p>
 						<div class="flex gap-4 text-sm text-gray-700">
 							<span>💻 {employee.laptop ?? '—'}</span>
